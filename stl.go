@@ -49,7 +49,7 @@ func loadSTLBinary(file *os.File) (*Mesh, error) {
 			p1 := Point{makeFloat(b[j+12: j+16]), makeFloat(b[j+16: j+20]), makeFloat(b[j+20: j+24])}
 			p2 := Point{makeFloat(b[j+24: j+28]), makeFloat(b[j+28: j+32]), makeFloat(b[j+32: j+36])}
 			p3 := Point{makeFloat(b[j+36: j+40]), makeFloat(b[j+40: j+44]), makeFloat(b[j+44: j+48])}
-			triangles[i].fill(p1, p2, p3)
+			triangles[i].Fill(p1, p2, p3)
 		}
 	}
 

@@ -26,3 +26,11 @@ func (a Vector) Dot(b Vector) float64 {
 func (a Vector) MulScalar(b float64) Vector {
 	return Vector{a.X * b, a.Y * b, a.Z * b}
 }
+
+func (a Vector) Rotate(mx, my, mz Vector) Vector {
+	return V(a.Dot(mx), a.Dot(my), a.Dot(mz))
+}
+
+func (a Vector) ToPoint(origin Point) Point {
+	return Point{X: a.X + origin.X, Y: a.Y + origin.Y, Z: a.Z + origin.Z}
+}

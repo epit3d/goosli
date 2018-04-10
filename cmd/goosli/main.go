@@ -9,14 +9,15 @@ import (
 )
 
 func main() {
-	path := "examples/bowser.stl"
+	path := "examples/bunny.stl"
 	gcodePath := "examples/bowser.gcode"
 
 	mesh, err := LoadSTL(path)
 	if err != nil {
 		log.Fatal("failed to load mesh: ", err)
 	}
-	cmds := slicers.Slice3DOF(*mesh)
+	//cmds := slicers.Slice3DOF(*mesh)
+	cmds := slicers.SliceWithSlope(*mesh)
 
 	var buffer bytes.Buffer
 	for i := 0; i < len(cmds); i++ {

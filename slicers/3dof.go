@@ -3,7 +3,6 @@ package slicers
 import (
 	"github.com/l1va/goosli"
 	"github.com/l1va/goosli/commands"
-	"github.com/fogleman/fauxgl"
 	"sort"
 	"math"
 )
@@ -12,8 +11,7 @@ func Slice3DOF(mesh goosli.Mesh) []commands.Layer {
 
 	thickness := 0.2 //TODO: move to appropriate place
 
-	minz := mesh.MinZ()
-	maxz := mesh.MaxZ()
+	bb := mesh.BoundingBox()
 
 	triangles := mesh.CopyTriangles()
 
@@ -21,7 +19,7 @@ func Slice3DOF(mesh goosli.Mesh) []commands.Layer {
 		return triangles[i].MinZ < triangles[j].MinZ
 	})
 
-	n := int(math.Ceil((maxz - minz) / thickness))
+	n := int(math.Ceil((bb.MaxZ - bb.MinZ) / thickness))
 
 	in := make(chan job, n)
 	out := make(chan commands.Layer, n)
@@ -31,7 +29,7 @@ func Slice3DOF(mesh goosli.Mesh) []commands.Layer {
 	index := 0
 	var active []*goosli.Triangle
 	for i := 0; i < n; i++ {
-		z := fauxgl.RoundPlaces(minz+thickness*float64(i)+thickness/2, 8)
+		z := goosli.RoundPlaces(bb.MinZ+thickness*float64(i)+thickness/2, 8)
 		// remove triangles below plane
 		newActive := active[:0]
 		for _, t := range active {
