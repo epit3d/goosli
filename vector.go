@@ -18,3 +18,11 @@ func (a Vector) Cross(b Vector) Vector {
 func (a Vector) Sub(b Vector) Vector {
 	return V(a.X-b.X, a.Y-b.Y, a.Z-b.Z)
 }
+
+func (a Vector) Dot(b Vector) float64 {
+	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
+}
+
+func (a Vector) MulScalar(b float64) Vector {
+	return Vector{a.X * b, a.Y * b, a.Z * b}
+}

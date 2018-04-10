@@ -3,9 +3,9 @@ package commands
 import "github.com/l1va/goosli"
 
 type Line struct {
-	V1,V2 goosli.Vector
+	P1, P2 goosli.Point
 }
 
 func(l Line) ToGCode() string{
-	return "TODO"
+	return "Line " + l.P1.ToString() +" "+ l.P2.ToString()
 }

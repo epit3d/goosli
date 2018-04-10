@@ -6,8 +6,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"runtime"
-	"sync"
 )
 
 type stlHeader struct {
@@ -48,28 +46,15 @@ func loadSTLBinary(file *os.File) (*Mesh, error) {
 	work := func(wi, wn int) {
 		for i := wi; i < count; i += wn {
 			j := i * 50
-			v1 := Vector{makeFloat(b[j+12: j+16]), makeFloat(b[j+16: j+20]), makeFloat(b[j+20: j+24])}
-			v2 := Vector{makeFloat(b[j+24: j+28]), makeFloat(b[j+28: j+32]), makeFloat(b[j+32: j+36])}
-			v3 := Vector{makeFloat(b[j+36: j+40]), makeFloat(b[j+40: j+44]), makeFloat(b[j+44: j+48])}
-			triangles[i].fill(v1, v2, v3)
+			p1 := Point{makeFloat(b[j+12: j+16]), makeFloat(b[j+16: j+20]), makeFloat(b[j+20: j+24])}
+			p2 := Point{makeFloat(b[j+24: j+28]), makeFloat(b[j+28: j+32]), makeFloat(b[j+32: j+36])}
+			p3 := Point{makeFloat(b[j+36: j+40]), makeFloat(b[j+40: j+44]), makeFloat(b[j+44: j+48])}
+			triangles[i].fill(p1, p2, p3)
 		}
 	}
 
-	doParallel(work)
+	DoInParallelAndWait(work)
 
 	mesh := NewMesh(triangles)
 	return &mesh, nil
-}
-
-func doParallel(work func(wi, wn int)) {
-	wn := runtime.NumCPU()
-	var wg sync.WaitGroup
-	for wi := 0; wi < wn; wi++ {
-		wg.Add(1)
-		go func(wi, wn int) {
-			work(wi, wn)
-			wg.Done()
-		}(wi, wn)
-	}
-	wg.Wait()
 }
