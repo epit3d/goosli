@@ -6,14 +6,13 @@ import (
 	"math"
 )
 
-func SliceWithSlope(mesh goosli.Mesh) []commands.Layer {
+func SliceWithSlope(mesh goosli.Mesh, thickness, angle float64) []commands.Layer {
 
 	bb := mesh.BoundingBox()
 
-	c := goosli.Point{X: (bb.MaxX - bb.MinX) / 2, Y: (bb.MaxY - bb.MinY) / 2, Z: bb.MinZ} // let it be origin
-	//c := goosli.Point{X: 0, Y: 0, Z: 0} // let it be origin
+	c := goosli.Point{X: (bb.MaxX - bb.MinX) / 2, Y: (bb.MaxY - bb.MinY) / 2, Z: bb.MinZ} //TODO: let it be origin
 
-	alpha := 30 * math.Pi / 180
+	alpha := angle * math.Pi / 180
 	// transposed matrix to rotate around X
 	mx := goosli.V(1, 0, 0)
 	my := goosli.V(0, math.Cos(alpha), math.Sin(alpha))
@@ -28,10 +27,10 @@ func SliceWithSlope(mesh goosli.Mesh) []commands.Layer {
 		rotatedMesh.Triangles[i].Fill(p1, p2, p3)
 	}
 
-	cmds := Slice3DOF(rotatedMesh)
-
+	cmds := Slice3DOF(rotatedMesh, thickness)
+	//return cmds
 	// Reverse rotation
-	ralpha := -30 * math.Pi / 180
+	ralpha := -angle * math.Pi / 180
 	// transposed matrix to rotate around X
 	rmx := goosli.V(1, 0, 0)
 	rmy := goosli.V(0, math.Cos(ralpha), math.Sin(ralpha))

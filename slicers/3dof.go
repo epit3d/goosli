@@ -7,9 +7,7 @@ import (
 	"math"
 )
 
-func Slice3DOF(mesh goosli.Mesh) []commands.Layer {
-
-	thickness := 0.2 //TODO: move to appropriate place
+func Slice3DOF(mesh goosli.Mesh, thickness float64) []commands.Layer {
 
 	bb := mesh.BoundingBox()
 

@@ -13,7 +13,6 @@ type Layer struct {
 
 func (l Layer) ToGCode() string {
 	var buffer bytes.Buffer
-	buffer.WriteString(";Layer\n")
 	eOff := 0.0
 	for _, p := range l.Paths {
 		buffer.WriteString("G0 " + p.Lines[0].P1.ToString() + "\n")

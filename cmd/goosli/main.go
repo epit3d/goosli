@@ -6,25 +6,34 @@ import (
 	"bytes"
 	"io/ioutil"
 	. "github.com/l1va/goosli"
+	"strconv"
+	"gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	stl       = kingpin.Flag("stl", "Source stl file to slice.").Short('s').Required().String()
+	gcode     = kingpin.Flag("gcode", "Output file for gcode.").Short('o').Default("out.gcode").String()
+	thickness = kingpin.Flag("thickness", "Set the slice thickness.").Short('t').Default("0.2").Float64()
+	alpha     = kingpin.Flag("alpha", "Angle of slicing rotation in degrees.").Short('a').Default("30").Float64()
 )
 
 func main() {
-	path := "examples/bunny.stl"
-	gcodePath := "examples/bowser.gcode"
+	kingpin.Parse()
 
-	mesh, err := LoadSTL(path)
+	mesh, err := LoadSTL(*stl)
 	if err != nil {
 		log.Fatal("failed to load mesh: ", err)
 	}
 	//cmds := slicers.Slice3DOF(*mesh)
-	cmds := slicers.SliceWithSlope(*mesh)
+	cmds := slicers.SliceWithSlope(*mesh, *thickness, *alpha)
 
 	var buffer bytes.Buffer
 	for i := 0; i < len(cmds); i++ {
-		buffer.WriteString(cmds[i].ToGCode() + "\n")
+		buffer.WriteString(";Layer" + strconv.Itoa(i) + "\n")
+		buffer.WriteString(cmds[i].ToGCode())
 	}
 
-	err = ioutil.WriteFile(gcodePath, buffer.Bytes(), 0644)
+	err = ioutil.WriteFile(*gcode, buffer.Bytes(), 0644)
 	if err != nil {
 		log.Fatal("failed to save gcode in file: ", err)
 	}
