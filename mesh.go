@@ -34,20 +34,10 @@ func (m *Mesh) MinMaxZ(z Vector) (float64, float64) {
 	maxz := -math.MaxFloat64
 
 	for _, t := range m.Triangles {
-		tminz, tmaxz := t.MinMaxZSquareDirected(z)
+		tminz, tmaxz := t.MinMaxZ(z)
 		minz = math.Min(minz, tminz)
 		maxz = math.Max(maxz, tmaxz)
 	}
-	// find sqrt carefully because of negative values
-	if minz < 0 {
-		minz = - math.Sqrt(math.Abs(minz))
-	} else {
-		minz = math.Sqrt(minz)
-	}
-	if maxz < 0 {
-		maxz = - math.Sqrt(-math.Abs(maxz))
-	} else {
-		maxz = math.Sqrt(maxz)
-	}
+
 	return minz, maxz
 }

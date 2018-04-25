@@ -2,21 +2,32 @@ package slicers
 
 import (
 	"github.com/l1va/goosli"
-	"github.com/fogleman/fauxgl"
 )
 
-
-func Crop(mesh *goosli.Mesh, plane goosli.Plane) *goosli.Mesh {
+func Crop(mesh *goosli.Mesh, p goosli.Plane) *goosli.Mesh {
 	var triangles []goosli.Triangle
 	for _, t := range mesh.Triangles {
-		f1 := p.pointInFront(t.V1.Position)
-		f2 := p.pointInFront(t.V2.Position)
-		f3 := p.pointInFront(t.V3.Position)
-		if f1 && f2 && f3 {
+		var inFront []goosli.Point
+		if p.PointInFront(t.P1) {
+			inFront = append(inFront, t.P1)
+		}
+		if p.PointInFront(t.P2) {
+			inFront = append(inFront, t.P2)
+		}
+		if p.PointInFront(t.P3) {
+			inFront = append(inFront, t.P3)
+		}
+		if len(inFront) == 3 {
 			triangles = append(triangles, t)
-		} else if f1 || f2 || f3 {
-			triangles = append(triangles, p.clipTriangle(t)...)
+		} else if len(inFront) == 2 {
+			line := p.IntersectTriangle(&t)
+			triangles = append(triangles, goosli.NewTriangle(inFront[0], line.P1, line.P2))
+			triangles = append(triangles, goosli.NewTriangle(inFront[0], line.P2, inFront[1]))
+		} else if len(inFront) == 1 {
+			line := p.IntersectTriangle(&t)
+			triangles = append(triangles, goosli.NewTriangle(inFront[0], line.P1, line.P2))
 		}
 	}
-	return goosli.NewMesh(triangles)
+	res := goosli.NewMesh(triangles)
+	return &res
 }

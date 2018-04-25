@@ -5,12 +5,12 @@ import (
 	"sort"
 	"math"
 )
-
+// SliceByZ - Slicing on layers by vector Z
 func SliceByZ(mesh goosli.Mesh, thickness float64, Z goosli.Vector) []goosli.Layer {
 
 	triangles := mesh.CopyTriangles()
 	sort.Slice(triangles, func(i, j int) bool {
-		return triangles[i].MinZSquareDirected(Z) < triangles[j].MinZSquareDirected(Z)
+		return triangles[i].MinZ(Z) < triangles[j].MinZ(Z)
 	})
 
 	minz, maxz := mesh.MinMaxZ(Z)
@@ -27,17 +27,17 @@ func SliceByZ(mesh goosli.Mesh, thickness float64, Z goosli.Vector) []goosli.Lay
 	curP := unitz.MulScalar(minz).ToPoint().Shift(sh.MulScalar(0.5))
 	for i := 0; i < n; i++ {
 		plane := goosli.Plane{P: curP, N: Z}
-		z := curP.ToVector().ProjectOn(Z).LengthSquareDirected(Z)
+		z := curP.ToVector().Dot(Z)
 		// remove triangles below plane
 		newActive := active[:0]
 		for _, t := range active {
-			if z <= t.MaxZSquareDirected(Z) {
+			if z <= t.MaxZ(Z) {
 				newActive = append(newActive, t)
 			}
 		}
 		active = newActive
 		// add triangles above plane
-		for index < len(triangles) && triangles[index].MinZSquareDirected(Z) <= z {
+		for index < len(triangles) && triangles[index].MinZ(Z) <= z {
 			active = append(active, triangles[index])
 			index++
 		}

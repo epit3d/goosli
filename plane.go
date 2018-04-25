@@ -10,8 +10,8 @@ func (p Plane) Intersect(t *Triangle) bool {
 	if t == nil {
 		return false
 	}
-	min, max := t.MinMaxZSquareDirected(p.N)
-	pp := p.P.ToVector().ProjectOn(p.N).LengthSquareDirected(p.N)
+	min, max := t.MinMaxZ(p.N)
+	pp := p.P.ToVector().Dot(p.N)
 	return min <= pp && pp <= max
 }
 
@@ -46,12 +46,12 @@ func (p Plane) IntersectTriangle(t *Triangle) *Line {
 }
 
 func (p Plane) IntersectSegment(p1, p2 Point) *Point {
-	pr1 := p1.ToVector().ProjectOn(p.N).LengthDirected(p.N)
-	pr2 := p2.ToVector().ProjectOn(p.N).LengthDirected(p.N)
+	pr1 := p1.ToVector().Dot(p.N)
+	pr2 := p2.ToVector().Dot(p.N)
 	if pr1 == pr2 {
 		return nil
 	}
-	z := p.P.ToVector().ProjectOn(p.N).LengthDirected(p.N)
+	z := p.P.ToVector().Dot(p.N)
 	t := (z - pr1) / (pr2 - pr1)
 	if t < 0 || t > 1 {
 		return nil
@@ -59,3 +59,8 @@ func (p Plane) IntersectSegment(p1, p2 Point) *Point {
 	res := p1.Shift(p1.VectorTo(p2).MulScalar(t))
 	return &res
 }
+
+func (p Plane) PointInFront(v Point) bool {
+	return p.P.VectorTo(v).Dot(p.N) >= 0
+}
+

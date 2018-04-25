@@ -17,6 +17,10 @@ func (a Vector) Cross(b Vector) Vector {
 	return V(x, y, z)
 }
 
+func (a Vector) Add(b Vector) Vector {
+	return V(a.X+b.X, a.Y+b.Y, a.Z+b.Z)
+}
+
 func (a Vector) Sub(b Vector) Vector {
 	return V(a.X-b.X, a.Y-b.Y, a.Z-b.Z)
 }
@@ -45,22 +49,8 @@ func (a Vector) Length() float64 {
 	return math.Sqrt(a.LengthSquare())
 }
 
-func (a Vector) LengthDirected(b Vector) float64 {
-	if a.CodirectedWith(b) {
-		return a.Length()
-	}
-	return -a.Length()
-}
-
 func (a Vector) LengthSquare() float64 {
 	return a.X*a.X + a.Y*a.Y + a.Z*a.Z
-}
-
-func (a Vector) LengthSquareDirected(b Vector) float64 {
-	if a.CodirectedWith(b) {
-		return a.LengthSquare()
-	}
-	return -a.LengthSquare()
 }
 
 func (a Vector) Normalize() Vector {
@@ -70,11 +60,11 @@ func (a Vector) Normalize() Vector {
 	}
 	return V(a.X/n, a.Y/n, a.Z/n)
 }
-
+/*
 func (a Vector) ProjectOn(b Vector) Vector {
 	n := b.LengthSquare()
 	if n == 0 {
 		return b
 	}
 	return b.MulScalar(b.Dot(a) / n)
-}
+}*/

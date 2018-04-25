@@ -30,23 +30,23 @@ func normal(v1, v2 Vector) Vector {
 	return v1.Cross(v2)
 }
 
-func (t *Triangle) MinZSquareDirected(z Vector) float64 {
-	pr1 := t.P1.ToVector().ProjectOn(z).LengthSquareDirected(z)
-	pr2 := t.P2.ToVector().ProjectOn(z).LengthSquareDirected(z)
-	pr3 := t.P3.ToVector().ProjectOn(z).LengthSquareDirected(z)
+func (t *Triangle) MinZ(z Vector) float64 {
+	pr1 := t.P1.ToVector().Dot(z)
+	pr2 := t.P2.ToVector().Dot(z)
+	pr3 := t.P3.ToVector().Dot(z)
 	return math.Min(pr1, math.Min(pr2, pr3))
 }
 
-func (t *Triangle) MaxZSquareDirected(z Vector) float64 {
-	pr1 := t.P1.ToVector().ProjectOn(z).LengthSquareDirected(z)
-	pr2 := t.P2.ToVector().ProjectOn(z).LengthSquareDirected(z)
-	pr3 := t.P3.ToVector().ProjectOn(z).LengthSquareDirected(z)
+func (t *Triangle) MaxZ(z Vector) float64 {
+	pr1 := t.P1.ToVector().Dot(z)
+	pr2 := t.P2.ToVector().Dot(z)
+	pr3 := t.P3.ToVector().Dot(z)
 	return math.Max(pr1, math.Max(pr2, pr3))
 }
 
-func (t *Triangle) MinMaxZSquareDirected(z Vector) (float64, float64) {
-	pr1 := t.P1.ToVector().ProjectOn(z).LengthSquareDirected(z)
-	pr2 := t.P2.ToVector().ProjectOn(z).LengthSquareDirected(z)
-	pr3 := t.P3.ToVector().ProjectOn(z).LengthSquareDirected(z)
+func (t *Triangle) MinMaxZ(z Vector) (float64, float64) {
+	pr1 := t.P1.ToVector().Dot(z)
+	pr2 := t.P2.ToVector().Dot(z)
+	pr3 := t.P3.ToVector().Dot(z)
 	return math.Min(pr1, math.Min(pr2, pr3)), math.Max(pr1, math.Max(pr2, pr3))
 }
