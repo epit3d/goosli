@@ -1,5 +1,7 @@
 package goosli
 
+import "math"
+
 type Vector struct {
 	X, Y, Z float64
 }
@@ -31,6 +33,48 @@ func (a Vector) Rotate(mx, my, mz Vector) Vector {
 	return V(a.Dot(mx), a.Dot(my), a.Dot(mz))
 }
 
-func (a Vector) ToPoint(origin Point) Point {
-	return Point{X: a.X + origin.X, Y: a.Y + origin.Y, Z: a.Z + origin.Z}
+func (a Vector) ToPoint() Point {
+	return Point{X: a.X, Y: a.Y, Z: a.Z}
+}
+
+func (a Vector) CodirectedWith(b Vector) bool {
+	return a.Dot(b) >= 0
+}
+
+func (a Vector) Length() float64 {
+	return math.Sqrt(a.LengthSquare())
+}
+
+func (a Vector) LengthDirected(b Vector) float64 {
+	if a.CodirectedWith(b) {
+		return a.Length()
+	}
+	return -a.Length()
+}
+
+func (a Vector) LengthSquare() float64 {
+	return a.X*a.X + a.Y*a.Y + a.Z*a.Z
+}
+
+func (a Vector) LengthSquareDirected(b Vector) float64 {
+	if a.CodirectedWith(b) {
+		return a.LengthSquare()
+	}
+	return -a.LengthSquare()
+}
+
+func (a Vector) Normalize() Vector {
+	n := a.Length()
+	if n == 0 {
+		return a
+	}
+	return V(a.X/n, a.Y/n, a.Z/n)
+}
+
+func (a Vector) ProjectOn(b Vector) Vector {
+	n := b.LengthSquare()
+	if n == 0 {
+		return b
+	}
+	return b.MulScalar(b.Dot(a) / n)
 }

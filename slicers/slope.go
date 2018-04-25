@@ -1,3 +1,4 @@
+package slicers/*
 package slicers
 
 import (
@@ -27,7 +28,7 @@ func SliceWithSlope(mesh goosli.Mesh, thickness, angle float64) []commands.Layer
 		rotatedMesh.Triangles[i].Fill(p1, p2, p3)
 	}
 
-	cmds := Slice3DOF(rotatedMesh, thickness)
+	cmds := SliceByZ(rotatedMesh, thickness)
 	//return cmds
 	// Reverse rotation
 	ralpha := -angle * math.Pi / 180
@@ -52,3 +53,4 @@ func SliceWithSlope(mesh goosli.Mesh, thickness, angle float64) []commands.Layer
 	return res
 
 }
+*/

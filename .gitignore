@@ -1,1 +1,6 @@
+*.pyc
 .idea/
+.~lock*
+.DS_Store
+._*
+out.gcode

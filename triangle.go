@@ -5,9 +5,8 @@ import (
 )
 
 type Triangle struct {
-	N                                  Vector
-	P1, P2, P3                         Point
-	MinX, MaxX, MinY, MaxY, MinZ, MaxZ float64
+	N          Vector
+	P1, P2, P3 Point
 }
 
 func NewTriangle(p1, p2, p3 Point) Triangle {
@@ -25,14 +24,29 @@ func (t *Triangle) Fill(p1, p2, p3 Point) {
 
 func (t *Triangle) recalculate() {
 	t.N = normal(t.P1.VectorTo(t.P2), t.P1.VectorTo(t.P3))
-	t.MinX = math.Min(math.Min(t.P1.X, t.P2.X), t.P3.X)
-	t.MaxX = math.Max(math.Max(t.P1.X, t.P2.X), t.P3.X)
-	t.MinY = math.Min(math.Min(t.P1.Y, t.P2.Y), t.P3.Y)
-	t.MaxY = math.Max(math.Max(t.P1.Y, t.P2.Y), t.P3.Y)
-	t.MinZ = math.Min(math.Min(t.P1.Z, t.P2.Z), t.P3.Z)
-	t.MaxZ = math.Max(math.Max(t.P1.Z, t.P2.Z), t.P3.Z)
 }
 
 func normal(v1, v2 Vector) Vector {
 	return v1.Cross(v2)
+}
+
+func (t *Triangle) MinZSquareDirected(z Vector) float64 {
+	pr1 := t.P1.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	pr2 := t.P2.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	pr3 := t.P3.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	return math.Min(pr1, math.Min(pr2, pr3))
+}
+
+func (t *Triangle) MaxZSquareDirected(z Vector) float64 {
+	pr1 := t.P1.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	pr2 := t.P2.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	pr3 := t.P3.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	return math.Max(pr1, math.Max(pr2, pr3))
+}
+
+func (t *Triangle) MinMaxZSquareDirected(z Vector) (float64, float64) {
+	pr1 := t.P1.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	pr2 := t.P2.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	pr3 := t.P3.ToVector().ProjectOn(z).LengthSquareDirected(z)
+	return math.Min(pr1, math.Min(pr2, pr3)), math.Max(pr1, math.Max(pr2, pr3))
 }

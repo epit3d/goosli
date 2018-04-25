@@ -24,8 +24,8 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to load mesh: ", err)
 	}
-	//cmds := slicers.Slice3DOF(*mesh)
-	cmds := slicers.SliceWithSlope(*mesh, *thickness, *alpha)
+	cmds := slicers.SliceByZ(*mesh, *thickness, V(1,1,3))
+	//cmds := slicers.SliceWithSlope(*mesh, *thickness, *alpha)
 
 	var buffer bytes.Buffer
 	for i := 0; i < len(cmds); i++ {

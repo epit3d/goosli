@@ -1,31 +1,17 @@
-package commands
-
-import (
-	"bytes"
-	"github.com/l1va/goosli"
-)
+package goosli
 
 type Path struct {
 	Lines []Line
 }
 
-func (p Path) ToGCode() string {
-	var buffer bytes.Buffer
-	buffer.WriteString("Path gCode\n")
-	for _, l := range p.Lines {
-		buffer.WriteString(l.ToGCode() + "\n")
-	}
-	return buffer.String()
-}
-
 func JoinPaths(paths []Path) []Path {
-	lookup := make(map[goosli.Point]Path, len(paths))
+	lookup := make(map[Point]Path, len(paths))
 	for _, path := range paths {
 		lookup[path.Lines[0].P1] = path
 	}
 	var result []Path
 	for len(lookup) > 0 {
-		var v goosli.Point
+		var v Point
 		for v = range lookup {
 			break
 		}
