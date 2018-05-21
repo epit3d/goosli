@@ -30,7 +30,7 @@ func normal(v1, v2 Vector) Vector {
 	return v1.Cross(v2)
 }
 
-func (t *Triangle) MinZ(z Vector) float64 {
+func (t *Triangle) MinZ(z Vector) float64 { // it is without normalization!!
 	pr1 := t.P1.ToVector().Dot(z)
 	pr2 := t.P2.ToVector().Dot(z)
 	pr3 := t.P3.ToVector().Dot(z)

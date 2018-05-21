@@ -24,11 +24,12 @@ func (p Plane) IntersectTriangle(t *Triangle) *Line {
 	v2 := p.IntersectSegment(t.P2, t.P3)
 	v3 := p.IntersectSegment(t.P3, t.P1)
 	var p1, p2 Point
-	if v1 != nil && v2 != nil {
+
+	if v1 != nil && v2 != nil && *v1!=*v2{
 		p1, p2 = *v1, *v2
-	} else if v1 != nil && v3 != nil {
+	} else if v1 != nil && v3 != nil && *v1!=*v3{
 		p1, p2 = *v1, *v3
-	} else if v2 != nil && v3 != nil {
+	} else if v2 != nil && v3 != nil && *v2!=*v3{
 		p1, p2 = *v2, *v3
 	} else {
 		return nil

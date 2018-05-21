@@ -8,15 +8,16 @@ import (
 // SliceByZ - Slicing on layers by vector Z
 func SliceByZ(mesh goosli.Mesh, thickness float64, Z goosli.Vector) []goosli.Layer {
 
+	Z = Z.Normalize()
+
 	triangles := mesh.CopyTriangles()
 	sort.Slice(triangles, func(i, j int) bool {
 		return triangles[i].MinZ(Z) < triangles[j].MinZ(Z)
 	})
 
 	minz, maxz := mesh.MinMaxZ(Z)
-	unitz := Z.Normalize()
 	n := int(math.Ceil((maxz - minz) / thickness))
-	sh := unitz.MulScalar(maxz - minz).MulScalar(1.0 / float64(n))
+	sh := Z.MulScalar(maxz - minz).MulScalar(1.0 / float64(n))
 
 	in := make(chan job, n)
 	out := make(chan goosli.Layer, n)
@@ -24,7 +25,7 @@ func SliceByZ(mesh goosli.Mesh, thickness float64, Z goosli.Vector) []goosli.Lay
 
 	index := 0
 	var active []*goosli.Triangle
-	curP := unitz.MulScalar(minz).ToPoint().Shift(sh.MulScalar(0.5))
+	curP := Z.MulScalar(minz).ToPoint().Shift(sh.MulScalar(0.5))
 	for i := 0; i < n; i++ {
 		plane := goosli.Plane{P: curP, N: Z}
 		z := curP.ToVector().Dot(Z)

@@ -146,6 +146,16 @@ func TestVector_ProjectOn(t *testing.T) {
 			in2: Vector{0, 0, 0},
 			out: Vector{0, 0, 0},
 		},
+		{
+			in1: Vector{1, 1, 1},
+			in2: Vector{0, 0, 1},
+			out: Vector{0, 0, 1},
+		},
+		{
+			in1: Vector{1, 1, 1},
+			in2: Vector{0, 0, 2},
+			out: Vector{0, 0, 1},
+		},
 	}
 	for i, row := range cases {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {

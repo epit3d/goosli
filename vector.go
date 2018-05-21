@@ -60,11 +60,11 @@ func (a Vector) Normalize() Vector {
 	}
 	return V(a.X/n, a.Y/n, a.Z/n)
 }
-/*
+
 func (a Vector) ProjectOn(b Vector) Vector {
-	n := b.LengthSquare()
-	if n == 0 {
+	bl := b.LengthSquare() // because result = b.MulScalar(projectLen/|b|), where projectLen = b.Dot(a)/|b|
+	if bl == 0 {
 		return b
 	}
-	return b.MulScalar(b.Dot(a) / n)
-}*/
+	return b.MulScalar(b.Dot(a) / bl)
+}
