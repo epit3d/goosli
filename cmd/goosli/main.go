@@ -20,6 +20,23 @@ var (
 	oz        = kingpin.Flag("originz", "Shift center of model by z.").Short('z').Default("0").Float64()
 )
 
+func main() {
+
+	kingpin.Parse()
+
+	mesh, err := LoadSTL(*stl)
+	if err != nil {
+		log.Fatal("failed to load mesh: ", err)
+	}
+	buffer := slicers.Slice5a(mesh, *thickness)
+
+	err = ioutil.WriteFile(*gcode, buffer.Bytes(), 0644)
+	if err != nil {
+		log.Fatal("failed to save gcode in file: ", err)
+	}
+
+}
+
 func main3() {
 	kingpin.Parse()
 
@@ -28,8 +45,10 @@ func main3() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 
-	m2 := slicers.Crop(mesh, Plane{Point{0, 0, 30}, V(0, 0, 1)})
-	m1 := slicers.Crop(mesh, Plane{Point{0, 0, 30}, V(0, 0, -1)})
+	m2, m1, err := slicers.Cut(mesh, Plane{Point{0, 0, 30}, V(0, 0, 1)})
+	if err != nil {
+		log.Fatal("failed to make first cut mesh: ", err)
+	}
 
 	cmds := slicers.SliceByZ(*m1, *thickness, V(0, 0, 1))
 
@@ -38,7 +57,6 @@ func main3() {
 		buffer.WriteString(";Layer" + strconv.Itoa(i) + "\n")
 		buffer.WriteString(cmds[i].ToGCode())
 	}
-
 
 	alphaG := 30
 	buffer.WriteString("G52 " + strconv.Itoa(alphaG) + "\n")
@@ -52,7 +70,7 @@ func main3() {
 	//my := V(0, math.Cos(alpha), math.Sin(alpha))
 	//mz := V(0, -math.Sin(alpha), math.Cos(alpha))
 	mx := V(math.Cos(alpha), math.Sin(alpha), 0)
-	my := V(-math.Sin(alpha), math.Cos(alpha), 0 )
+	my := V(-math.Sin(alpha), math.Cos(alpha), 0)
 	mz := V(0, 0, 1)
 
 	triangles := make([]Triangle, len(m2.Triangles))
@@ -64,8 +82,10 @@ func main3() {
 		rotatedMesh.Triangles[i].Fill(p1, p2, p3)
 	}
 
-	m3 := slicers.Crop(&rotatedMesh, Plane{Point{0, 0, 50}, V(0, 0, 1)})
-	m2 = slicers.Crop(&rotatedMesh, Plane{Point{0, 0, 50}, V(0, 0, -1)})
+	m3, m2, err := slicers.Cut(&rotatedMesh, Plane{Point{0, 0, 50}, V(0, 0, 1)})
+	if err != nil {
+		log.Fatal("failed to make second cut mesh: ", err)
+	}
 
 	cmds = slicers.SliceByZ(*m2, *thickness, V(0, 0, 1))
 
@@ -111,7 +131,7 @@ func main3() {
 	}
 
 }
-func main() {
+func main4() {
 	kingpin.Parse()
 
 	mesh, err := LoadSTL(*stl)
@@ -119,8 +139,10 @@ func main() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 
-	m2 := slicers.Crop(mesh, Plane{Point{0, 0, 30}, V(0, 0, 1)})
-	m1 := slicers.Crop(mesh, Plane{Point{0, 0, 30}, V(0, 0, -1)})
+	m2, m1, err := slicers.Cut(mesh, Plane{Point{0, 0, 30}, V(0, 0, 1)})
+	if err != nil {
+		log.Fatal("failed to make first cut mesh: ", err)
+	}
 
 	cmds := slicers.SliceByZ(*m1, *thickness, V(1, 0, 1))
 
@@ -154,8 +176,10 @@ func main() {
 		rotatedMesh.Triangles[i].Fill(p1, p2, p3)
 	}
 
-	m3 := slicers.Crop(&rotatedMesh, Plane{Point{0, 0, 70}, V(0, 1, 1)})
-	m2 = slicers.Crop(&rotatedMesh, Plane{Point{0, 0, 70}, V(0, -1, -1)})
+	m3, m2, err := slicers.Cut(&rotatedMesh, Plane{Point{0, 0, 70}, V(0, 1, 1)})
+	if err != nil {
+		log.Fatal("failed to make second cut mesh: ", err)
+	}
 
 	cmds = slicers.SliceByZ(*m2, *thickness, V(0, 1, 1))
 
@@ -176,7 +200,7 @@ func main() {
 	//my = V(0, math.Cos(alpha), math.Sin(alpha))
 	//mz = V(0, -math.Sin(alpha), math.Cos(alpha))
 	mx = V(math.Cos(alpha), math.Sin(alpha), 0)
-	my = V(-math.Sin(alpha), math.Cos(alpha), 0 )
+	my = V(-math.Sin(alpha), math.Cos(alpha), 0)
 	mz = V(0, 0, 1)
 
 	triangles = make([]Triangle, len(m3.Triangles))
@@ -188,8 +212,10 @@ func main() {
 		rotatedMesh.Triangles[i].Fill(p1, p2, p3)
 	}
 
-	m4 := slicers.Crop(&rotatedMesh, Plane{Point{0, 0, 70}, V(0, 0, 1)})
-	m3 = slicers.Crop(&rotatedMesh, Plane{Point{0, 0, 70}, V(0, 0, -1)})
+	m4, m3, err := slicers.Cut(&rotatedMesh, Plane{Point{0, 0, 70}, V(0, 0, 1)})
+	if err != nil {
+		log.Fatal("failed to make third cut mesh: ", err)
+	}
 
 	cmds = slicers.SliceByZ(*m3, *thickness, V(1, 1, 0))
 
@@ -243,8 +269,10 @@ func main2() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 
-	m2 := slicers.Crop(mesh, Plane{Point{0, 0, 40}, V(0, 0, 1)})
-	m1 := slicers.Crop(mesh, Plane{Point{0, 0, 40}, V(0, 0, -1)})
+	m2, m1, err := slicers.Cut(mesh, Plane{Point{0, 0, 40}, V(0, 0, 1)})
+	if err != nil {
+		log.Fatal("failed to cut mesh: ", err)
+	}
 
 	cmds := slicers.SliceByZ(*m1, *thickness, V(0, 0, 1))
 	//cmds := slicers.SliceWithSlope(*mesh, *thickness, *alpha)

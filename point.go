@@ -1,9 +1,16 @@
 package goosli
 
-import "math"
+import (
+	"math"
+)
 
 type Point struct {
 	X, Y, Z float64
+}
+
+func (a Point) Equal(b Point) bool {
+
+	return math.Abs(a.X-b.X) < AlmostZero && math.Abs(a.Y-b.Y) < AlmostZero && math.Abs(a.Z-b.Z) < AlmostZero
 }
 
 func (a Point) VectorTo(b Point) Vector {

@@ -1,6 +1,8 @@
 package goosli
 
-import "math"
+import (
+	"math"
+)
 
 type Vector struct {
 	X, Y, Z float64
@@ -61,10 +63,26 @@ func (a Vector) Normalize() Vector {
 	return V(a.X/n, a.Y/n, a.Z/n)
 }
 
+func (a Vector) Reverse() Vector {
+	return V(-a.X, -a.Y, -a.Z)
+}
+
+func (a Vector) Angle(b Vector) float64 {
+	v := a.Dot(b) / a.Length() / b.Length()
+	if v < -1 || v > 1 {
+		return 0
+	}
+	return math.Acos(v) * 180 / math.Pi
+}
+
 func (a Vector) ProjectOn(b Vector) Vector {
 	bl := b.LengthSquare() // because result = b.MulScalar(projectLen/|b|), where projectLen = b.Dot(a)/|b|
 	if bl == 0 {
 		return b
 	}
 	return b.MulScalar(b.Dot(a) / bl)
+}
+
+func (a Vector) ProjectOnPlane(p Plane) Vector {
+	return a.Add(a.ProjectOn(p.N).Reverse()) // substracting orthogonal to the plane component from a
 }
