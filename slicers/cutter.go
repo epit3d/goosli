@@ -2,6 +2,7 @@ package slicers
 
 import (
 	"github.com/l1va/goosli"
+	"fmt"
 )
 
 func Crop(mesh *goosli.Mesh, p goosli.Plane) *goosli.Mesh {
@@ -25,7 +26,11 @@ func Crop(mesh *goosli.Mesh, p goosli.Plane) *goosli.Mesh {
 			triangles = append(triangles, goosli.NewTriangle(inFront[0], line.P2, inFront[1]))
 		} else if len(inFront) == 1 {
 			line := p.IntersectTriangle(&t)
-			triangles = append(triangles, goosli.NewTriangle(inFront[0], line.P1, line.P2))
+			if line!=nil { //TODO:
+				triangles = append(triangles, goosli.NewTriangle(inFront[0], line.P1, line.P2))
+			}else{
+				fmt.Println(p, t)
+			}
 		}
 	}
 	res := goosli.NewMesh(triangles)
