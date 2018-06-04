@@ -15,6 +15,10 @@ func NewTriangle(p1, p2, p3 Point) Triangle {
 	return t
 }
 
+func (t *Triangle) Shift(v Vector) Triangle {
+	return NewTriangle(t.P1.Shift(v), t.P2.Shift(v), t.P3.Shift(v))
+}
+
 func (t *Triangle) Fill(p1, p2, p3 Point) {
 	t.P1 = p1
 	t.P2 = p2

@@ -27,8 +27,6 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to load mesh: ", err)
 	}
-	/*	minz, maxz := mesh.MinMaxZ(V(0,0,1))
-		fmt.Println(minz, maxz)*/
 
 	mUp, mDown, err := slicers.Cut(mesh, Plane{Point{*px, *py, *pz}, V(*nx, *ny, *nz)})
 	if err != nil {

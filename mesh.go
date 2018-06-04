@@ -12,13 +12,21 @@ func NewMesh(triangles []Triangle) Mesh {
 	return Mesh{Triangles: triangles}
 }
 
-func (m *Mesh) CopyTriangles() []*Triangle {
-	triangles := make([]*Triangle, len(m.Triangles))
+func (m *Mesh) Shift(v Vector) {
+	if m == nil {
+		return
+	}
+	for i, t:= range(m.Triangles){
+		m.Triangles[i] = t.Shift(v)
+	}
+}
+
+func (m *Mesh) CopyTriangles() []Triangle {
+	triangles := make([]Triangle, len(m.Triangles))
 
 	work := func(wi, wn int) {
 		for i := wi; i < len(m.Triangles); i += wn {
-			t := m.Triangles[i]
-			triangles[i] = &t
+			triangles[i] = m.Triangles[i]
 		}
 	}
 	DoInParallelAndWait(work)

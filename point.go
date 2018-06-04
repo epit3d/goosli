@@ -36,6 +36,20 @@ func (a Point) ToVector() Vector {
 	return V(a.X, a.Y, a.Z)
 }
 
+func (a Point) DistanceToLine(b Point, c Point) float64 {
+	return a.ProjectOnLine(b, c).DistanceTo(a)
+}
+
+func (a Point) ProjectOnLine(b, c Point) Point {
+	ba := b.VectorTo(a)
+	bcUnit := b.VectorTo(c).Normalize()
+	return b.Shift(bcUnit.MulScalar(ba.Dot(bcUnit)))
+}
+
 func (a Point) ToString() string {
 	return "X" + StrF(a.X) + " Y" + StrF(a.Y) + " Z" + StrF(a.Z)
+}
+
+func (a Point) ToString2() string {
+	return StrF(a.X) + " " + StrF(a.Y) + " " + StrF(a.Z) + " "
 }
