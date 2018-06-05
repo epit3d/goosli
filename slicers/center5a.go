@@ -30,35 +30,26 @@ func Slice5aByCenter(mesh *goosli.Mesh, thickness float64) bytes.Buffer {
 	layersCount := 0
 	absangleZ := 0
 	absangleX := 0
-	angleZ := 0
-	angleX := 0
 
-	for i := 1; i < len(simplified)-1; i++ {
-		//v := simplified[i-1].VectorTo(simplified[i])
-		//TODO: fixme
-		absangleZ = calcZ(simplified[i-1], simplified[i], nil)
-		absangleX = calcX(simplified[i-1], simplified[i], nil)
 
-		if angleZ != 0 {
-			up = rotateZ(absangleZ-angleZ, absangleZ-angleZ, up, &buffer, goosli.Point{0, 0, 0})
-		}
-		if angleX != 0 {
-			up = rotateX(absangleX-angleX, absangleX-angleX, up, &buffer, goosli.Point{0, 0, 0})
-		}
-
-		angleZ = absangleZ
-		angleX = absangleX
-
-		if i < len(simplified)-2 {
-			up, down, err = Cut(up, goosli.Plane{simplified[i], goosli.V(0, 0, 1)}) //TODO: rotate points too
+	for i := 1; i < len(simplified); i++ {
+		v := simplified[i-1].VectorTo(simplified[i])
+		if i < len(simplified)-1 {
+			up, down, err = Cut(up, goosli.Plane{simplified[i], v}) //TODO: rotate points too
 			if err != nil {
 				log.Fatal("failed to cut mesh by plane: ", err)
 			}
 		} else {
 			down = up
 		}
+		//TODO: fixme
+		absangleZ = calcZ(simplified[i-1], simplified[i], nil)
+		absangleX = calcX(simplified[i-1], simplified[i], nil)
+		println(absangleX," ", absangleZ)
 
-		layersCount += slicePart(down, goosli.V(0, 0, 1), thickness, layersCount, &buffer)
+		down = rotateXZ(absangleX,absangleZ, down, &buffer, goosli.Point{0,0,0})
+
+		layersCount += slicePart(down, v, thickness, layersCount, &buffer)
 	}
 
 	return buffer

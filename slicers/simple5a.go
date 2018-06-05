@@ -59,9 +59,9 @@ func Slice5a(mesh *goosli.Mesh, thickness float64) bytes.Buffer {
 			angleX := calcX(c, point, mint)
 
 			if angleZ != 0 {
-				up = rotateZ(angleZ, angleZ,up, &b, c)
+				up = rotateZ(angleZ, up, &b, c)
 			}
-			mesh = rotateX(angleX, angleX,up, &b, c)
+			mesh = rotateX(angleX, up, &b, c)
 
 		} else {
 			slicePart(mesh, z, thickness, layers, &b)
@@ -97,8 +97,14 @@ func calcX(c goosli.Point, p goosli.Point, t *goosli.Triangle) int {
 	return int(v.Angle(goosli.V(0, 0, 1)))
 }
 
-func rotateX(angle int, absangle int,mesh *goosli.Mesh, b *bytes.Buffer, c goosli.Point) *goosli.Mesh {
-	b.WriteString("G42 " + strconv.Itoa(absangle) + "\n")
+func rotateXZ(angleX int, angleZ int,mesh *goosli.Mesh, b *bytes.Buffer, c goosli.Point) *goosli.Mesh {
+	b.WriteString("G62 " + strconv.Itoa(angleX) +" "+strconv.Itoa(angleZ)+ "\n")
+	mesh = rotateX(angleX,mesh, b, c)
+	return rotateZ(angleZ, mesh, b, c)
+}
+
+func rotateX(angle int,mesh *goosli.Mesh, b *bytes.Buffer, c goosli.Point) *goosli.Mesh {
+	//b.WriteString("G42 " + strconv.Itoa(absangle) + "\n")
 
 	cv := c.ToVector()
 
@@ -118,8 +124,8 @@ func rotateX(angle int, absangle int,mesh *goosli.Mesh, b *bytes.Buffer, c goosl
 	}
 	return &rotatedMesh
 }
-func rotateZ(angle int, absangle int, mesh *goosli.Mesh, b *bytes.Buffer, c goosli.Point) *goosli.Mesh {
-	b.WriteString("G52 " + strconv.Itoa(absangle) + "\n")
+func rotateZ(angle int, mesh *goosli.Mesh, b *bytes.Buffer, c goosli.Point) *goosli.Mesh {
+	//b.WriteString("G52 " + strconv.Itoa(absangle) + "\n")
 
 	cv := c.ToVector()
 
