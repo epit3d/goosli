@@ -4,6 +4,12 @@ import (
 	"math"
 )
 
+var (
+	AxisX = V(1, 0, 0)
+	AxisY = V(0, 1, 0)
+	AxisZ = V(0, 0, 1)
+)
+
 type Vector struct {
 	X, Y, Z float64
 }

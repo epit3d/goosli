@@ -6,8 +6,8 @@ import (
 	"log"
 )
 
-//Cut mesh in two meshes, first that inFront of plane, second - outFront
-func Cut(mesh *goosli.Mesh, p goosli.Plane) (*goosli.Mesh, *goosli.Mesh, error) {
+//BisectMesh mesh in two meshes, first that inFront of plane, second - outFront
+func BisectMesh(mesh *goosli.Mesh, p goosli.Plane) (*goosli.Mesh, *goosli.Mesh, error) {
 	if mesh == nil || len(mesh.Triangles) == 0 {
 		return nil, nil, fmt.Errorf("mesh is empty, nothing to cut")
 	}

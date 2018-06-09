@@ -6,8 +6,8 @@ import (
 	"math"
 )
 
-// SliceByZ - Slicing on layers by vector Z
-func SliceByZ(mesh *goosli.Mesh, thickness float64, Z goosli.Vector) []goosli.Layer {
+// SliceByVector - Slicing on layers by vector Z
+func SliceByVector(mesh *goosli.Mesh, thickness float64, Z goosli.Vector) []goosli.Layer {
 
 	if mesh == nil || len(mesh.Triangles) == 0 {
 		return nil

@@ -22,7 +22,7 @@ func main() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 
-	mUp, err := slicers.Simplify(mesh, *triangles)
+	mUp, err := slicers.SimplifyMesh(mesh, *triangles)
 	if err != nil {
 		log.Fatal("failed to cut mesh: ", err)
 	}

@@ -28,7 +28,7 @@ func main() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 
-	mUp, mDown, err := slicers.Cut(mesh, Plane{Point{*px, *py, *pz}, V(*nx, *ny, *nz)})
+	mUp, mDown, err := slicers.BisectMesh(mesh, Plane{Point{*px, *py, *pz}, V(*nx, *ny, *nz)})
 	if err != nil {
 		log.Fatal("failed to cut mesh: ", err)
 	}

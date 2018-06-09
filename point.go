@@ -4,6 +4,11 @@ import (
 	"math"
 )
 
+
+var (
+	OriginPoint = Point{0, 0, 0}
+)
+
 type Point struct {
 	X, Y, Z float64
 }

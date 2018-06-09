@@ -6,7 +6,7 @@ import (
 	"github.com/fogleman/simplify"
 )
 
-func Simplify(mesh *goosli.Mesh, resSize int) (*goosli.Mesh, error) {
+func SimplifyMesh(mesh *goosli.Mesh, resSize int) (*goosli.Mesh, error) {
 	if mesh == nil {
 		return nil, fmt.Errorf("cannot simplify, mesh is nil")
 	}
@@ -18,7 +18,7 @@ func Simplify(mesh *goosli.Mesh, resSize int) (*goosli.Mesh, error) {
 
 	factor := float64(resSize) / float64(actualSize)
 
-	smesh := toFoglemanMesh(mesh)
+	smesh := toFoglemanMesh(mesh) //TODO: implement by self
 	smesh = smesh.Simplify(factor)
 	return toGoosliMesh(smesh), nil
 }

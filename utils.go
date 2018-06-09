@@ -5,7 +5,44 @@ import (
 	"sync"
 	"math"
 	"strconv"
+	"bytes"
+	"io/ioutil"
+	"log"
 )
+
+
+func LayersToBuffer(layers []Layer, start int, b *bytes.Buffer) int {
+	for i := 0; i < len(layers); i++ {
+		b.WriteString(";Layer" + strconv.Itoa(i+start) + "\n")
+		b.WriteString(layers[i].ToGCode())
+	}
+	return len(layers)
+}
+
+func PointsToDebugFile(ps []Point, filename string) {
+	var b bytes.Buffer
+	for i := 0; i < len(ps)-1; i++ {
+		b.WriteString("line ")
+		b.WriteString(ps[i].ToString2())
+		b.WriteString(ps[i+1].ToString2() + "\n")
+	}
+
+	err := ioutil.WriteFile(filename, b.Bytes(), 0644)
+	if err != nil {
+		log.Fatal("failed to save debug in file: ", err)
+	}
+}
+
+
+func LayersToFile(layers []Layer, filename string) {
+	var buf bytes.Buffer
+	LayersToBuffer(layers, 0, &buf)
+	err := ioutil.WriteFile(filename, buf.Bytes(), 0644)
+	if err != nil {
+		log.Fatal("failed to save upper mesh: ", err)
+	}
+}
+
 
 func DoInParallelAndWait(work func(wi, wn int)) {
 	wn := runtime.NumCPU()

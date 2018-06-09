@@ -4,7 +4,7 @@ import (
 	"github.com/l1va/goosli"
 )
 
-//DouglasPeucker algorithm of line simplification
+//SimplifyLine - DouglasPeucker algorithm of line simplification
 func SimplifyLine(ps []goosli.Point, epsilon float64) []goosli.Point {
 	// Find the point with the maximum distance
 	dmax := 0.0
