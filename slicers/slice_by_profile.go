@@ -5,13 +5,14 @@ import (
 	"bytes"
 	"strconv"
 	"log"
+	"github.com/l1va/goosli/commands"
 )
 
 // SliceByProfile - Slicing on layers by simple algo
 func SliceByProfile(mesh *goosli.Mesh, thickness float64, epsilon float64) bytes.Buffer {
 
 	layers := SliceByVector(mesh, thickness, goosli.AxisZ)
-	//goosli.LayersToGcode(layers, "/home/l1va/debug.gcode")
+	//LayersToGcode(layers, "/home/l1va/debug.gcode")
 
 	centers := calculateCenters(layers)
 	//goosli.PointsToDebugFile(centers, "/home/l1va/debug.txt")
@@ -23,6 +24,7 @@ func SliceByProfile(mesh *goosli.Mesh, thickness float64, epsilon float64) bytes
 	layersCount := 0
 	up := mesh
 	var down *goosli.Mesh
+	var cmds []commands.Command
 
 	for i := 1; i < len(simplified); i++ {
 		v := simplified[i-1].VectorTo(simplified[i])
@@ -39,12 +41,13 @@ func SliceByProfile(mesh *goosli.Mesh, thickness float64, epsilon float64) bytes
 		angleX := int(v.ProjectOnPlane(goosli.PlaneYZ).Angle(goosli.AxisZ))
 
 		down = rotateXZ(angleX, angleZ, down, &buffer, goosli.OriginPoint)
+		cmds = append(cmds, commands.RotateXZ{angleX, angleZ})
 
 		layers := SliceByVector(mesh, thickness, v)
-		goosli.LayersToBuffer(layers, layersCount, &buffer)
+		cmds = append(cmds, commands.LayersMoving{layers, layersCount})
 		layersCount += len(layers)
 	}
-
+	cmdsToBuffer(cmds, &buffer)
 	return buffer
 }
 

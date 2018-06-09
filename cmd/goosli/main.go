@@ -4,7 +4,7 @@ import (
 	"log"
 	"github.com/l1va/goosli/slicers"
 	"io/ioutil"
-	. "github.com/l1va/goosli"
+	"github.com/l1va/goosli"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -22,11 +22,11 @@ func main() {
 
 	kingpin.Parse()
 
-	mesh, err := LoadSTL(*stl)
+	mesh, err := goosli.LoadSTL(*stl)
 	if err != nil {
 		log.Fatal("failed to load mesh: ", err)
 	}
-	mesh.Shift(V(*ox, *oy, *oz))
+	mesh.Shift(goosli.V(*ox, *oy, *oz))
 
 	buffer := slicers.SliceByProfile(mesh, *thickness, *epsilon)
 

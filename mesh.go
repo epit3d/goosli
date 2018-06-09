@@ -2,8 +2,6 @@ package goosli
 
 import (
 	"math"
-	"bytes"
-	"github.com/constabulary/gb/testdata/src/c"
 )
 
 type Mesh struct {
@@ -14,7 +12,6 @@ func NewMesh(triangles []Triangle) Mesh {
 	return Mesh{Triangles: triangles}
 }
 
-
 func (m *Mesh) RotateX(angle int, around Point) *Mesh {
 
 	alpha := math.Pi * float64(angle) / 180.0
@@ -23,9 +20,8 @@ func (m *Mesh) RotateX(angle int, around Point) *Mesh {
 	my := V(0, math.Cos(alpha), math.Sin(alpha))
 	mz := V(0, -math.Sin(alpha), math.Cos(alpha))
 
-	return m.Rotate(mx,my,mz, around)
+	return m.Rotate(mx, my, mz, around)
 }
-
 
 func (m *Mesh) RotateZ(angle int, around Point) *Mesh {
 
@@ -35,10 +31,10 @@ func (m *Mesh) RotateZ(angle int, around Point) *Mesh {
 	my := V(-math.Sin(alpha), math.Cos(alpha), 0)
 	mz := V(0, 0, 1)
 
-	return m.Rotate(mx,my,mz, around)
+	return m.Rotate(mx, my, mz, around)
 }
 
-func (m *Mesh) Rotate(mx,my,mz Vector, around Point) *Mesh {
+func (m *Mesh) Rotate(mx, my, mz Vector, around Point) *Mesh {
 	cv := around.ToVector()
 	triangles := make([]Triangle, len(m.Triangles))
 	rotatedMesh := NewMesh(triangles)
@@ -51,12 +47,11 @@ func (m *Mesh) Rotate(mx,my,mz Vector, around Point) *Mesh {
 	return &rotatedMesh
 }
 
-
 func (m *Mesh) Shift(v Vector) {
 	if m == nil {
 		return
 	}
-	for i, t:= range(m.Triangles){
+	for i, t := range (m.Triangles) {
 		m.Triangles[i] = t.Shift(v)
 	}
 }

@@ -51,10 +51,4 @@ func (a Point) ProjectOnLine(b, c Point) Point {
 	return b.Shift(bcUnit.MulScalar(ba.Dot(bcUnit)))
 }
 
-func (a Point) ToString() string {
-	return "X" + StrF(a.X) + " Y" + StrF(a.Y) + " Z" + StrF(a.Z)
-}
 
-func (a Point) ToString2() string {
-	return StrF(a.X) + " " + StrF(a.Y) + " " + StrF(a.Z) + " "
-}

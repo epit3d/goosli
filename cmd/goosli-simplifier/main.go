@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"github.com/l1va/goosli/slicers"
-	. "github.com/l1va/goosli"
+	"github.com/l1va/goosli"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -17,7 +17,7 @@ func main() {
 
 	kingpin.Parse()
 
-	mesh, err := LoadSTL(*stl)
+	mesh, err := goosli.LoadSTL(*stl)
 	if err != nil {
 		log.Fatal("failed to load mesh: ", err)
 	}
@@ -27,7 +27,7 @@ func main() {
 		log.Fatal("failed to cut mesh: ", err)
 	}
 
-	err = SaveSTL(*out, mUp)
+	err = goosli.SaveSTL(*out, mUp)
 	if err != nil {
 		log.Fatal("failed to save simplified mesh: ", err)
 	}
