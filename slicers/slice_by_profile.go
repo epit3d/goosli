@@ -3,24 +3,22 @@ package slicers
 import (
 	"github.com/l1va/goosli"
 	"bytes"
-	"strconv"
 	"log"
 	"github.com/l1va/goosli/commands"
+	"github.com/l1va/goosli/debug"
 )
 
 // SliceByProfile - Slicing on layers by simple algo
-func SliceByProfile(mesh *goosli.Mesh, thickness float64, epsilon float64) bytes.Buffer {
-
-	layers := SliceByVector(mesh, thickness, goosli.AxisZ)
-	//LayersToGcode(layers, "/home/l1va/debug.gcode")
+func SliceByProfile(mesh *goosli.Mesh, epsilon float64, settings Settings) bytes.Buffer {
+	layers := SliceByVector(mesh, settings.LayerHeight, goosli.AxisZ)
+	//LayersToGcode(layers, "debug.gcode")
 
 	centers := calculateCenters(layers)
-	//goosli.PointsToDebugFile(centers, "/home/l1va/debug.txt")
+	debug.PointsToDebugFile(centers, "debug.txt")
 
 	simplified := SimplifyLine(centers, epsilon)
-	//goosli.PointsToDebugFile(simplified, "/home/l1va/debug_simplified.txt")
+	debug.PointsToDebugFile(simplified, "debug_simplified.txt")
 
-	var buffer bytes.Buffer
 	layersCount := 0
 	up := mesh
 	var down *goosli.Mesh
@@ -40,23 +38,22 @@ func SliceByProfile(mesh *goosli.Mesh, thickness float64, epsilon float64) bytes
 		angleZ := int(v.ProjectOnPlane(goosli.PlaneXY).Angle(goosli.AxisX))
 		angleX := int(v.ProjectOnPlane(goosli.PlaneYZ).Angle(goosli.AxisZ))
 
-		down = rotateXZ(angleX, angleZ, down, &buffer, goosli.OriginPoint)
+		down = down.RotateX(angleX, goosli.OriginPoint)
+		down = down.RotateZ(angleZ, goosli.OriginPoint) // local rotation!!!
 		cmds = append(cmds, commands.RotateXZ{angleX, angleZ})
 
-		layers := SliceByVector(mesh, thickness, v)
+		layers := SliceByVector(down, settings.LayerHeight, v)
 		cmds = append(cmds, commands.LayersMoving{layers, layersCount})
 		layersCount += len(layers)
 	}
+	settings.LayerCount = layersCount
+	smap := settings.ToMap()
+
+	var buffer bytes.Buffer
+	buffer.WriteString(goosli.PrepareDataFile("slicers/data/header_template.txt", smap))
 	cmdsToBuffer(cmds, &buffer)
+	buffer.WriteString(goosli.PrepareDataFile("slicers/data/footer_template.txt", smap))
 	return buffer
-}
-
-
-
-func rotateXZ(angleX int, angleZ int, mesh *goosli.Mesh, b *bytes.Buffer, around goosli.Point) *goosli.Mesh {
-	b.WriteString("G62 " + strconv.Itoa(angleX) + " " + strconv.Itoa(angleZ) + "\n")
-	mesh = mesh.RotateX(angleX, around)
-	return mesh.RotateZ(angleZ, around) // local rotation!!!
 }
 
 func calculateCenters(layers []goosli.Layer) []goosli.Point {

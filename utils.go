@@ -8,12 +8,24 @@ import (
 	"bytes"
 	"io/ioutil"
 	"log"
+	"strings"
 )
 
+func PrepareDataFile(filename string, m map[string]string) string {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatal("failed to read file: ", err)
+	}
+	s := string(data)
+	for k, v := range m {
+		s = strings.Replace(s, k, v, -1)
+	}
+	return s
+}
 func ToFile(buffer bytes.Buffer, filename string) {
 	err := ioutil.WriteFile(filename, buffer.Bytes(), 0644)
 	if err != nil {
-		log.Fatal("failed to save debug in file: ", err)
+		log.Fatal("failed to save buffer to file: ", err)
 	}
 }
 

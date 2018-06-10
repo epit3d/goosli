@@ -14,7 +14,7 @@ func LayersToGcode(layers []goosli.Layer, filename string) {
 }
 
 func cmdsToBuffer(cmds []commands.Command, b *bytes.Buffer) {
-	for _,cmd:= range(cmds){
+	for _, cmd := range (cmds) {
 		cmd.ToGCode(b)
 	}
 }
