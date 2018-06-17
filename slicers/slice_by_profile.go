@@ -42,7 +42,7 @@ func SliceByProfile(mesh *goosli.Mesh, epsilon float64, settings Settings) bytes
 		down = down.RotateZ(angleZ, goosli.OriginPoint) // local rotation!!!
 		cmds = append(cmds, commands.RotateXZ{angleX, angleZ})
 
-		layers := SliceByVector(down, settings.LayerHeight, v)
+		layers := SliceByVector(down, settings.LayerHeight, v)  //TODO: should be sliced before or v rotated
 		cmds = append(cmds, commands.LayersMoving{layers, layersCount})
 		layersCount += len(layers)
 	}
@@ -50,9 +50,9 @@ func SliceByProfile(mesh *goosli.Mesh, epsilon float64, settings Settings) bytes
 	smap := settings.ToMap()
 
 	var buffer bytes.Buffer
-	buffer.WriteString(goosli.PrepareDataFile("slicers/data/header_template.txt", smap))
+	buffer.WriteString(goosli.PrepareDataFile("data/header_template.txt", smap))
 	cmdsToBuffer(cmds, &buffer)
-	buffer.WriteString(goosli.PrepareDataFile("slicers/data/footer_template.txt", smap))
+	buffer.WriteString(goosli.PrepareDataFile("data/footer_template.txt", smap))
 	return buffer
 }
 

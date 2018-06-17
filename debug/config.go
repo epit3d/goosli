@@ -13,7 +13,7 @@ type Cfg struct {
 
 func Config() Cfg {
 	var c Cfg
-	yamlFile, err := ioutil.ReadFile("debug/config.yaml")
+	yamlFile, err := ioutil.ReadFile("data/config.yaml")
 	if err != nil {
 		log.Printf("yamlFile.Get err: %v ", err)
 	}

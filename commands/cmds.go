@@ -17,7 +17,7 @@ type RotateXZ struct {
 }
 
 func (r RotateXZ) ToGCode(b *bytes.Buffer) {
-	b.WriteString("G62 " + strconv.Itoa(r.AngleX) + " " + strconv.Itoa(r.AngleZ) + "\n")
+	b.WriteString("G62 X" + strconv.Itoa(r.AngleX) + " Z" + strconv.Itoa(r.AngleZ) + "\n")
 }
 
 type LayersMoving struct {
@@ -27,7 +27,7 @@ type LayersMoving struct {
 
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 	for i := 0; i < len(lm.Layers); i++ {
-		b.WriteString(";Layer" + strconv.Itoa(i+lm.Index) + "\n")
+		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
 		layerToGCode(lm.Layers[i], b)
 	}
 }
