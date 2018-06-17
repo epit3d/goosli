@@ -1,7 +1,7 @@
 package slicers
 
 import (
-	"github.com/l1va/goosli"
+	. "github.com/l1va/goosli/primitives"
 	"strconv"
 )
 
@@ -19,8 +19,8 @@ type Settings struct {
 func (s *Settings) ToMap() map[string]string {
 	return map[string]string{
 		"{datetime}":             s.DateTime,
-		"{layer_height}":         goosli.StrF(s.LayerHeight),
-		"{wall_thickness}":       goosli.StrF(s.WallThickness),
+		"{layer_height}":         StrF(s.LayerHeight),
+		"{wall_thickness}":       StrF(s.WallThickness),
 		"{fill_density}":         strconv.Itoa(s.FillDensity),
 		"{bed_temperature}":      strconv.Itoa(s.BedTemperature),
 		"{extruder_temperature}": strconv.Itoa(s.ExtruderTemperature),

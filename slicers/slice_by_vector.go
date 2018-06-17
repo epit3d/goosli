@@ -1,13 +1,13 @@
 package slicers
 
 import (
-	"github.com/l1va/goosli"
+	. "github.com/l1va/goosli/primitives"
 	"sort"
 	"math"
 )
 
 // SliceByVector - Slicing on layers by vector Z
-func SliceByVector(mesh *goosli.Mesh, thickness float64, Z goosli.Vector) []goosli.Layer {
+func SliceByVector(mesh *Mesh, thickness float64, Z Vector) []Layer {
 
 	if mesh == nil || len(mesh.Triangles) == 0 {
 		return nil
@@ -25,14 +25,14 @@ func SliceByVector(mesh *goosli.Mesh, thickness float64, Z goosli.Vector) []goos
 	sh := Z.MulScalar(maxz - minz).MulScalar(1.0 / float64(n))
 
 	in := make(chan job, n)
-	out := make(chan goosli.Layer, n)
-	goosli.DoInParallel(slicingWorker(in, out))
+	out := make(chan Layer, n)
+	DoInParallel(slicingWorker(in, out))
 
 	index := 0
-	var active []*goosli.Triangle
+	var active []*Triangle
 	curP := Z.MulScalar(minz).ToPoint().Shift(sh.MulScalar(0.5))
 	for i := 0; i < n; i++ {
-		plane := goosli.Plane{P: curP, N: Z}
+		plane := Plane{P: curP, N: Z}
 		z := curP.ToVector().Dot(Z)
 		// remove triangles below plane
 		newActive := active[:0]
@@ -49,7 +49,7 @@ func SliceByVector(mesh *goosli.Mesh, thickness float64, Z goosli.Vector) []goos
 			index++
 		}
 		// copy triangles for worker job
-		activeCopy := make([]*goosli.Triangle, len(active))
+		activeCopy := make([]*Triangle, len(active))
 		copy(activeCopy, active)
 		in <- job{order: i, plane: plane, triangles: activeCopy}
 		curP = curP.Shift(sh)
@@ -57,7 +57,7 @@ func SliceByVector(mesh *goosli.Mesh, thickness float64, Z goosli.Vector) []goos
 	close(in)
 
 	// read results from workers
-	layers := make([]goosli.Layer, n)
+	layers := make([]Layer, n)
 	for i := 0; i < n; i++ {
 		layers[i] = <-out
 	}
@@ -80,21 +80,21 @@ func SliceByVector(mesh *goosli.Mesh, thickness float64, Z goosli.Vector) []goos
 
 type job struct {
 	order     int
-	plane     goosli.Plane
-	triangles []*goosli.Triangle
+	plane     Plane
+	triangles []*Triangle
 }
 
-func slicingWorker(in chan job, out chan goosli.Layer) func(wi, wn int) {
+func slicingWorker(in chan job, out chan Layer) func(wi, wn int) {
 	return func(_, _ int) {
-		var paths []goosli.Path
+		var paths []Path
 		for job := range in {
 			paths = paths[:0]
 			for _, t := range job.triangles {
 				if line := job.plane.IntersectTriangle(t); line != nil {
-					paths = append(paths, goosli.Path{Lines: []goosli.Line{*line}})
+					paths = append(paths, Path{Lines: []Line{*line}})
 				}
 			}
-			out <- goosli.Layer{Order: job.order, Paths: goosli.JoinPaths(paths)}
+			out <- Layer{Order: job.order, Paths: JoinPaths(paths)}
 		}
 	}
 }
