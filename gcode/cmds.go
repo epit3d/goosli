@@ -12,12 +12,12 @@ type Command interface {
 }
 
 type RotateXZ struct {
-	AngleX int
-	AngleZ int
+	AngleX float64
+	AngleZ float64
 }
 
 func (r RotateXZ) ToGCode(b *bytes.Buffer) {
-	b.WriteString("G62 X" + strconv.Itoa(r.AngleX) + " Z" + strconv.Itoa(r.AngleZ) + "\n")
+	b.WriteString("G62 X" + StrF(r.AngleX) + " Z" + StrF(r.AngleZ) + "\n")
 }
 
 type LayersMoving struct {

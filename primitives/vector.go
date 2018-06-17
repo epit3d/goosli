@@ -41,8 +41,8 @@ func (a Vector) MulScalar(b float64) Vector {
 	return Vector{a.X * b, a.Y * b, a.Z * b}
 }
 
-func (a Vector) Rotate(mx, my, mz Vector) Vector {
-	return V(a.Dot(mx), a.Dot(my), a.Dot(mz))
+func (a Vector) Rotate(rm RotationMatrix) Vector {
+	return V(a.Dot(rm.X), a.Dot(rm.Y), a.Dot(rm.Z))
 }
 
 func (a Vector) ToPoint() Point {

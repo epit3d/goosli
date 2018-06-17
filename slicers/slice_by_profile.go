@@ -36,14 +36,14 @@ func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer
 		} else {
 			down = up
 		}
-		angleZ := int(v.ProjectOnPlane(PlaneXY).Angle(AxisX))
-		angleX := int(v.ProjectOnPlane(PlaneYZ).Angle(AxisZ))
+		angleZ := v.ProjectOnPlane(PlaneXY).Angle(AxisX)
+		angleX := v.ProjectOnPlane(PlaneYZ).Angle(AxisZ)
 
-		down = down.RotateX(angleX, OriginPoint)
-		down = down.RotateZ(angleZ, OriginPoint) // local rotation!!!
+		down = down.Rotate(RotationAroundX(angleX), OriginPoint)
+		down = down.Rotate(RotationAroundZ(angleZ), OriginPoint) // local rotation!!!
 		cmds = append(cmds, gcode.RotateXZ{angleX, angleZ})
 
-		layers := SliceByVector(down, settings.LayerHeight, v)  //TODO: should be sliced before or v rotated
+		layers := SliceByVector(down, settings.LayerHeight, AxisZ)
 		cmds = append(cmds, gcode.LayersMoving{layers, layersCount})
 		layersCount += len(layers)
 	}
