@@ -40,7 +40,7 @@ func layerToGCode(l Layer, b *bytes.Buffer) {
 			eDist := math.Sqrt(math.Pow(line.P2.X-line.P1.X, 2) + math.Pow(line.P2.Y-line.P1.Y, 2) + math.Pow(line.P2.Z-line.P1.Z, 2))
 			eOff += eDist
 			b.WriteString("G1 " + pointToString(line.P2) + " E" + StrF(eOff) + "\n")
-		}
+		} //TODO: optimize - not write coordinate if it was not changed
 	}
 }
 

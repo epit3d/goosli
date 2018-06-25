@@ -12,7 +12,7 @@ import (
 // SliceByProfile - Slicing on layers by simple algo
 func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer {
 	layers := SliceByVector(mesh, settings.LayerHeight, AxisZ)
-	//LayersToGcode(layers, "debug.gcode")
+	LayersToGcode(layers, "/home/l1va/debug.gcode")
 
 	centers := calculateCenters(layers)
 	debug.PointsToDebugFile(centers, "debug.txt")
@@ -29,7 +29,7 @@ func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer
 		v := simplified[i-1].VectorTo(simplified[i])
 		if i < len(simplified)-1 {
 			var err error
-			up, down, err = helpers.CutMesh(up, Plane{simplified[i], v})
+			up, down, err = helpers.CutMesh(up, Plane{simplified[i], AxisZ})
 			if err != nil {
 				log.Fatal("failed to cut mesh by plane: ", err)
 			}
@@ -39,8 +39,8 @@ func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer
 		angleZ := v.ProjectOnPlane(PlaneXY).Angle(AxisX)
 		angleX := v.ProjectOnPlane(PlaneYZ).Angle(AxisZ)
 
+		down = down.Rotate(RotationAroundZ(angleZ), OriginPoint)
 		down = down.Rotate(RotationAroundX(angleX), OriginPoint)
-		down = down.Rotate(RotationAroundZ(angleZ), OriginPoint) // local rotation!!!
 		cmds = append(cmds, gcode.RotateXZ{angleX, angleZ})
 
 		layers := SliceByVector(down, settings.LayerHeight, AxisZ)
@@ -60,19 +60,24 @@ func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer
 func calculateCenters(layers []Layer) []Point {
 	var centers []Point
 	for _, layer := range layers {
-		x, y, z, count := 0.0, 0.0, 0.0, 0
-		for _, path := range layer.Paths {
-			for _, line := range path.Lines {
-				x += line.P1.X + line.P2.X
-				y += line.P1.Y + line.P2.Y
-				z += line.P1.Z + line.P2.Z
-			}
-			count += len(path.Lines) * 2
-		}
-		if count > 0 {
-			countF := float64(count)
-			centers = append(centers, Point{x / countF, y / countF, z / countF})
-		}
+		centers = append(centers, calculateCenter(layer))
 	}
 	return centers
+}
+
+func calculateCenter(layer Layer) Point {
+	x, y, z, count := 0.0, 0.0, 0.0, 0
+	for _, path := range layer.Paths {
+		for _, line := range path.Lines {
+			x += line.P1.X + line.P2.X
+			y += line.P1.Y + line.P2.Y
+			z += line.P1.Z + line.P2.Z
+		}
+		count += len(path.Lines) * 2
+	}
+	if count > 0 {
+		countF := float64(count)
+		return Point{x / countF, y / countF, z / countF}
+	}
+	return OriginPoint
 }

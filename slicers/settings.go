@@ -12,7 +12,8 @@ type Settings struct {
 	FillDensity         int
 	BedTemperature      int
 	ExtruderTemperature int
-	TravelSpeed         int
+	PrintSpeed          int
+	Nozzle              float64
 	LayerCount          int
 }
 
@@ -24,7 +25,8 @@ func (s *Settings) ToMap() map[string]string {
 		"{fill_density}":         strconv.Itoa(s.FillDensity),
 		"{bed_temperature}":      strconv.Itoa(s.BedTemperature),
 		"{extruder_temperature}": strconv.Itoa(s.ExtruderTemperature),
-		"{travel_speed}":         strconv.Itoa(s.TravelSpeed),
+		"{print_speed}":          strconv.Itoa(s.PrintSpeed),
+		"{nozzle}":               StrF(s.Nozzle),
 		"{layer_count}":          strconv.Itoa(s.LayerCount),
 	}
 }

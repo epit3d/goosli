@@ -30,18 +30,18 @@ func (p Plane) IntersectTriangle(t *Triangle) *Line {
 	v3 := p.IntersectSegment(t.P3, t.P1)
 	var p1, p2 Point
 
-	if v1 != nil && v2 != nil && *v1 != *v2 {
+	if v1 != nil && v2 != nil && !v1.Equal(*v2) {
 		p1, p2 = *v1, *v2
-	} else if v1 != nil && v3 != nil && *v1 != *v3 {
+	} else if v1 != nil && v3 != nil && !v1.Equal(*v3) {
 		p1, p2 = *v1, *v3
-	} else if v2 != nil && v3 != nil && *v2 != *v3 {
+	} else if v2 != nil && v3 != nil && !v2.Equal(*v3) {
 		p1, p2 = *v2, *v3
 	} else {
 		return nil
 	}
 	p1 = p1.RoundPlaces(8)
 	p2 = p2.RoundPlaces(8)
-	if p1 == p2 {
+	if p1.Equal(p2) {
 		return nil
 	}
 	n := p1.VectorTo(p2).Cross(p.N)
