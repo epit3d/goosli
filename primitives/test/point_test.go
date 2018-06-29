@@ -28,7 +28,7 @@ func TestPoint_Equal(t *testing.T) {
 			out: true,
 		},
 		{
-			in1: Point{33.333333, 1, 1},
+			in1: Point{33.33333, 1, 1},
 			in2: Point{33.3333333333333, 1, 1},
 			out: false,
 		},
@@ -44,7 +44,7 @@ func TestPoint_Equal(t *testing.T) {
 		},
 		{
 			in1: Point{33.3333333333333, 1, 1},
-			in2: Point{33.333333, 1, 1},
+			in2: Point{33.33333, 1, 1},
 			out: false,
 		},
 	}

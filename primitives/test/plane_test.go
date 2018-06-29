@@ -73,8 +73,8 @@ func TestPlane_IntersectTriangle(t *testing.T) {
 		},
 		{
 			in1: Plane{Point{0, 0, 0}, V(0, 0, 1)},
-			in2: NewTriangle(Point{0, 0, -0.0000001}, Point{2, 0, 1}, Point{0, 0, 1}),
-			out: &Line{P1:Point{X:2e-07, Y:0, Z:0}, P2:Point{X:0, Y:0, Z:0}},
+			in2: NewTriangle(Point{0, 0, -0.00001}, Point{2, 0, 1}, Point{0, 0, 1}),
+			out: &Line{P1:Point{X:2e-05, Y:0, Z:0}, P2:Point{X:0, Y:0, Z:0}},
 		},
 	}
 	for i, row := range cases {

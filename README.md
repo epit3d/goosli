@@ -8,7 +8,7 @@ See slicers/slice_by_profile.go. For sure your 3d-printer have to support bed ro
 
 Feel free to open issues or implement your slicing algorithms.
 
-Do not forget to place data directory near your binary. 
+Do not forget to place <b>data directory</b> near your binary. 
 
 Here is a viewer to see results of slicing - [spycer](https://github.com/l1va/spycer).
 
@@ -19,5 +19,5 @@ Cut stl in two stls by required plane.
 Simplifies stl to required count of triangles.
 
 ### Thanks
-A lot of ideas and code was taken from different [fogleman](https://github.com/fogleman) 
+A lot of ideas and code was taken from various [fogleman](https://github.com/fogleman) 
 repos. Thank you!

@@ -4,7 +4,6 @@ import (
 	"math"
 )
 
-
 var (
 	OriginPoint = Point{0, 0, 0}
 )
@@ -51,4 +50,23 @@ func (a Point) ProjectOnLine(b, c Point) Point {
 	return b.Shift(bcUnit.MulScalar(ba.Dot(bcUnit)))
 }
 
-
+// Crossing Number method: calculates count of intersections plane with polygon(path) in one direction,
+// if odd - inside. Can have problems with difficult forms as shown here
+// http://geomalgorithms.com/a03-_inclusion.html
+func (p Point) Inside(path Path) bool {
+	if len(path.Lines) == 0 {
+		return false
+	}
+	n := path.Lines[0].P1.VectorTo(path.Lines[0].P2)
+	pl := Plane{p, n}
+	v := p.VectorTo(path.Lines[0].P1).ProjectOnPlane(pl)
+	c := 0
+	for i := 0; i < len(path.Lines); i++ {
+		line := path.Lines[i]
+		inters := pl.IntersectSegment(line.P1, line.P2)
+		if inters != nil && p.VectorTo(*inters).CodirectedWith(v) {
+			c += 1
+		}
+	}
+	return c%2 != 0
+}

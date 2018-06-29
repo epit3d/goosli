@@ -81,3 +81,18 @@ func calculateCenter(layer Layer) Point {
 	}
 	return OriginPoint
 }
+
+func calculateCenterForPath(path Path) Point {
+	x, y, z, count := 0.0, 0.0, 0.0, 0
+	for _, line := range path.Lines {
+		x += line.P1.X + line.P2.X
+		y += line.P1.Y + line.P2.Y
+		z += line.P1.Z + line.P2.Z
+	}
+	count += len(path.Lines) * 2
+	if count > 0 {
+		countF := float64(count)
+		return Point{x / countF, y / countF, z / countF}
+	}
+	return OriginPoint
+}

@@ -19,7 +19,17 @@ func PointsToDebugFile(ps []Point, filename string) {
 		ToFile(b, cfg.DebugPath+filename)
 	}
 }
+func TriangleToDebugFile(p1, p2, p3 Point, filename string) {
+	if cfg.Debug {
+		var b bytes.Buffer
+		b.WriteString("triangle ")
+		b.WriteString(pointToString(p1))
+		b.WriteString(pointToString(p2))
+		b.WriteString(pointToString(p3) + "\n")
 
+		ToFile(b, cfg.DebugPath+filename)
+	}
+}
 func pointToString(a Point) string {
 	return StrF(a.X) + " " + StrF(a.Y) + " " + StrF(a.Z) + " "
 }

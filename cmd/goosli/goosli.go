@@ -48,7 +48,7 @@ func main() {
 
 	kingpin.Parse()
 
-	mesh, err := LoadSTL("/home/l1va/bridge.stl")
+	mesh, err := LoadSTL("/home/l1va/test31.stl")
 	//mesh, err := LoadSTL(*stl)
 	if err != nil {
 		log.Fatal("failed to load mesh: ", err)
@@ -58,9 +58,9 @@ func main() {
 	//test1 := V(-0.9999999403953552, 13.000000238418579, 0.0)
 	//test2 := V(-3.078000009059906, 6.99399995803833, 0.0)
 	//test3 := V(-6.065999925136566, 6.99399995803833, 0.0)
-	//test31 := V(-6, 0.0, 0.0)
-	bridge := V(-0.5, -4.0, 0.0)
-	mesh.Shift(bridge)
+	test31 := V(-6, 0.0, 0.0)
+	//bridge := V(-0.5, -4.0, 0.0)
+	mesh.Shift(test31)
 
 	var buffer bytes.Buffer
 	if *slicingType == "by_profile" {
