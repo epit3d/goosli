@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+	"os"
 )
 
 func PrepareDataFile(filename string, m map[string]string) string {
@@ -22,10 +23,25 @@ func PrepareDataFile(filename string, m map[string]string) string {
 	}
 	return s
 }
+
 func ToFile(buffer bytes.Buffer, filename string) {
 	err := ioutil.WriteFile(filename, buffer.Bytes(), 0644)
 	if err != nil {
 		log.Fatal("failed to save buffer to file: ", err)
+	}
+}
+
+
+func AddToFile(buffer bytes.Buffer, filename string) {
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+	if _, err = f.WriteString(buffer.String()); err != nil {
+		panic(err)
 	}
 }
 

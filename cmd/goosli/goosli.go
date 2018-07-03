@@ -27,7 +27,7 @@ var (
 	printSpeed          = kingpin.Flag("print_speed", "Printing speed.").Default("50").Int()
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
 
-	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("5axes").String()
+	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("3axes").String()
 )
 
 func settings() slicers.Settings {
@@ -48,22 +48,16 @@ func main() {
 
 	kingpin.Parse()
 
-	mesh, err := LoadSTL("/home/l1va/test31.stl")
-	//mesh, err := LoadSTL(*stl)
+	mesh, err := LoadSTL(*stl)
 	if err != nil {
 		log.Fatal("failed to load mesh: ", err)
 	}
 	mesh.Shift(V(-*ox, -*oy, -*oz))
 
-	//test1 := V(-0.9999999403953552, 13.000000238418579, 0.0)
-	//test2 := V(-3.078000009059906, 6.99399995803833, 0.0)
-	//test3 := V(-6.065999925136566, 6.99399995803833, 0.0)
-	test31 := V(-6, 0.0, 0.0)
-	//bridge := V(-0.5, -4.0, 0.0)
-	mesh.Shift(test31)
-
 	var buffer bytes.Buffer
-	if *slicingType == "by_profile" {
+	if *slicingType == "3axes" {
+		buffer = slicers.SliceByVectorToBuffer(mesh, AxisZ, settings())
+	} else if *slicingType == "5axes_by_profile" {
 		buffer = slicers.SliceByProfile(mesh, *epsilon, settings())
 	} else if *slicingType == "5axes" {
 		buffer = slicers.Slice5Axes(mesh, settings())

@@ -7,8 +7,8 @@ import (
 	"github.com/l1va/goosli/gcode"
 	"log"
 	"math"
-	"fmt"
 	"github.com/l1va/goosli/debug"
+	"fmt"
 )
 
 var
@@ -16,11 +16,13 @@ var
 	angle_dist  = 10
 	angle_full  = 360
 	angle_count = angle_full / angle_dist
+	angleX = 60.0
+
 )
 
 // SliceByProfile - Slicing on layers by simple algo
 func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
-
+	debug.RecreateFile()
 	layersCount := 0
 	var cmds []gcode.Command
 	simpMesh, err := helpers.SimplifyMesh(mesh, 500)
@@ -37,20 +39,20 @@ func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
 
 	i := 0
 	layers := SliceByVector(simpMesh, settings.LayerHeight, AxisZ) //TODO: make slicing by one layer?
-	LayersToGcode(layers, "/home/l1va/debug.gcode")
+	//LayersToGcode(layers, "/home/l1va/debug.gcode")
 	toAdd := SliceByVector(mesh, settings.LayerHeight, AxisZ)
-	//rotated := false
-	angleX := 0.0
+	rotated := false
 	angleZ := 0.0
+	down := mesh
 	for i < len(layers) {
 		if i == 0 {
 			i++
 			continue
 		}
 
-		fails := calculateFails(layers[i], layers[i-1], sh, settings.LayerHeight)
+		newPlane := calculateFails(layers[i], layers[i-1], sh, settings.LayerHeight)
 
-		if len(fails) == 0 {
+		if newPlane == nil {
 			i++
 			if i == len(layers) {
 				cmds = append(cmds, gcode.LayersMoving{toAdd, layersCount})
@@ -64,64 +66,73 @@ func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
 			//	break
 			//}
 			//rotated = true
-			SaveSTL("/home/l1va/simp_mesh_before_cut.stl", simpMesh)
+			debug.AddLayer(layers[i-1])
+			debug.AddLayer(layers[i])
 			curP := calculateCenter(layers[i])
-			if i != len(layers)-1 {
-				fmt.Printf("\n %v \n", layers[i])
-				fmt.Printf("\n %v \n", layers[i-1])
-				debug.TriangleToDebugFile(curP, curP.Shift(AxisX.MulScalar(10)), curP.Shift(AxisY.MulScalar(15)), "debug_simplified.txt")
-				simpMesh, _, err = helpers.CutMesh(simpMesh, Plane{curP, AxisZ})
-				if err != nil {
-					log.Fatal("failed to cut simpMesh by plane in 5a slicing: ", err)
-				}
-				mesh, _, err = helpers.CutMesh(mesh, Plane{curP, AxisZ})
-				if err != nil {
-					log.Fatal("failed to cut mesh by plane in 5a slicing: ", err)
-				}
-			}
-			SaveSTL("/home/l1va/simp_mesh_before.stl", simpMesh)
-			//revert previous to zero
-			simpMesh = simpMesh.Rotate(RotationAroundX(-angleX), OriginPoint)
-			simpMesh = simpMesh.Rotate(RotationAroundZ(-angleZ), OriginPoint)
+			//fmt.Printf("\n %v \n", layers[i])
+			fmt.Printf("\n %v \n", i)
 
+			//SaveSTL("/home/l1va/simp_mesh_before.stl", simpMesh)
+			//debug.TriangleToDebugFile(curP, curP.Shift(AxisX.MulScalar(10)), curP.Shift(AxisY.MulScalar(15)), "debug_simplified.txt")
+			simpMesh, _, err = helpers.CutMesh(simpMesh, Plane{curP, AxisZ})
+			if err != nil {
+
+				log.Fatal("failed to cut simpMesh by plane in 5a slicing: ", err)
+			}
+			mesh, _, err = helpers.CutMesh(mesh, Plane{curP, AxisZ})
+			if err != nil {
+				log.Fatal("failed to cut mesh by plane in 5a slicing: ", err)
+			}
+			debug.AddTriangleByPoints(newPlane.P, newPlane.P.Shift(AxisX.ProjectOnPlane(*newPlane).MulScalar(10)),
+				newPlane.P.Shift(AxisY.ProjectOnPlane(*newPlane).MulScalar(15)))
+
+			//newPlane.N.Rotate(RotationAroundZ(90))
+
+			//SaveSTL("/home/l1va/simp_mesh_before_cut.stl", simpMesh)
+
+			simpMesh, _, err = helpers.CutMesh(simpMesh, *newPlane)
+			if err != nil {
+				break //TODO: remvoe me
+				log.Fatal("failed to cut simpMesh by newPlane in 5a slicing: ", err)
+			}
+			if i > 10 {
+				debug.AddTriangleByPoints(newPlane.P, newPlane.P.Shift(AxisX.ProjectOnPlane(*newPlane).MulScalar(10)),
+					newPlane.P.Shift(AxisY.ProjectOnPlane(*newPlane).MulScalar(15)))
+
+				//newPlane.N.Rotate(RotationAroundZ(90))
+
+				//SaveSTL("/home/l1va/simp_mesh_before_cut.stl", simpMesh)
+
+			}
+			mesh, down, err = helpers.CutMesh(mesh, *newPlane)
+			if err != nil {
+				log.Fatal("failed to cut mesh by newPlane in 5a slicing: ", err)
+			}
+			toAdd = SliceByVector(down, settings.LayerHeight, AxisZ)
+			cmds = append(cmds, gcode.LayersMoving{toAdd, layersCount})
+			layersCount += len(toAdd)
+
+			if rotated {
+				simpMesh = simpMesh.Rotate(RotationAroundX(-angleX), OriginPoint)
+				simpMesh = simpMesh.Rotate(RotationAroundZ(-angleZ), OriginPoint)
+				mesh = mesh.Rotate(RotationAroundX(-angleX), OriginPoint)
+				mesh = mesh.Rotate(RotationAroundZ(-angleZ), OriginPoint)
+				cmds = append(cmds, gcode.RotateXZ{0, 0})
+				rotated = false
+			} else {
+				angleZ = newPlane.N.ProjectOnPlane(PlaneXY).Angle(AxisX) + 90
+				print(angleZ)
+				simpMesh = simpMesh.Rotate(RotationAroundZ(angleZ), OriginPoint)
+				simpMesh = simpMesh.Rotate(RotationAroundX(angleX), OriginPoint)
+				mesh = mesh.Rotate(RotationAroundZ(angleZ), OriginPoint)
+				mesh = mesh.Rotate(RotationAroundX(angleX), OriginPoint)
+				cmds = append(cmds, gcode.RotateXZ{angleX, angleZ})
+				rotated = true
+			}
 			layers = SliceByVector(simpMesh, settings.LayerHeight, AxisZ)
-			LayersToGcode(layers, "/home/l1va/debug2.gcode")
-			SaveSTL("/home/l1va/simp_mesh.stl", simpMesh)
-			curX := 0.0
-			curZ := 0.0
-			if len(layers) > 1 {
-				fails = calculateFails(layers[1], layers[0], sh, settings.LayerHeight)
-				fmt.Printf("\n%v first compare: %v %v", fails, len(layers[0].Paths), len(layers[1].Paths))
-				fmt.Printf("%v", layers[0])
-				for _, fail := range fails {
-					curX = 60
-					curZ = float64(fail) + 90
-					simpMesh = simpMesh.Rotate(RotationAroundZ(curZ), OriginPoint)
-					simpMesh = simpMesh.Rotate(RotationAroundX(curX), OriginPoint)
-					layers = SliceByVector(simpMesh, settings.LayerHeight, AxisZ)
-					if len(layers) > 1 {
-						fails = calculateFails(layers[1], layers[0], sh, settings.LayerHeight)
-						if len(fails) == 0 {
-							break
-						}
-						simpMesh = simpMesh.Rotate(RotationAroundX(-curX), OriginPoint)
-						simpMesh = simpMesh.Rotate(RotationAroundZ(-curZ), OriginPoint)
-					}
-
-				}
-			}
-			mesh = mesh.Rotate(RotationAroundX(-angleX), OriginPoint)
-			mesh = mesh.Rotate(RotationAroundZ(-angleZ), OriginPoint)
-
-			angleX = curX
-			angleZ = curZ
-			print("\n !!!!!!!!!! MAXZ: ", angleX, angleZ)
-
-			cmds = append(cmds, gcode.RotateXZ{angleX, angleZ})
-
-			mesh = mesh.Rotate(RotationAroundZ(angleZ), OriginPoint)
-			mesh = mesh.Rotate(RotationAroundX(angleX), OriginPoint)
 			toAdd = SliceByVector(mesh, settings.LayerHeight, AxisZ)
+			//cmds = append(cmds, gcode.LayersMoving{layers, layersCount})
+			//break
 			i = 0
 			minz, maxz := simpMesh.MinMaxZ(Z)
 			n := int(math.Ceil((maxz - minz) / settings.LayerHeight))
@@ -139,10 +150,9 @@ func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
 	return buffer
 }
 
-func calculateFails(layer, prev_layer Layer, sh Vector, layerHeight float64) []int {
+func calculateFails(layer, prev_layer Layer, sh Vector, layerHeight float64) *Plane {
 	half_height := layerHeight + 0.1 //TODO: remove hardcode
 	rm := RotationAroundZ(float64(angle_dist))
-	fails := []int{}
 
 	for _, path := range (layer.Paths) {
 		curP := calculateCenterForPath(path)
@@ -150,10 +160,16 @@ func calculateFails(layer, prev_layer Layer, sh Vector, layerHeight float64) []i
 		prev_path := findPrevPath(prevP, prev_layer)
 		failsCur := []float64{}
 		if prev_path == nil {
-			for _, prev_path := range (prev_layer.Paths) {
-				pathP := calculateCenterForPath(prev_path)
-				angle := pathP.VectorTo(prevP).Angle(AxisX)
-				failsCur = append(failsCur, angle)
+			prevPath := prev_layer.Paths[0] //checking only first path
+			pathP := calculateCenterForPath(prevPath)
+			for _, line := range (prevPath.Lines) { //TODO: optimize me
+				pl := Plane{pathP, pathP.VectorTo(prevP).Cross(AxisZ)}
+				pi := pl.IntersectSegment(line.P1, line.P2)
+				if pi != nil && pathP.VectorTo(*pi).CodirectedWith(pathP.VectorTo(prevP)) {
+					angle := pathP.VectorTo(*pi).Angle(AxisX)+90
+					norm := AxisZ.Rotate(RotationAroundX(angleX)).Rotate(RotationAroundZ(angle))
+					return &Plane{*pi, norm}
+				}
 			}
 		} else {
 			curX := AxisX
@@ -184,29 +200,27 @@ func calculateFails(layer, prev_layer Layer, sh Vector, layerHeight float64) []i
 					failsCur = append(failsCur, float64(j*angle_dist))
 				}
 			}
-		}
-		if len(failsCur) > 0 {
-			fails = append(fails, MiddleOnTheRing(failsCur, angle_full))
-		}
-	}
+			if len(failsCur) > 0 {
+				prevPath := *prev_path
+				pathP := calculateCenterForPath(prevPath)
+				angle := float64(MiddleOnTheRing(failsCur, angle_full))
+				v := AxisX.Rotate(RotationAroundZ(angle))
+				pl := Plane{pathP, v.Cross(AxisZ)}
 
-	if len(fails) > 0 {
-		fmt.Printf("\n %v\n", fails)
-		/*		print("\n======= layer ")
-				for j := 0; j < len(fails); j++ {
-					print("\n", fails[j], " ", cur_dist[fail[j]], " ", prev_dist[fail[j]])
-					if !rotated {
-						points = append(points, prevP)
-						points = append(points, prev_p[fail[j]])
-						points1 = append(points1, curP)
-						points1 = append(points1, cur_p[fail[j]])
+				for _, line := range prevPath.Lines { //TODO: optimize me
+					pi := pl.IntersectSegment(line.P1, line.P2)
+					if pi != nil && pathP.VectorTo(*pi).CodirectedWith(v) {
+						norm := AxisZ.Rotate(RotationAroundX(angleX)).Rotate(RotationAroundZ(angle + 90))
+						return &Plane{*pi, norm}
 					}
 				}
-				debug.PointsToDebugFile(points, "debug.txt")
-				debug.PointsToDebugFile(points1, "debug_simplified.txt")*/
-		print("\n---------")
+			}
+		}
+
 	}
-	return fails
+
+	return nil
+
 }
 
 func findPrevPath(prevP Point, prev_layer Layer) *Path {

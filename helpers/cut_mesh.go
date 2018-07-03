@@ -38,7 +38,8 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 		} else if len(inFront) == 2 {
 			line := p.IntersectTriangle(&t)
 			if line == nil {
-				log.Fatal("failed to intersect triangle by plane2: %v, %v", t, p)
+				log.Printf("failed to intersect triangle by plane2, skip it: %v, %v\n", t, p)
+				continue
 			}
 
 			ts := splitOnThree(outFront[0], *line, t)
@@ -50,7 +51,8 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 		} else if len(inFront) == 1 {
 			line := p.IntersectTriangle(&t)
 			if line == nil {
-				log.Fatal("failed to intersect triangle by plane1: %v, %v", t, p)
+				log.Printf("failed to intersect triangle by plane1, skip it: %v, %v\n", t, p)
+				continue
 			}
 			ts := splitOnThree(inFront[0], *line, t)
 

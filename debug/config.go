@@ -8,7 +8,7 @@ import (
 
 type Cfg struct {
 	Debug bool
-	DebugPath string `yaml:"debug_path"`
+	DebugFile string `yaml:"debug_file"`
 }
 
 func Config() Cfg {

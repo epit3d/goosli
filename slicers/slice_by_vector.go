@@ -4,7 +4,24 @@ import (
 	. "github.com/l1va/goosli/primitives"
 	"sort"
 	"math"
+	"bytes"
+	"github.com/l1va/goosli/gcode"
 )
+
+// SliceByVectorToBuffer - Slicing on layers by vector Z
+func SliceByVectorToBuffer(mesh *Mesh, Z Vector, settings Settings) bytes.Buffer {
+	layers := SliceByVector(mesh, settings.LayerHeight, Z)
+	settings.LayerCount = len(layers)
+	smap := settings.ToMap()
+
+	var buffer bytes.Buffer
+	var cmds []gcode.Command
+	cmds = append(cmds, gcode.LayersMoving{layers, 0})
+	buffer.WriteString(PrepareDataFile("data/header_template.txt", smap))
+	cmdsToBuffer(cmds, &buffer)
+	buffer.WriteString(PrepareDataFile("data/footer_template.txt", smap))
+	return buffer
+}
 
 // SliceByVector - Slicing on layers by vector Z
 func SliceByVector(mesh *Mesh, thickness float64, Z Vector) []Layer {
