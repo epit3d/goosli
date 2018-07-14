@@ -6,6 +6,8 @@ import (
 	"io"
 	"math"
 	"os"
+	"strings"
+	"strconv"
 )
 
 type stlHeader struct {
@@ -16,15 +18,73 @@ type stlTriangle struct {
 	N, V1, V2, V3 [3]float32
 	_             uint16
 }
+
 func LoadSTL(path string) (*Mesh, error) {
+
+	// open file
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	return loadSTLBinary(file)
+	// get file size
+	info, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
 
+	header := stlHeader{}
+	if err := binary.Read(file, binary.LittleEndian, &header); err != nil {
+		return nil, err
+	}
+	expectedSize := int64(header.Count)*50 + 84
+
+	// parse ascii or binary stl
+	if info.Size() == expectedSize {
+		return loadSTLBinary(file)
+	}
+	// rewind to start of file
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		return nil, err
+	}
+	return loadSTLAscii(file)
+
+}
+
+func loadSTLAscii(file *os.File) (*Mesh, error) {
+	var triangles []Triangle
+	var p1, p2, p3, px Point
+	i := 0
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if len(line) < 12 || line[0] != 'v' {
+			continue
+		}
+		fields := strings.Fields(line[7:])
+		if len(fields) != 3 {
+			continue
+		}
+		px = Point{parseFloat(fields[0]), parseFloat(fields[1]), parseFloat(fields[2])}
+		switch i % 3 {
+		case 0:
+			p1 = px
+		case 1:
+			p2 = px
+		case 2:
+			p3 = px
+			triangles = append(triangles, NewTriangle(p1, p2, p3))
+		}
+		i++
+	}
+	mesh := NewMesh(triangles)
+	return &mesh, scanner.Err()
+}
+func parseFloat(f string) float64 {
+	v, _ := strconv.ParseFloat(f, 32)
+	return float64(v)
 }
 
 func makeFloat(b []byte) float64 {
@@ -61,7 +121,6 @@ func loadSTLBinary(file *os.File) (*Mesh, error) {
 	mesh := NewMesh(triangles)
 	return &mesh, nil
 }
-
 
 func SaveSTL(path string, mesh *Mesh) error {
 	file, err := os.Create(path)
