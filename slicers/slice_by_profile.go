@@ -12,12 +12,12 @@ import (
 // SliceByProfile - Slicing on layers by simple algo
 func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer {
 	layers := SliceByVector(mesh, settings.LayerHeight, AxisZ)
-	//LayersToGcode(layers, "/home/l1va/debug.gcode")
+	LayersToGcode(layers, "/home/l1va/debug.gcode")
 
 	centers := calculateCenters(layers)
-
+	debug.PointsToFile(centers)
 	simplified := helpers.SimplifyLine(centers, epsilon)
-	debug.PointsToFile(simplified)
+	//debug.PointsToFile(simplified)
 
 	layersCount := 0
 	up := mesh
@@ -95,3 +95,4 @@ func calculateCenterForPath(path Path) Point {
 	}
 	return OriginPoint
 }
+

@@ -45,7 +45,7 @@ func (p Plane) IntersectTriangle(t *Triangle) *Line {
 		return nil
 	}
 	n := p1.VectorTo(p2).Cross(p.N)
-	if n.Dot(t.N) < 0 { // orientation according to triangle plane
+	if n.Dot(t.N) < 0 { // orientation according to triangle plane (against t normal)
 		return &Line{p1, p2}
 	}
 	return &Line{p2, p1}

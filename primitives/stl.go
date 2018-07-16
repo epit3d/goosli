@@ -42,7 +42,7 @@ func LoadSTL(path string) (*Mesh, error) {
 
 	// parse ascii or binary stl
 	if info.Size() == expectedSize {
-		return loadSTLBinary(file)
+		return loadSTLBinary(file,int(header.Count))
 	}
 	// rewind to start of file
 	_, err = file.Seek(0, 0)
@@ -91,15 +91,9 @@ func makeFloat(b []byte) float64 {
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(b)))
 }
 
-func loadSTLBinary(file *os.File) (*Mesh, error) {
-	reader := bufio.NewReader(file)
-	header := stlHeader{}
-	if err := binary.Read(reader, binary.LittleEndian, &header); err != nil {
-		return nil, err
-	}
-	count := int(header.Count)
+func loadSTLBinary(file *os.File, count int) (*Mesh, error) {
 	b := make([]byte, count*50)
-	_, err := io.ReadFull(reader, b)
+	_, err := io.ReadFull(file, b)
 	if err != nil {
 		return nil, err
 	}

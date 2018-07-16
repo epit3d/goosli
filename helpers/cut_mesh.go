@@ -65,9 +65,9 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 		}
 	}
 
-	if len(up) == 0 || len(down) == 0 {
-		return nil, nil, fmt.Errorf("one of meshes is empty")
-	}
+	//if len(up) == 0 || len(down) == 0 {
+	//	return nil, nil, fmt.Errorf("one of meshes is empty")
+	//}
 
 	resUp := NewMesh(up)
 	resDown := NewMesh(down)
