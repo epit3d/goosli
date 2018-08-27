@@ -11,6 +11,16 @@ type Plane struct {
 	N Vector
 }
 
+func (p Plane) IntersectMesh(mesh *Mesh) Layer {
+	var paths []Path
+	for _, t := range mesh.Triangles {
+		if line := p.IntersectTriangle(&t); line != nil {
+			paths = append(paths, Path{Lines: []Line{*line}})
+		}
+	}
+	return Layer{Order: 0, Paths: JoinPaths(paths)}
+}
+
 func (p Plane) Intersect(t *Triangle) bool {
 	if t == nil {
 		return false
@@ -64,6 +74,17 @@ func (p Plane) IntersectSegment(p1, p2 Point) *Point {
 	}
 	res := p1.Shift(p1.VectorTo(p2).MulScalar(t))
 	return &res
+}
+
+func (p Plane) IntersectPathCodirectedWith(path Path, v Vector) *Point {
+	cp := FindCentroid(path)
+	for _, line := range path.Lines { //TODO: optimize me
+		pi := p.IntersectSegment(line.P1, line.P2)
+		if pi != nil && cp.VectorTo(*pi).CodirectedWith(v) {
+			return pi
+		}
+	}
+	return nil
 }
 
 func (p Plane) PointInFront(v Point) bool {

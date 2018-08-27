@@ -10,14 +10,15 @@ import (
 )
 
 // SliceByProfile - Slicing on layers by simple algo
-func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer {
+func SliceByProfile(mesh *Mesh, settings Settings) bytes.Buffer {
+	debug.RecreateFile()
 	layers := SliceByVector(mesh, settings.LayerHeight, AxisZ)
 	LayersToGcode(layers, "/home/l1va/debug.gcode")
 
 	centers := calculateCenters(layers)
-	debug.PointsToFile(centers)
-	simplified := helpers.SimplifyLine(centers, epsilon)
-	//debug.PointsToFile(simplified)
+	debug.AddPointsToFile(centers)
+	simplified := helpers.SimplifyLine(centers, settings.Epsilon)
+	debug.AddPointsToFile(simplified)
 
 	layersCount := 0
 	up := mesh
@@ -35,9 +36,10 @@ func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer
 		} else {
 			down = up
 		}
-		angleZ := v.ProjectOnPlane(PlaneXY).Angle(AxisX)
-		angleX := v.ProjectOnPlane(PlaneYZ).Angle(AxisZ)
+		angleZ := v.ProjectOnPlane(PlaneXY).Angle(AxisX) + 90
+		angleX := v.Angle(AxisZ)
 
+		println("angles: ", angleX, " ", angleZ, "")
 		down = down.Rotate(RotationAroundZ(angleZ), OriginPoint)
 		down = down.Rotate(RotationAroundX(angleX), OriginPoint)
 		cmds = append(cmds, gcode.RotateXZ{angleX, angleZ})
@@ -47,15 +49,8 @@ func SliceByProfile(mesh *Mesh, epsilon float64, settings Settings) bytes.Buffer
 		layersCount += len(layers)
 	}
 	settings.LayerCount = layersCount
-	smap := settings.ToMap()
-
-	var buffer bytes.Buffer
-	buffer.WriteString(PrepareDataFile("data/header_template.txt", smap))
-	cmdsToBuffer(cmds, &buffer)
-	buffer.WriteString(PrepareDataFile("data/footer_template.txt", smap))
-	return buffer
+	return CommandsWithTemplates(cmds, settings)
 }
-
 func calculateCenters(layers []Layer) []Point {
 	var centers []Point
 	for _, layer := range layers {
@@ -67,12 +62,11 @@ func calculateCenters(layers []Layer) []Point {
 func calculateCenter(layer Layer) Point {
 	x, y, z, count := 0.0, 0.0, 0.0, 0
 	for _, path := range layer.Paths {
-		for _, line := range path.Lines {
-			x += line.P1.X + line.P2.X
-			y += line.P1.Y + line.P2.Y
-			z += line.P1.Z + line.P2.Z
-		}
-		count += len(path.Lines) * 2
+		crd := FindCentroid(path)
+		x += crd.X
+		y += crd.Y
+		z += crd.Z
+		count += 1
 	}
 	if count > 0 {
 		countF := float64(count)
@@ -80,19 +74,3 @@ func calculateCenter(layer Layer) Point {
 	}
 	return OriginPoint
 }
-
-func calculateCenterForPath(path Path) Point {
-	x, y, z, count := 0.0, 0.0, 0.0, 0
-	for _, line := range path.Lines {
-		x += line.P1.X + line.P2.X
-		y += line.P1.Y + line.P2.Y
-		z += line.P1.Z + line.P2.Z
-	}
-	count += len(path.Lines) * 2
-	if count > 0 {
-		countF := float64(count)
-		return Point{x / countF, y / countF, z / countF}
-	}
-	return OriginPoint
-}
-

@@ -7,6 +7,7 @@ import (
 
 type Settings struct {
 	DateTime            string
+	Epsilon             float64
 	LayerHeight         float64
 	WallThickness       float64
 	FillDensity         int

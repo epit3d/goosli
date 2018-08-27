@@ -18,3 +18,13 @@ func cmdsToBuffer(cmds []gcode.Command, b *bytes.Buffer) {
 		cmd.ToGCode(b)
 	}
 }
+
+func CommandsWithTemplates(cmds []gcode.Command, settings Settings) bytes.Buffer{
+	smap := settings.ToMap()
+
+	var buffer bytes.Buffer
+	buffer.WriteString(PrepareDataFile("data/header_template.txt", smap))
+	cmdsToBuffer(cmds, &buffer)
+	buffer.WriteString(PrepareDataFile("data/footer_template.txt", smap))
+	return buffer
+}

@@ -2,14 +2,14 @@ package helpers
 
 import (
 	. "github.com/l1va/goosli/primitives"
-	"fmt"
+//	"fmt"
 	"log"
 )
 
 //CutMesh mesh in two meshes, first that inFront of plane, second - outFront
 func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 	if mesh == nil || len(mesh.Triangles) == 0 {
-		return nil, nil, fmt.Errorf("mesh is empty, nothing to cut")
+		return &Mesh{}, &Mesh{}, nil //fmt.Errorf("mesh is empty, nothing to cut")
 	}
 
 	var up []Triangle
@@ -89,7 +89,7 @@ func splitOnThree(p1 Point, line Line, t Triangle) []Triangle {
 		t1, t2, t3 = t3, t1, t2
 	}
 
-	if t1.VectorTo(t2).Cross(t1.VectorTo(lp1)).Length() > AlmostZero {
+	if !AlmostZero(t1.VectorTo(t2).Cross(t1.VectorTo(lp1)).Length() ){
 		// lp2 lies on t1->t2 vector, but should lp1 lie
 		lp1, lp2 = lp2, lp1
 	}

@@ -8,6 +8,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"time"
 	"bytes"
+	"github.com/l1va/goosli/slicers/vip"
 )
 
 var (
@@ -27,12 +28,13 @@ var (
 	printSpeed          = kingpin.Flag("print_speed", "Printing speed.").Default("50").Int()
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
 
-	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("3axes").String()
+	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("vip").String()
 )
 
 func settings() slicers.Settings {
 	return slicers.Settings{
 		DateTime:            time.Now().Format(time.RFC822),
+		Epsilon: *epsilon,
 		LayerHeight:         *thickness,
 		WallThickness:       *wallThickness,
 		FillDensity:         *fillDensity,
@@ -60,9 +62,11 @@ func main() {
 	if *slicingType == "3axes" {
 		buffer = slicers.SliceByVectorToBuffer(mesh, AxisZ, settings())
 	} else if *slicingType == "5axes_by_profile" {
-		buffer = slicers.SliceByProfile(mesh, *epsilon, settings())
+		buffer = slicers.SliceByProfile(mesh, settings())
 	} else if *slicingType == "5axes" {
 		buffer = slicers.Slice5Axes(mesh, settings())
+	} else if *slicingType == "vip" {
+		buffer = vip.Slice(mesh, settings())
 	} else {
 		log.Fatal("unsupported slicing type: ", *slicingType)
 	}

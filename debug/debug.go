@@ -28,7 +28,7 @@ func RecreateFile() {
 		defer file.Close()
 }
 
-func PointsToFile(ps []Point) {
+func AddPointsToFile(ps []Point) {
 	if cfg.Debug {
 		var b bytes.Buffer
 		for i := 0; i < len(ps)-1; i++ {
@@ -36,7 +36,7 @@ func PointsToFile(ps []Point) {
 			b.WriteString(pointToString(ps[i]))
 			b.WriteString(pointToString(ps[i+1]) + "\n")
 		}
-		ToFile(b, cfg.DebugFile)
+		AddToFile(b, cfg.DebugFile)
 	}
 }
 
@@ -84,6 +84,19 @@ func AddLayer(layer Layer) {
 				b.WriteString(pointToString(line.P2) + "\n")
 			}
 		}
+		AddToFile(b, cfg.DebugFile)
+	}
+}
+
+
+func AddPath(path Path) {
+	if cfg.Debug {
+		var b bytes.Buffer
+			for _, line := range path.Lines {
+				b.WriteString("line ")
+				b.WriteString(pointToString(line.P1))
+				b.WriteString(pointToString(line.P2) + "\n")
+			}
 		AddToFile(b, cfg.DebugFile)
 	}
 }
