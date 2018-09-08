@@ -11,6 +11,9 @@ import (
 // SliceByVectorToBuffer - Slicing on layers by vector Z
 func SliceByVectorToBuffer(mesh *Mesh, Z Vector, settings Settings) bytes.Buffer {
 	layers := SliceByVector(mesh, settings.LayerHeight, Z)
+
+	layers = fillLayers(layers, calcPlanes(mesh, settings))
+
 	settings.LayerCount = len(layers)
 	smap := settings.ToMap()
 
@@ -22,6 +25,7 @@ func SliceByVectorToBuffer(mesh *Mesh, Z Vector, settings Settings) bytes.Buffer
 	buffer.WriteString(PrepareDataFile("data/footer_template.txt", smap))
 	return buffer
 }
+
 
 // SliceByVector - Slicing on layers by vector Z
 func SliceByVector(mesh *Mesh, thickness float64, Z Vector) []Layer {
