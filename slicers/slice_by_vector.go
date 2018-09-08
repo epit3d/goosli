@@ -12,7 +12,7 @@ import (
 func SliceByVectorToBuffer(mesh *Mesh, Z Vector, settings Settings) bytes.Buffer {
 	layers := SliceByVector(mesh, settings.LayerHeight, Z)
 
-	layers = fillLayers(layers, calcPlanes(mesh, settings))
+	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
 
 	settings.LayerCount = len(layers)
 	smap := settings.ToMap()

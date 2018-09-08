@@ -11,6 +11,10 @@ type Plane struct {
 	N Vector
 }
 
+func (a Plane) Rotate(rm RotationMatrix) Plane {
+	return Plane{a.P.ToVector().Rotate(rm).ToPoint(), a.N.Rotate(rm)}
+}
+
 func (p Plane) IntersectMesh(mesh *Mesh) Layer {
 	var paths []Path
 	for _, t := range mesh.Triangles {
