@@ -89,7 +89,7 @@ func splitOnThree(p1 Point, line Line, t Triangle) []Triangle {
 		t1, t2, t3 = t3, t1, t2
 	}
 
-	if !AlmostZero(t1.VectorTo(t2).Cross(t1.VectorTo(lp1)).Length() ){
+	if AlmostZero(t1.VectorTo(t2).Cross(t1.VectorTo(lp2)).Length() ){
 		// lp2 lies on t1->t2 vector, but should lp1 lie
 		lp1, lp2 = lp2, lp1
 	}

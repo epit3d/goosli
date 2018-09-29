@@ -4,6 +4,14 @@ type Path struct {
 	Lines []Line
 }
 
+func (p Path) Reverse() Path {
+	res := Path{}
+	for _,l := range p.Lines {
+		res.Lines = append(res.Lines, l.Reverse())
+	}
+	return res
+}
+
 func JoinPaths(paths []Path) []Path {
 	lookup := make(map[Point]Path, len(paths))
 	for _, path := range paths {
@@ -27,7 +35,62 @@ func JoinPaths(paths []Path) []Path {
 		}
 		result = append(result, path)
 	}
+	for i:=0; i<len(result);i++{
+		for j:=i+1;j<len(result);j++ {
+			jp := tryJoin(result[i], result[j])
+			if jp != nil{
+				result[i] = *jp
+				result[j] = result[len(result)-1]
+				result = result[:len(result)-1]
+				i=-1
+				break
+			}
+		}
+	}
+	// clean from small lines
+	for i:=0;i< len(result);i++{
+		for j:=0;j< len(result[i].Lines);j++ {
+			if result[i].Lines[j].ToVector().Length() < 0.1 { //TODO: hardcode
+				if j!=0 {
+					result[i].Lines[j-1].P2 = result[i].Lines[j].P2
+				}else {
+					result[i].Lines[j+1].P1 = result[i].Lines[j].P1
+				}
+				result[i].Lines = append(result[i].Lines[:j] , result[i].Lines[j+1:]...)
+				j--
+			}
+		}
+		if len(result[i].Lines) ==0{
+			result[i] = result[len(result)-1]
+			result = result[:len(result)-1]
+			i--
+		}
+	}
 	return result
+}
+
+func tryJoin(p1, p2 Path) *Path {
+	if p1.Lines[len(p1.Lines)-1].P2.Equal(p2.Lines[0].P1){
+		p1.Lines = append(p1.Lines, p2.Lines...)
+		//println("works right way")
+		return &p1
+	}
+	if p2.Lines[len(p2.Lines)-1].P2.Equal(p1.Lines[0].P1){
+		p2.Lines = append(p2.Lines, p1.Lines...)
+		//println("works otherside")
+		return &p2
+	}
+	if p1.Lines[len(p1.Lines)-1].P2.Equal(p2.Lines[len(p2.Lines)-1].P2){
+		p1.Lines = append(p1.Lines, p2.Reverse().Lines...)
+		println("something not good, reverse path found")
+		return &p1
+	}
+	if p1.Lines[0].P1.Equal(p2.Lines[0].P1){
+		p2.Lines = append(p2.Reverse().Lines, p1.Lines...)
+		println("something not good, reverse path found")
+		return &p2
+	}
+	return nil
 }
 
 func FindCentroid(path Path) Point { //TODO: refactorme
