@@ -13,11 +13,11 @@ import (
 )
 
 var (
-	stl   = kingpin.Flag("stl", "Source stl file to slice.").Short('s').Required().String()
+	stl = kingpin.Flag("stl", "Source stl file to slice.").Short('s').Required().String()
 	out = kingpin.Flag("gcode", "Output file for gcode.").Short('o').Default("out.gcode").String()
-	ox    = kingpin.Flag("originx", "Center of model by x.").Short('x').Default("0").Float64()
-	oy    = kingpin.Flag("originy", "Center of model by y.").Short('y').Default("0").Float64()
-	oz    = kingpin.Flag("originz", "Min of model by z.").Short('z').Default("0").Float64()
+	ox  = kingpin.Flag("originx", "Center of model by x.").Short('x').Default("0").Float64()
+	oy  = kingpin.Flag("originy", "Center of model by y.").Short('y').Default("0").Float64()
+	oz  = kingpin.Flag("originz", "Min of model by z.").Short('z').Default("0").Float64()
 
 	epsilon = kingpin.Flag("epsilon", "Simplification line parameter.").Short('e').Default("10.0").Float64()
 
@@ -35,7 +35,7 @@ var (
 func settings() slicers.Settings {
 	return slicers.Settings{
 		DateTime:            time.Now().Format(time.RFC822),
-		Epsilon: *epsilon,
+		Epsilon:             *epsilon,
 		LayerHeight:         *thickness,
 		WallThickness:       *wallThickness,
 		FillDensity:         *fillDensity,
@@ -59,22 +59,22 @@ func main() {
 	mesh.Shift(V(-*ox, -*oy, -*oz))
 	//mesh.Shift(most)
 
-	var buffer gcode.Gcode
+	var gcd gcode.Gcode
 	setts := settings()
 
 	if *slicingType == "3axes" {
-		buffer = slicers.SliceByVectorToBuffer(mesh, AxisZ, setts)
+		gcd = slicers.SliceByVectorToBuffer(mesh, AxisZ, setts)
 	} else if *slicingType == "5axes_by_profile" {
-		buffer = slicers.SliceByProfile(mesh, setts)
+		gcd = slicers.SliceByProfile(mesh, setts)
 	} else if *slicingType == "5axes" {
-		buffer = slicers.Slice5Axes(mesh, setts)
+		gcd = slicers.Slice5Axes(mesh, setts)
 	} else if *slicingType == "vip" {
-		buffer = vip.Slice(mesh, setts)
+		gcd = vip.Slice(mesh, setts)
 	} else {
 		log.Fatal("unsupported slicing type: ", *slicingType)
 	}
 
-	buf:= CommandsWithTemplates(buffer, setts)
+	buf := CommandsWithTemplates(gcd, setts)
 
 	err = ioutil.WriteFile(*out, buf.Bytes(), 0644)
 	if err != nil {
@@ -82,20 +82,15 @@ func main() {
 	}
 }
 
-func CommandsWithTemplates(gcd gcode.Gcode, settings slicers.Settings) bytes.Buffer{
+func CommandsWithTemplates(gcd gcode.Gcode, settings slicers.Settings) bytes.Buffer {
 	settings.LayerCount = gcd.LayersCount
 	smap := settings.ToMap()
 
 	var buffer bytes.Buffer
 	buffer.WriteString(PrepareDataFile("data/header_template.txt", smap))
-	cmdsToBuffer(gcd, &buffer)
+	for _, cmd := range gcd.Cmds {
+		cmd.ToGCode(&buffer)
+	}
 	buffer.WriteString(PrepareDataFile("data/footer_template.txt", smap))
 	return buffer
 }
-
-func cmdsToBuffer(gcd gcode.Gcode, b *bytes.Buffer) {
-	for _, cmd := range gcd.Cmds {
-		cmd.ToGCode(b)
-	}
-}
-
