@@ -7,8 +7,8 @@ import (
 	"github.com/l1va/goosli/gcode"
 )
 
-// SliceByVectorToBuffer - Slicing on layers by vector Z
-func SliceByVectorToBuffer(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
+// SliceByVectorToGcode - Slicing on layers by vector Z
+func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	layers := SliceByVector(mesh, settings.LayerHeight, Z)
 
 	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))

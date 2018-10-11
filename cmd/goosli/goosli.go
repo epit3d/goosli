@@ -63,7 +63,7 @@ func main() {
 	setts := settings()
 
 	if *slicingType == "3axes" {
-		gcd = slicers.SliceByVectorToBuffer(mesh, AxisZ, setts)
+		gcd = slicers.SliceByVectorToGcode(mesh, AxisZ, setts)
 	} else if *slicingType == "5axes_by_profile" {
 		gcd = slicers.SliceByProfile(mesh, setts)
 	} else if *slicingType == "5axes" {
