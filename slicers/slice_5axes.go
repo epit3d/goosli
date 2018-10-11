@@ -1,7 +1,6 @@
 package slicers
 
 import (
-	"bytes"
 	"github.com/l1va/goosli/helpers"
 	. "github.com/l1va/goosli/primitives"
 	"github.com/l1va/goosli/gcode"
@@ -20,10 +19,9 @@ var
 )
 
 // SliceByProfile - Slicing on layers by simple algo
-func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
+func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 	debug.RecreateFile()
-	layersCount := 0
-	var cmds []gcode.Command
+	var gcd gcode.Gcode
 
 	simpMesh, err := helpers.SimplifyMesh(mesh, 2500) //TODO: hardcoded value
 	if err != nil {
@@ -56,12 +54,10 @@ func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
 		if newPlane == nil {
 			i++
 			if i == len(layers) {
-				cmds = append(cmds, gcode.LayersMoving{Layers: toAdd, Index: layersCount})
-				layersCount += len(toAdd)
+				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
 			}
 		} else {
-			cmds = append(cmds, gcode.LayersMoving{Layers: toAdd[:i], Index: layersCount})
-			layersCount += i
+			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount})
 
 			//if rotated {
 			//	break
@@ -109,15 +105,14 @@ func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
 				log.Fatal("failed to cut mesh by newPlane in 5a slicing: ", err)
 			}
 			toAdd = SliceByVector(down, settings.LayerHeight, AxisZ)
-			cmds = append(cmds, gcode.LayersMoving{Layers: toAdd, Index: layersCount})
-			layersCount += len(toAdd)
+			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
 
 			if rotated {
 				simpMesh = simpMesh.Rotate(RotationAroundX(-angleX), OriginPoint)
 				simpMesh = simpMesh.Rotate(RotationAroundZ(-angleZ), OriginPoint)
 				mesh = mesh.Rotate(RotationAroundX(-angleX), OriginPoint)
 				mesh = mesh.Rotate(RotationAroundZ(-angleZ), OriginPoint)
-				cmds = append(cmds, gcode.RotateXZ{})
+				gcd.Add(gcode.RotateXZ{})
 				rotated = false
 			} else {
 				angleZ = newPlane.N.ProjectOnPlane(PlaneXY).Angle(AxisX) + 90
@@ -126,7 +121,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
 				simpMesh = simpMesh.Rotate(RotationAroundX(angleX), OriginPoint)
 				mesh = mesh.Rotate(RotationAroundZ(angleZ), OriginPoint)
 				mesh = mesh.Rotate(RotationAroundX(angleX), OriginPoint)
-				cmds = append(cmds, gcode.RotateXZ{AngleX: angleX, AngleZ: angleZ})
+				gcd.Add(gcode.RotateXZ{AngleX: angleX, AngleZ: angleZ})
 				rotated = true
 			}
 			layers = SliceByVector(simpMesh, settings.LayerHeight, AxisZ)
@@ -137,8 +132,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) bytes.Buffer {
 		}
 	}
 
-	settings.LayerCount = layersCount
-	return CommandsWithTemplates(cmds, settings)
+	return gcd
 }
 
 func CalculateFails(prevLayer, curLayer Layer) *Plane {
@@ -161,7 +155,7 @@ func CalculateFails(prevLayer, curLayer Layer) *Plane {
 			if len(prevLayer.Paths) > 0 {
 				prevPath := prevLayer.Paths[0] //checking only first pth
 				prevCp := FindCentroid(prevPath)
-				v:=prevCp.VectorTo(curCp).ProjectOnPlane(PlaneXY)
+				v := prevCp.VectorTo(curCp).ProjectOnPlane(PlaneXY)
 				pl := Plane{P: prevCp, N: v.Cross(AxisZ)}
 				pi := pl.IntersectPathCodirectedWith(prevPath, v)
 				if pi != nil {

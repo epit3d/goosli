@@ -4,6 +4,7 @@ import (
 	"sort"
 	"math"
 	. "github.com/l1va/goosli/primitives"
+	"github.com/l1va/goosli/debug"
 )
 
 func CalcFillPlanes(mesh *Mesh, settings Settings) []Plane {
@@ -20,23 +21,30 @@ func CalcFillPlanes(mesh *Mesh, settings Settings) []Plane {
 	return planes
 }
 
-func FillLayers(layers []Layer, planes []Plane) []Layer {
+func FillLayers(layers []Layer, planes []Plane) []Layer { //TODO: can be paralleled
 	for i, layer := range layers {
-		res := layer
+		inner := layer.InnerPs
+		if inner == nil { //if one layer only
+			inner = layer.Paths
+			//println("inner nil")
+		}
 		for _, plane := range planes {
-			pth := intersectByPlane(layer, plane)
+			pth := intersectByPlane(inner, plane)
 			if pth != nil {
-				res.Paths = append(res.Paths, pth...)
+				layers[i].Fill = append(layers[i].Fill, pth...)
 			}
 		}
-		layers[i] = res
 	}
 	return layers
 }
 
-func intersectByPlane(layer Layer, plane Plane) []Path {
+var (
+	x = 0
+)
+
+func intersectByPlane(pathes []Path, plane Plane) []Path {
 	pts := []Point{}
-	for _, pth := range layer.Paths {
+	for _, pth := range pathes {
 		for _, line := range pth.Lines {
 
 			p := plane.IntersectSegment(line.P1, line.P2)
@@ -60,7 +68,13 @@ func intersectByPlane(layer Layer, plane Plane) []Path {
 	}
 
 	if len(pts) > 4 { //TODO: any ideas ?
-		println("do not know how to fill, pts > 4, skipping, layer order: ", layer.Order)
+	if x<23{
+		for i:=1; i<len(pts);i+=2 {
+			debug.AddLine(Line{pts[i-1], pts[i]})
+		}
+		x+=1
+	}
+		println("do not know how to fill, pts > 4, skipping :", len(pts))
 		return nil
 	}
 	if len(pts) == 2 || len(pts) == 3 {

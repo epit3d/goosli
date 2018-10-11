@@ -4,28 +4,19 @@ import (
 	. "github.com/l1va/goosli/primitives"
 	"sort"
 	"math"
-	"bytes"
 	"github.com/l1va/goosli/gcode"
 )
 
 // SliceByVectorToBuffer - Slicing on layers by vector Z
-func SliceByVectorToBuffer(mesh *Mesh, Z Vector, settings Settings) bytes.Buffer {
+func SliceByVectorToBuffer(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	layers := SliceByVector(mesh, settings.LayerHeight, Z)
 
 	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
 
-	settings.LayerCount = len(layers)
-	smap := settings.ToMap()
-
-	var buffer bytes.Buffer
-	var cmds []gcode.Command
-	cmds = append(cmds, gcode.LayersMoving{layers, 0})
-	buffer.WriteString(PrepareDataFile("data/header_template.txt", smap))
-	cmdsToBuffer(cmds, &buffer)
-	buffer.WriteString(PrepareDataFile("data/footer_template.txt", smap))
-	return buffer
+	var gcd gcode.Gcode
+	gcd.Add(gcode.LayersMoving{layers, 0})
+	return gcd
 }
-
 
 // SliceByVector - Slicing on layers by vector Z
 func SliceByVector(mesh *Mesh, thickness float64, Z Vector) []Layer {
@@ -115,7 +106,7 @@ func slicingWorker(in chan job, out chan Layer) func(wi, wn int) {
 					paths = append(paths, Path{Lines: []Line{*line}})
 				}
 			}
-			out <- Layer{Order: job.order, Paths: JoinPaths(paths)}
+			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths(paths)}
 		}
 	}
 }

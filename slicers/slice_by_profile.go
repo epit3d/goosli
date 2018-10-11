@@ -2,7 +2,6 @@ package slicers
 
 import (
 	. "github.com/l1va/goosli/primitives"
-	"bytes"
 	"log"
 	"github.com/l1va/goosli/gcode"
 	"github.com/l1va/goosli/helpers"
@@ -10,7 +9,7 @@ import (
 )
 
 // SliceByProfile - Slicing on layers by simple algo
-func SliceByProfile(mesh *Mesh, settings Settings) bytes.Buffer {
+func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 	debug.RecreateFile()
 	layers := SliceByVector(mesh, settings.LayerHeight, AxisZ)
 	LayersToGcode(layers, "/home/l1va/debug.gcode")
@@ -20,10 +19,9 @@ func SliceByProfile(mesh *Mesh, settings Settings) bytes.Buffer {
 	simplified := helpers.SimplifyLine(centers, settings.Epsilon)
 	debug.AddPointsToFile(simplified)
 
-	layersCount := 0
 	up := mesh
 	var down *Mesh
-	var cmds []gcode.Command
+	var gcd gcode.Gcode
 
 	for i := 1; i < len(simplified); i++ {
 		v := simplified[i-1].VectorTo(simplified[i])
@@ -42,14 +40,12 @@ func SliceByProfile(mesh *Mesh, settings Settings) bytes.Buffer {
 		println("angles: ", angleX, " ", angleZ, "")
 		down = down.Rotate(RotationAroundZ(angleZ), OriginPoint)
 		down = down.Rotate(RotationAroundX(angleX), OriginPoint)
-		cmds = append(cmds, gcode.RotateXZ{angleX, angleZ})
+		gcd.Add(gcode.RotateXZ{angleX, angleZ})
 
 		layers := SliceByVector(down, settings.LayerHeight, AxisZ)
-		cmds = append(cmds, gcode.LayersMoving{layers, layersCount})
-		layersCount += len(layers)
+		gcd.Add(gcode.LayersMoving{layers, gcd.LayersCount})
 	}
-	settings.LayerCount = layersCount
-	return CommandsWithTemplates(cmds, settings)
+	return gcd
 }
 func calculateCenters(layers []Layer) []Point {
 	var centers []Point

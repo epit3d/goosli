@@ -9,11 +9,12 @@ import (
 	"time"
 	"bytes"
 	"github.com/l1va/goosli/slicers/vip"
+	"github.com/l1va/goosli/gcode"
 )
 
 var (
 	stl   = kingpin.Flag("stl", "Source stl file to slice.").Short('s').Required().String()
-	gcode = kingpin.Flag("gcode", "Output file for gcode.").Short('o').Default("out.gcode").String()
+	out = kingpin.Flag("gcode", "Output file for gcode.").Short('o').Default("out.gcode").String()
 	ox    = kingpin.Flag("originx", "Center of model by x.").Short('x').Default("0").Float64()
 	oy    = kingpin.Flag("originy", "Center of model by y.").Short('y').Default("0").Float64()
 	oz    = kingpin.Flag("originz", "Min of model by z.").Short('z').Default("0").Float64()
@@ -21,7 +22,7 @@ var (
 	epsilon = kingpin.Flag("epsilon", "Simplification line parameter.").Short('e').Default("10.0").Float64()
 
 	thickness           = kingpin.Flag("thickness", "Set the slice thickness.").Short('t').Default("0.2").Float64()
-	wallThickness       = kingpin.Flag("wall_thickness", "Set the wall thickness.").Default("0.8").Float64()
+	wallThickness       = kingpin.Flag("wall_thickness", "Set the wall thickness.").Default("1.2").Float64()
 	fillDensity         = kingpin.Flag("fill_density", "Fill density in percents.").Default("20").Int()
 	bedTemperature      = kingpin.Flag("bed_temperature", "Bed temperature in Celsius.").Default("60").Int()
 	extruderTemperature = kingpin.Flag("extruder_temperature", "Extruder temperature in Celsius.").Default("200").Int()
@@ -58,21 +59,43 @@ func main() {
 	mesh.Shift(V(-*ox, -*oy, -*oz))
 	//mesh.Shift(most)
 
-	var buffer bytes.Buffer
+	var buffer gcode.Gcode
+	setts := settings()
+
 	if *slicingType == "3axes" {
-		buffer = slicers.SliceByVectorToBuffer(mesh, AxisZ, settings())
+		buffer = slicers.SliceByVectorToBuffer(mesh, AxisZ, setts)
 	} else if *slicingType == "5axes_by_profile" {
-		buffer = slicers.SliceByProfile(mesh, settings())
+		buffer = slicers.SliceByProfile(mesh, setts)
 	} else if *slicingType == "5axes" {
-		buffer = slicers.Slice5Axes(mesh, settings())
+		buffer = slicers.Slice5Axes(mesh, setts)
 	} else if *slicingType == "vip" {
-		buffer = vip.Slice(mesh, settings())
+		buffer = vip.Slice(mesh, setts)
 	} else {
 		log.Fatal("unsupported slicing type: ", *slicingType)
 	}
 
-	err = ioutil.WriteFile(*gcode, buffer.Bytes(), 0644)
+	buf:= CommandsWithTemplates(buffer, setts)
+
+	err = ioutil.WriteFile(*out, buf.Bytes(), 0644)
 	if err != nil {
 		log.Fatal("failed to save gcode in file: ", err)
 	}
 }
+
+func CommandsWithTemplates(gcd gcode.Gcode, settings slicers.Settings) bytes.Buffer{
+	settings.LayerCount = gcd.LayersCount
+	smap := settings.ToMap()
+
+	var buffer bytes.Buffer
+	buffer.WriteString(PrepareDataFile("data/header_template.txt", smap))
+	cmdsToBuffer(gcd, &buffer)
+	buffer.WriteString(PrepareDataFile("data/footer_template.txt", smap))
+	return buffer
+}
+
+func cmdsToBuffer(gcd gcode.Gcode, b *bytes.Buffer) {
+	for _, cmd := range gcd.Cmds {
+		cmd.ToGCode(b)
+	}
+}
+

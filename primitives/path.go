@@ -12,6 +12,14 @@ func (p Path) Reverse() Path {
 	return res
 }
 
+func (p Path) Enclose() Path {
+	s := len(p.Lines)
+	if !p.Lines[s-1].P2.Equal(p.Lines[0].P1) {
+		p.Lines = append(p.Lines, Line{p.Lines[s-1].P2, p.Lines[0].P1} )
+	}
+	return p
+}
+
 func JoinPaths(paths []Path) []Path {
 	lookup := make(map[Point]Path, len(paths))
 	for _, path := range paths {
@@ -53,7 +61,7 @@ func JoinPaths(paths []Path) []Path {
 			if result[i].Lines[j].ToVector().Length() < 0.1 { //TODO: hardcode
 				if j!=0 {
 					result[i].Lines[j-1].P2 = result[i].Lines[j].P2
-				}else {
+				}else if j<len(result[i].Lines)-1 {
 					result[i].Lines[j+1].P1 = result[i].Lines[j].P1
 				}
 				result[i].Lines = append(result[i].Lines[:j] , result[i].Lines[j+1:]...)

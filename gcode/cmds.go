@@ -9,6 +9,7 @@ import (
 
 type Command interface {
 	ToGCode(b *bytes.Buffer)
+	LayersCount() int
 }
 
 type RotateXZ struct {
@@ -19,6 +20,9 @@ type RotateXZ struct {
 func (r RotateXZ) ToGCode(b *bytes.Buffer) {
 	b.WriteString("G62 X" + StrF(r.AngleX) + " Z" + StrF(r.AngleZ) + "\n")
 }
+func (r RotateXZ) LayersCount() int {
+	return 0
+}
 
 type LayersMoving struct {
 	Layers []Layer
@@ -28,13 +32,20 @@ type LayersMoving struct {
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 	for i := 0; i < len(lm.Layers); i++ {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
-		layerToGCode(lm.Layers[i], b)
+		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", b)
+		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", b)
+		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", b)
+		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", b)
 	}
 }
+func (lm LayersMoving) LayersCount() int {
+	return len(lm.Layers)
+}
 
-func layerToGCode(l Layer, b *bytes.Buffer) {
+func pathesToGCode(pths []Path, comment string, b *bytes.Buffer) {
 	eOff := 0.0 //TODO: fix extruder value
-	for _, p := range l.Paths {
+	b.WriteString(";" + comment + "\n")
+	for _, p := range pths {
 		b.WriteString("G0 " + pointToString(p.Lines[0].P1) + "\n")
 		for _, line := range p.Lines {
 			eDist := math.Sqrt(math.Pow(line.P2.X-line.P1.X, 2) + math.Pow(line.P2.Y-line.P1.Y, 2) + math.Pow(line.P2.Z-line.P1.Z, 2))

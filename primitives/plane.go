@@ -22,7 +22,7 @@ func (p Plane) IntersectMesh(mesh *Mesh) Layer {
 			paths = append(paths, Path{Lines: []Line{*line}})
 		}
 	}
-	return Layer{Order: 0, Paths: JoinPaths(paths)}
+	return Layer{Order: 0, Norm: p.N, Paths: JoinPaths(paths)}
 }
 
 func (p Plane) Intersect(t *Triangle) bool {

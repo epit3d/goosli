@@ -16,6 +16,8 @@ func Config() Cfg {
 	yamlFile, err := ioutil.ReadFile("data/config.yaml")
 	if err != nil {
 		log.Printf("yamlFile.Get err: %v ", err)
+		c.Debug = false
+		return c
 	}
 	err = yaml.Unmarshal(yamlFile, &c)
 	if err != nil {
