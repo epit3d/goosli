@@ -1,4 +1,7 @@
 # goosli
+
+[![Build Status](https://travis-ci.org/l1va/goosli.svg?branch=master)](https://travis-ci.org/l1va/goosli)
+
 Package to implement your own slicer using existing possibilities: cutting, crossing, 
 slicing by vector, mesh simplification, line simplification etc.
 

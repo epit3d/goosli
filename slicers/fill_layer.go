@@ -68,12 +68,12 @@ func intersectByPlane(pathes []Path, plane Plane) []Path {
 	}
 
 	if len(pts) > 4 { //TODO: any ideas ?
-	if x<23{
-		for i:=1; i<len(pts);i+=2 {
-			debug.AddLine(Line{pts[i-1], pts[i]}, debug.GreenColor)
+		if x < 23 {
+			for i := 1; i < len(pts); i += 2 {
+				debug.AddLine(Line{pts[i-1], pts[i]}, debug.GreenColor)
+			}
+			x += 1
 		}
-		x+=1
-	}
 		println("do not know how to fill, pts > 4, skipping :", len(pts))
 		return nil
 	}
