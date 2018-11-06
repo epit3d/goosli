@@ -56,7 +56,7 @@ func main() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 	//most := V(-60.08446554467082, -35.0, 0.0)
-	mesh.Shift(V(-*ox, -*oy, -*oz))
+	mesh.Shift(V(*ox, *oy, *oz))
 	//mesh.Shift(most)
 
 	var gcd gcode.Gcode

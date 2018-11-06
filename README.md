@@ -17,7 +17,7 @@ Cut stl in two stls by required plane.
 Simplifies stl to required count of triangles.
 
 ### Viewer
-[Spycer](https://github.com/l1va/spycer)
+[Spycer - https://github.com/l1va/spycer](https://github.com/l1va/spycer)
 
 ### Get binaries
 Do not forget to place <b>data directory</b> near your binary. 

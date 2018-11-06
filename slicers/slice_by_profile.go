@@ -15,9 +15,9 @@ func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 	LayersToGcode(layers, "/home/l1va/debug.gcode")
 
 	centers := calculateCenters(layers)
-	debug.AddPointsToFile(centers)
+	debug.AddPointsToFile(centers, debug.GreenColor)
 	simplified := helpers.SimplifyLine(centers, settings.Epsilon)
-	debug.AddPointsToFile(simplified)
+	debug.AddPointsToFile(simplified, debug.GreenColor)
 
 	up := mesh
 	var down *Mesh

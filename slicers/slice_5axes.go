@@ -63,8 +63,8 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 			//	break
 			//}
 			//rotated = true
-			debug.AddLayer(layers[i-1])
-			debug.AddLayer(layers[i])
+			debug.AddLayer(layers[i-1], debug.GreenColor)
+			debug.AddLayer(layers[i], debug.GreenColor)
 			curP := calculateCenter(layers[i])
 			//fmt.Printf("\n %v \n", layers[i])
 			fmt.Printf("\n %v \n", i)
@@ -81,7 +81,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 				log.Fatal("failed to cut mesh by plane in 5a slicing: ", err)
 			}
 			debug.AddTriangleByPoints(newPlane.P, newPlane.P.Shift(AxisX.ProjectOnPlane(*newPlane).MulScalar(10)),
-				newPlane.P.Shift(AxisY.ProjectOnPlane(*newPlane).MulScalar(15)))
+				newPlane.P.Shift(AxisY.ProjectOnPlane(*newPlane).MulScalar(15)), debug.GreenColor)
 
 			//newPlane.N.Rotate(RotationAroundZ(90))
 
@@ -93,7 +93,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 			}
 			if i > 10 {
 				debug.AddTriangleByPoints(newPlane.P, newPlane.P.Shift(AxisX.ProjectOnPlane(*newPlane).MulScalar(10)),
-					newPlane.P.Shift(AxisY.ProjectOnPlane(*newPlane).MulScalar(15)))
+					newPlane.P.Shift(AxisY.ProjectOnPlane(*newPlane).MulScalar(15)), debug.GreenColor)
 
 				//newPlane.N.Rotate(RotationAroundZ(90))
 
