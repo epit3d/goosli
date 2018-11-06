@@ -11,8 +11,6 @@ See slicers/slice_by_profile.go. For sure your 3d-printer have to support bed ro
 
 <i>Feel free to open issues or implement your slicing algorithms.</i>
 
-<b>PS. vip slicer hidden with gitignore (you know why). You have to fix a little for now </b> 
-
 # goosli-cutter
 Cut stl in two stls by required plane.
 
