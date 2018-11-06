@@ -8,3 +8,6 @@ install:
   - go get github.com/pkg/errors
   - go get github.com/stretchr/testify/assert
   - go get github.com/stretchr/testify/require
+  - go get github.com/fogleman/simplify
+  - go get gopkg.in/alecthomas/kingpin.v2
+  - go get gopkg.in/yaml.v2
