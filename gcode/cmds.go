@@ -12,6 +12,26 @@ type Command interface {
 	LayersCount() int
 }
 
+type InclineXBack struct {
+}
+
+func (r InclineXBack) ToGCode(b *bytes.Buffer) {
+	b.WriteString("M42 \n")
+}
+func (r InclineXBack) LayersCount() int {
+	return 0
+}
+
+type InclineX struct {
+}
+
+func (r InclineX) ToGCode(b *bytes.Buffer) {
+	b.WriteString("M43 \n")
+}
+func (r InclineX) LayersCount() int {
+	return 0
+}
+
 type RotateXZ struct {
 	AngleX float64
 	AngleZ float64
@@ -21,6 +41,17 @@ func (r RotateXZ) ToGCode(b *bytes.Buffer) {
 	b.WriteString("G62 X" + StrF(r.AngleX) + " Z" + StrF(r.AngleZ) + "\n")
 }
 func (r RotateXZ) LayersCount() int {
+	return 0
+}
+
+type RotateZ struct {
+	Angle float64
+}
+
+func (r RotateZ) ToGCode(b *bytes.Buffer) {
+	b.WriteString("G0 A" + StrF(r.Angle) + "\n")
+}
+func (r RotateZ) LayersCount() int {
 	return 0
 }
 

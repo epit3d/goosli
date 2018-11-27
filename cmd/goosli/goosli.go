@@ -10,6 +10,7 @@ import (
 	"bytes"
 	//"github.com/l1va/goosli/slicers/vip"
 	"github.com/l1va/goosli/gcode"
+	"github.com/l1va/goosli/slicers/vip"
 )
 
 var (
@@ -71,8 +72,8 @@ func main() {
 		gcd = slicers.SliceByProfile(mesh, setts)
 	} else if *slicingType == "5axes" {
 		gcd = slicers.Slice5Axes(mesh, setts)
-		//} else if *slicingType == "vip" {
-		//	gcd = vip.Slice(mesh, setts)
+		} else if *slicingType == "vip" {
+			gcd = vip.Slice(mesh, setts)
 	} else {
 		log.Fatal("unsupported slicing type: ", *slicingType)
 	}
