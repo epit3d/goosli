@@ -37,6 +37,10 @@ GOOS=windows GOARCH=amd64 go build -o goosli_cutter.exe cmd/goosli_cutter/goosli
 GOOS=windows GOARCH=amd64 go build -o goosli_simplifier.exe cmd/goosli_simplifier/goosli_simplifier.go 
 ```
 
+### Technical moments
+Rotations are always about global axes, if your rotation axis does not match with global 
+axis - you can use PlaneCenter parameter and shift your plane to match.
+
 ### Thanks
 A lot of ideas and code was taken from various [fogleman](https://github.com/fogleman) 
 repos. Thank you!
