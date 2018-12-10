@@ -8,9 +8,8 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"time"
 	"bytes"
-	//"github.com/l1va/goosli/slicers/vip"
 	"github.com/l1va/goosli/gcode"
-	"github.com/l1va/goosli/slicers/vip"
+	//"github.com/l1va/goosli/slicers/vip"
 )
 
 var (
@@ -60,7 +59,7 @@ func main() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 	//most := V(-60.08446554467082, -35.0, 0.0)
-	mesh.Shift(V(*ox + *pcx, *oy + *pcy, *oz + *pcz))
+	mesh.Shift(V(*pcx - *ox, *pcy - *oy, *pcz - *oz))
 	//mesh.Shift(most)
 
 	var gcd gcode.Gcode
@@ -72,8 +71,8 @@ func main() {
 		gcd = slicers.SliceByProfile(mesh, setts)
 	} else if *slicingType == "5axes" {
 		gcd = slicers.Slice5Axes(mesh, setts)
-		} else if *slicingType == "vip" {
-			gcd = vip.Slice(mesh, setts)
+		//} else if *slicingType == "vip" {
+		//	gcd = vip.Slice(mesh, setts)
 	} else {
 		log.Fatal("unsupported slicing type: ", *slicingType)
 	}
