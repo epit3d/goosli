@@ -13,6 +13,7 @@ import (
 var (
 	stl = kingpin.Flag("stl", "Source stl file to colorize.").Short('s').Required().String()
 	//stl = kingpin.Flag("stl", "Source stl file to colorize.").Short('s').Default("/home/l1va/Downloads/bunny.stl").String()
+	angle           = kingpin.Flag("angle", "Angle of bias to colorize a triangle.").Short('a').Default("30").Float64()
 	out = kingpin.Flag("out", "Output path for result.").Short('o').Default("colorize_triangles.txt").String()
 )
 
@@ -25,7 +26,7 @@ func main() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 
-	arr := helpers.ColorizeTriangles(*mesh, 45)
+	arr := helpers.ColorizeTriangles(*mesh, *angle)
 
 	file, err := os.Create(*out)
 	if err != nil {
