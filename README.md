@@ -11,6 +11,9 @@ See slicers/slice_by_profile.go. For sure your 3d-printer have to support bed ro
 
 <i>Feel free to open issues or implement your slicing algorithms.</i>
 
+# goosli-colorizer
+Save true/false to file for each triangle in stl according to logic (now it is big bias from Z axe)
+
 # goosli-cutter
 Cut stl in two stls by required plane.
 
@@ -26,6 +29,7 @@ Do not forget to place <b>data directory</b> near your binary.
 ```bash
 cd github.com/l1va/goosli
 go install cmd/goosli/goosli.go 
+go install cmd/goosli_colorizer/goosli_colorizer.go
 go install cmd/goosli_cutter/goosli_cutter.go 
 go install cmd/goosli_simplifier/goosli_simplifier.go
 ```
@@ -33,6 +37,7 @@ go install cmd/goosli_simplifier/goosli_simplifier.go
 ```bash
 cd github.com/l1va/goosli
 GOOS=windows GOARCH=amd64 go build -o goosli cmd/goosli/goosli.go 
+GOOS=windows GOARCH=amd64 go build -o goosli_colorizer cmd/goosli_colorizer/goosli_colorizer.go
 GOOS=windows GOARCH=amd64 go build -o goosli_cutter cmd/goosli_cutter/goosli_cutter.go 
 GOOS=windows GOARCH=amd64 go build -o goosli_simplifier cmd/goosli_simplifier/goosli_simplifier.go 
 ```
