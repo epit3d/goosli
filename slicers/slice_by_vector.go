@@ -1,10 +1,10 @@
 package slicers
 
 import (
-	. "github.com/l1va/goosli/primitives"
-	"sort"
-	"math"
 	"github.com/l1va/goosli/gcode"
+	. "github.com/l1va/goosli/primitives"
+	"math"
+	"sort"
 )
 
 // SliceByVectorToGcode - Slicing on layers by vector Z
@@ -14,7 +14,7 @@ func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
 
 	var gcd gcode.Gcode
-	gcd.Add(gcode.LayersMoving{layers, 0})
+	gcd.Add(gcode.LayersMoving{layers, 0, settings.PlaneCenterZ})
 	return gcd
 }
 

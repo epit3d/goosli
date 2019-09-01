@@ -1,10 +1,10 @@
 package test
 
 import (
-	"testing"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"github.com/l1va/goosli/slicers"
+	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestSlicer_MiddleOnTheRing(t *testing.T) {

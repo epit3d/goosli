@@ -2,9 +2,9 @@ package gcode
 
 import (
 	"bytes"
+	. "github.com/l1va/goosli/primitives"
 	"math"
 	"strconv"
-	. "github.com/l1va/goosli/primitives"
 )
 
 type Command interface {
@@ -56,30 +56,31 @@ func (r RotateZ) LayersCount() int {
 }
 
 type LayersMoving struct {
-	Layers []Layer
-	Index  int
+	Layers       []Layer
+	Index        int
+	PlaneCenterZ float64
 }
 
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 	for i := 0; i < len(lm.Layers); i++ {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
-		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", b)
-		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", b)
-		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", b)
-		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", b)
+		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", b, lm.PlaneCenterZ)
+		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", b, lm.PlaneCenterZ)
+		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", b, lm.PlaneCenterZ)
+		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", b, lm.PlaneCenterZ)
 	}
 }
 func (lm LayersMoving) LayersCount() int {
 	return len(lm.Layers)
 }
 
-func pathesToGCode(pths []Path, comment string, b *bytes.Buffer) {
+func pathesToGCode(pths []Path, comment string, b *bytes.Buffer, pcz float64) {
 	eOff := 0.0 //TODO: fix extruder value
 	b.WriteString(";" + comment + "\n")
 	for _, p := range pths {
 		b.WriteString("G0 " + pointToString(p.Lines[0].P1) + "\n")
 		for _, line := range p.Lines {
-			eDist := math.Sqrt(math.Pow(line.P2.X-line.P1.X, 2) + math.Pow(line.P2.Y-line.P1.Y, 2) + math.Pow(line.P2.Z-line.P1.Z, 2))
+			eDist := math.Sqrt(math.Pow(line.P2.X-line.P1.X, 2) + math.Pow(line.P2.Y-line.P1.Y, 2) + math.Pow(line.P2.Z-line.P1.Z+pcz, 2))
 			eOff += eDist
 			b.WriteString("G1 " + pointToString(line.P2) + " E" + StrF(eOff) + "\n")
 		} //TODO: optimize - not write coordinate if it was not changed

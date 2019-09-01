@@ -1,15 +1,15 @@
 package primitives
 
 import (
-	"runtime"
-	"sync"
-	"math"
-	"strconv"
 	"bytes"
 	"io/ioutil"
 	"log"
-	"strings"
+	"math"
 	"os"
+	"runtime"
+	"strconv"
+	"strings"
+	"sync"
 )
 
 func PrepareDataFile(filename string, m map[string]string) string {
@@ -30,7 +30,6 @@ func ToFile(buffer bytes.Buffer, filename string) {
 		log.Fatal("failed to save buffer to file: ", err)
 	}
 }
-
 
 func AddToFile(buffer bytes.Buffer, filename string) {
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0600)

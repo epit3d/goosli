@@ -1,15 +1,14 @@
 package slicers
 
 import (
-	. "github.com/l1va/goosli/primitives"
 	"bytes"
 	"github.com/l1va/goosli/gcode"
+	. "github.com/l1va/goosli/primitives"
 )
 
-func LayersToGcode(layers []Layer, filename string) {
+func LayersToGcode(layers []Layer, filename string, settings Settings) {
 	var b bytes.Buffer
-	cmd := gcode.LayersMoving{layers, 0}
+	cmd := gcode.LayersMoving{layers, 0, settings.PlaneCenterZ}
 	cmd.ToGCode(&b)
 	ToFile(b, filename)
 }
-

@@ -16,6 +16,7 @@ type Settings struct {
 	PrintSpeed          int
 	Nozzle              float64
 	LayerCount          int
+	PlaneCenterZ        float64
 }
 
 func (s *Settings) ToMap() map[string]string {

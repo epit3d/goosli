@@ -3,9 +3,9 @@ package test
 import (
 	//"fmt"
 	"testing"
+	"fmt"
 	//"github.com/stretchr/testify/require"
 	. "github.com/l1va/goosli/primitives"
-	"fmt"
 	"github.com/stretchr/testify/require"
 )
 
@@ -77,12 +77,12 @@ func TestPath_FindCentroid(t *testing.T) {
 				{Point{3, 2, 12}, Point{1, 13, 10}},
 				{Point{1, 13, 10}, Point{12, 11, 3}},
 				{Point{12, 11, 3}, Point{15, 3, 2}},}},
-			out: Point{X:7.472222222222222, Y:7.138888888888889, Z:7.444444444444445},
+			out: Point{X: 7.472222222222222, Y: 7.138888888888889, Z: 7.444444444444445},
 		},
 	}
 	for i, row := range cases {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			require.Equal(t, row.out, FindCentroid(row.in) )
+			require.Equal(t, row.out, FindCentroid(row.in))
 		})
 	}
 }

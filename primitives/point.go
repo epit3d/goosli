@@ -14,7 +14,7 @@ type Point struct {
 
 func (a Point) Equal(b Point) bool {
 
-	return AlmostZero(a.X-b.X)  && AlmostZero(a.Y-b.Y) && AlmostZero(a.Z-b.Z)
+	return AlmostZero(a.X-b.X) && AlmostZero(a.Y-b.Y) && AlmostZero(a.Z-b.Z)
 }
 
 func (a Point) VectorTo(b Point) Vector {
@@ -61,7 +61,7 @@ func (p Point) Inside(path Path) bool {
 	pl := Plane{p, n}
 	v := p.VectorTo(path.Lines[0].P1).ProjectOnPlane(pl)
 	c := 0
-	for _,line:=range path.Lines {
+	for _, line := range path.Lines {
 		inters := pl.IntersectSegment(line.P1, line.P2)
 		if inters != nil && p.VectorTo(*inters).CodirectedWith(v) {
 			c += 1

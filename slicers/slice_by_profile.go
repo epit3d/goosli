@@ -1,18 +1,18 @@
 package slicers
 
 import (
-	. "github.com/l1va/goosli/primitives"
-	"log"
+	"github.com/l1va/goosli/debug"
 	"github.com/l1va/goosli/gcode"
 	"github.com/l1va/goosli/helpers"
-	"github.com/l1va/goosli/debug"
+	. "github.com/l1va/goosli/primitives"
+	"log"
 )
 
 // SliceByProfile - Slicing on layers by simple algo
 func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 	debug.RecreateFile()
 	layers := SliceByVector(mesh, settings.LayerHeight, AxisZ)
-	LayersToGcode(layers, "/home/l1va/debug.gcode")
+	LayersToGcode(layers, "/home/l1va/debug.gcode", settings)
 
 	centers := calculateCenters(layers)
 	debug.AddPointsToFile(centers, debug.GreenColor)
@@ -43,7 +43,7 @@ func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 		gcd.Add(gcode.RotateXZ{angleX, angleZ})
 
 		layers := SliceByVector(down, settings.LayerHeight, AxisZ)
-		gcd.Add(gcode.LayersMoving{layers, gcd.LayersCount})
+		gcd.Add(gcode.LayersMoving{layers, gcd.LayersCount, settings.PlaneCenterZ})
 	}
 	return gcd
 }

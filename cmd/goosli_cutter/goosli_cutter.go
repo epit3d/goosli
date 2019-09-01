@@ -1,10 +1,10 @@
 package main
 
 import (
-	"log"
+	"github.com/l1va/goosli/helpers"
 	. "github.com/l1va/goosli/primitives"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"github.com/l1va/goosli/helpers"
+	"log"
 )
 
 var (

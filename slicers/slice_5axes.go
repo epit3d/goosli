@@ -1,12 +1,12 @@
 package slicers
 
 import (
+	"fmt"
+	"github.com/l1va/goosli/debug"
+	"github.com/l1va/goosli/gcode"
 	"github.com/l1va/goosli/helpers"
 	. "github.com/l1va/goosli/primitives"
-	"github.com/l1va/goosli/gcode"
 	"log"
-	"github.com/l1va/goosli/debug"
-	"fmt"
 )
 
 var
@@ -54,10 +54,10 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 		if newPlane == nil {
 			i++
 			if i == len(layers) {
-				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
+				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, PlaneCenterZ: settings.PlaneCenterZ})
 			}
 		} else {
-			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount})
+			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount, PlaneCenterZ: settings.PlaneCenterZ})
 
 			//if rotated {
 			//	break
@@ -105,7 +105,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 				log.Fatal("failed to cut mesh by newPlane in 5a slicing: ", err)
 			}
 			toAdd = SliceByVector(down, settings.LayerHeight, AxisZ)
-			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
+			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, PlaneCenterZ: settings.PlaneCenterZ})
 
 			if rotated {
 				simpMesh = simpMesh.Rotate(RotationAroundX(-angleX), OriginPoint)

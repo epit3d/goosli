@@ -1,11 +1,11 @@
 package test
 
 import (
-	"testing"
 	"fmt"
+	. "github.com/l1va/goosli/primitives"
 	"github.com/stretchr/testify/require"
 	"math"
-	. "github.com/l1va/goosli/primitives"
+	"testing"
 )
 
 func TestVector_Angle(t *testing.T) {

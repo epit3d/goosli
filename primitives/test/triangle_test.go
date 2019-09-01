@@ -2,9 +2,9 @@ package test
 
 import (
 	"fmt"
-	"testing"
-	"github.com/stretchr/testify/require"
 	. "github.com/l1va/goosli/primitives"
+	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestTriangle_MinZ(t *testing.T) {

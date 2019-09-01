@@ -6,7 +6,7 @@ type Path struct {
 
 func (p Path) Reverse() Path {
 	res := Path{}
-	for _,l := range p.Lines {
+	for _, l := range p.Lines {
 		res.Lines = append(res.Lines, l.Reverse())
 	}
 	return res
@@ -15,7 +15,7 @@ func (p Path) Reverse() Path {
 func (p Path) Enclose() Path {
 	s := len(p.Lines)
 	if !p.Lines[s-1].P2.Equal(p.Lines[0].P1) {
-		p.Lines = append(p.Lines, Line{p.Lines[s-1].P2, p.Lines[0].P1} )
+		p.Lines = append(p.Lines, Line{p.Lines[s-1].P2, p.Lines[0].P1})
 	}
 	return p
 }
@@ -43,32 +43,32 @@ func JoinPaths(paths []Path) []Path {
 		}
 		result = append(result, path)
 	}
-	for i:=0; i<len(result);i++{
-		for j:=i+1;j<len(result);j++ {
+	for i := 0; i < len(result); i++ {
+		for j := i + 1; j < len(result); j++ {
 			jp := tryJoin(result[i], result[j])
-			if jp != nil{
+			if jp != nil {
 				result[i] = *jp
 				result[j] = result[len(result)-1]
 				result = result[:len(result)-1]
-				i=-1
+				i = -1
 				break
 			}
 		}
 	}
 	// clean from small lines
-	for i:=0;i< len(result);i++{
-		for j:=0;j< len(result[i].Lines);j++ {
+	for i := 0; i < len(result); i++ {
+		for j := 0; j < len(result[i].Lines); j++ {
 			if result[i].Lines[j].ToVector().Length() < 0.1 { //TODO: hardcode
-				if j!=0 {
+				if j != 0 {
 					result[i].Lines[j-1].P2 = result[i].Lines[j].P2
-				}else if j<len(result[i].Lines)-1 {
+				} else if j < len(result[i].Lines)-1 {
 					result[i].Lines[j+1].P1 = result[i].Lines[j].P1
 				}
-				result[i].Lines = append(result[i].Lines[:j] , result[i].Lines[j+1:]...)
+				result[i].Lines = append(result[i].Lines[:j], result[i].Lines[j+1:]...)
 				j--
 			}
 		}
-		if len(result[i].Lines) ==0{
+		if len(result[i].Lines) == 0 {
 			result[i] = result[len(result)-1]
 			result = result[:len(result)-1]
 			i--
@@ -78,22 +78,22 @@ func JoinPaths(paths []Path) []Path {
 }
 
 func tryJoin(p1, p2 Path) *Path {
-	if p1.Lines[len(p1.Lines)-1].P2.Equal(p2.Lines[0].P1){
+	if p1.Lines[len(p1.Lines)-1].P2.Equal(p2.Lines[0].P1) {
 		p1.Lines = append(p1.Lines, p2.Lines...)
 		//println("works right way")
 		return &p1
 	}
-	if p2.Lines[len(p2.Lines)-1].P2.Equal(p1.Lines[0].P1){
+	if p2.Lines[len(p2.Lines)-1].P2.Equal(p1.Lines[0].P1) {
 		p2.Lines = append(p2.Lines, p1.Lines...)
 		//println("works otherside")
 		return &p2
 	}
-	if p1.Lines[len(p1.Lines)-1].P2.Equal(p2.Lines[len(p2.Lines)-1].P2){
+	if p1.Lines[len(p1.Lines)-1].P2.Equal(p2.Lines[len(p2.Lines)-1].P2) {
 		p1.Lines = append(p1.Lines, p2.Reverse().Lines...)
 		println("something not good, reverse path found")
 		return &p1
 	}
-	if p1.Lines[0].P1.Equal(p2.Lines[0].P1){
+	if p1.Lines[0].P1.Equal(p2.Lines[0].P1) {
 		p2.Lines = append(p2.Reverse().Lines, p1.Lines...)
 		println("something not good, reverse path found")
 		return &p2
@@ -132,7 +132,7 @@ func FindCentroid(path Path) Point { //TODO: refactorme
 	var x, x1, y, y1, z, z1 float64
 	//println(a, a2, a3, "<>", cx, cx2, cy, cy2, cz, cz2, "\n")
 	a = a * 0.5
-	if !AlmostZero(a){
+	if !AlmostZero(a) {
 		x = cx / 6 / a
 		y = cy / 6 / a
 	}
@@ -151,7 +151,7 @@ func FindCentroid(path Path) Point { //TODO: refactorme
 	//println("y:", y, " ", y1)
 	//println("z:", z, " ", z1)
 
-	if AlmostZero(a) && AlmostZero(a2){
+	if AlmostZero(a) && AlmostZero(a2) {
 		x = path.Lines[0].P1.X
 		y = y1
 		z = z1
@@ -164,7 +164,7 @@ func FindCentroid(path Path) Point { //TODO: refactorme
 		z = path.Lines[0].P1.Z
 	}
 
-	if AlmostZero(a) && !AlmostZero(a2){
+	if AlmostZero(a) && !AlmostZero(a2) {
 		x = x1
 	}
 	if AlmostZero(a) && !AlmostZero(a3) {

@@ -1,13 +1,13 @@
 package debug
 
 import (
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
-	"gopkg.in/yaml.v2"
 )
 
 type Cfg struct {
-	Debug bool
+	Debug     bool
 	DebugFile string `yaml:"debug_file"`
 }
 

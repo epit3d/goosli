@@ -1,10 +1,10 @@
 package slicers
 
 import (
-	"sort"
-	"math"
-	. "github.com/l1va/goosli/primitives"
 	"github.com/l1va/goosli/debug"
+	. "github.com/l1va/goosli/primitives"
+	"math"
+	"sort"
 )
 
 func CalcFillPlanes(mesh *Mesh, settings Settings) []Plane {

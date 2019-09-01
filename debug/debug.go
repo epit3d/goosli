@@ -2,9 +2,9 @@ package debug
 
 import (
 	"bytes"
+	"fmt"
 	. "github.com/l1va/goosli/primitives"
 	"os"
-	"fmt"
 )
 
 type DebugColor string
@@ -40,7 +40,7 @@ func AddPointsToFile(ps []Point, color DebugColor) {
 	if cfg.Debug {
 		var b bytes.Buffer
 		for i := 0; i < len(ps)-1; i++ {
-			b.WriteString("line "+ string(color)+" ")
+			b.WriteString("line " + string(color) + " ")
 			b.WriteString(pointToString(ps[i]))
 			b.WriteString(pointToString(ps[i+1]) + "\n")
 		}
@@ -51,7 +51,7 @@ func AddPointsToFile(ps []Point, color DebugColor) {
 func AddLine(l Line, color DebugColor) {
 	if cfg.Debug {
 		var b bytes.Buffer
-		b.WriteString("line "+ string(color)+" ")
+		b.WriteString("line " + string(color) + " ")
 		b.WriteString(pointToString(l.P1))
 		b.WriteString(pointToString(l.P2) + "\n")
 
@@ -62,7 +62,7 @@ func AddLine(l Line, color DebugColor) {
 func AddTriangle(t Triangle, color DebugColor) {
 	if cfg.Debug {
 		var b bytes.Buffer
-		b.WriteString("triangle "+ string(color)+" ")
+		b.WriteString("triangle " + string(color) + " ")
 		b.WriteString(pointToString(t.P1))
 		b.WriteString(pointToString(t.P2))
 		b.WriteString(pointToString(t.P3) + "\n")
@@ -73,7 +73,7 @@ func AddTriangle(t Triangle, color DebugColor) {
 func AddTriangleByPoints(p1, p2, p3 Point, color DebugColor) {
 	if cfg.Debug {
 		var b bytes.Buffer
-		b.WriteString("triangle "+ string(color)+" ")
+		b.WriteString("triangle " + string(color) + " ")
 		b.WriteString(pointToString(p1))
 		b.WriteString(pointToString(p2))
 		b.WriteString(pointToString(p3) + "\n")
@@ -87,7 +87,7 @@ func AddLayer(layer Layer, color DebugColor) {
 		var b bytes.Buffer
 		for _, path := range layer.Paths {
 			for _, line := range path.Lines {
-				b.WriteString("line "+ string(color)+" ")
+				b.WriteString("line " + string(color) + " ")
 				b.WriteString(pointToString(line.P1))
 				b.WriteString(pointToString(line.P2) + "\n")
 			}
@@ -100,7 +100,7 @@ func AddPath(path Path, color DebugColor) {
 	if cfg.Debug {
 		var b bytes.Buffer
 		for _, line := range path.Lines {
-			b.WriteString("line "+ string(color)+" ")
+			b.WriteString("line " + string(color) + " ")
 			b.WriteString(pointToString(line.P1))
 			b.WriteString(pointToString(line.P2) + "\n")
 		}

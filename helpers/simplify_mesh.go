@@ -1,9 +1,9 @@
 package helpers
 
 import (
-	. "github.com/l1va/goosli/primitives"
 	"fmt"
 	"github.com/fogleman/simplify"
+	. "github.com/l1va/goosli/primitives"
 )
 
 func SimplifyMesh(mesh *Mesh, resSize int) (*Mesh, error) {

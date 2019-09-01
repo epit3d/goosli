@@ -1,11 +1,11 @@
 package test
 
 import (
-	"testing"
-	"github.com/stretchr/testify/require"
 	. "github.com/l1va/goosli/primitives"
 	"github.com/l1va/goosli/slicers"
+	"github.com/stretchr/testify/require"
 	"log"
+	"testing"
 )
 
 func TestSlicers_SliceByVectorZ(t *testing.T) {

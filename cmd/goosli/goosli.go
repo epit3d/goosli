@@ -48,6 +48,7 @@ func settings() slicers.Settings {
 		PrintSpeed:          *printSpeed * 60,
 		Nozzle:              *nozzle,
 		LayerCount:          0,
+		PlaneCenterZ:        *pcz,
 	}
 }
 
