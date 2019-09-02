@@ -78,15 +78,15 @@ func pathesToGCode(pths []Path, comment string, b *bytes.Buffer, pcz float64) {
 	eOff := 0.0 //TODO: fix extruder value
 	b.WriteString(";" + comment + "\n")
 	for _, p := range pths {
-		b.WriteString("G0 " + pointToString(p.Lines[0].P1) + "\n")
+		b.WriteString("G0 " + pointToString(p.Lines[0].P1, pcz) + "\n")
 		for _, line := range p.Lines {
-			eDist := math.Sqrt(math.Pow(line.P2.X-line.P1.X, 2) + math.Pow(line.P2.Y-line.P1.Y, 2) + math.Pow(line.P2.Z-line.P1.Z+pcz, 2))
+			eDist := math.Sqrt(math.Pow(line.P2.X-line.P1.X, 2) + math.Pow(line.P2.Y-line.P1.Y, 2) + math.Pow(line.P2.Z-line.P1.Z, 2))
 			eOff += eDist
-			b.WriteString("G1 " + pointToString(line.P2) + " E" + StrF(eOff) + "\n")
+			b.WriteString("G1 " + pointToString(line.P2, pcz) + " E" + StrF(eOff) + "\n")
 		} //TODO: optimize - not write coordinate if it was not changed
 	}
 }
 
-func pointToString(a Point) string {
-	return "X" + StrF(a.X) + " Y" + StrF(a.Y) + " Z" + StrF(a.Z)
+func pointToString(a Point, pcz float64) string {
+	return "X" + StrF(a.X) + " Y" + StrF(a.Y) + " Z" + StrF(a.Z-pcz)
 }
