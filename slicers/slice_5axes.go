@@ -54,10 +54,10 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 		if newPlane == nil {
 			i++
 			if i == len(layers) {
-				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, PlaneCenterZ: settings.PlaneCenterZ})
+				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
 			}
 		} else {
-			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount, PlaneCenterZ: settings.PlaneCenterZ})
+			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount})
 
 			//if rotated {
 			//	break
@@ -105,7 +105,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 				log.Fatal("failed to cut mesh by newPlane in 5a slicing: ", err)
 			}
 			toAdd = SliceByVector(down, settings.LayerHeight, AxisZ)
-			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, PlaneCenterZ: settings.PlaneCenterZ})
+			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
 
 			if rotated {
 				simpMesh = simpMesh.Rotate(RotationAroundX(-angleX), OriginPoint)

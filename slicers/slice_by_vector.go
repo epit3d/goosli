@@ -14,7 +14,7 @@ func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
 
 	var gcd gcode.Gcode
-	gcd.Add(gcode.LayersMoving{layers, 0, settings.PlaneCenterZ})
+	gcd.Add(gcode.LayersMoving{layers, 0})
 	return gcd
 }
 

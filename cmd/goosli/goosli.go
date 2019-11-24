@@ -19,9 +19,9 @@ var (
 	ox  = kingpin.Flag("originx", "Center of model by x.").Short('x').Default("0").Float64()
 	oy  = kingpin.Flag("originy", "Center of model by y.").Short('y').Default("0").Float64()
 	oz  = kingpin.Flag("originz", "Min of model by z.").Short('z').Default("0").Float64()
-	pcx = kingpin.Flag("planecx", "X coord of plane center.").Default("0").Float64()
-	pcy = kingpin.Flag("planecy", "Y coord of plane center.").Default("0").Float64()
-	pcz = kingpin.Flag("planecz", "Z coord of plane center.").Default("0").Float64()
+	rcx = kingpin.Flag("rotcx", "X coord of rotation center.").Default("0").Float64()
+	rcy = kingpin.Flag("rotcy", "Y coord of rotation center.").Default("0").Float64()
+	rcz = kingpin.Flag("rotcz", "Z coord of rotation center.").Default("0").Float64()
 
 	epsilon = kingpin.Flag("epsilon", "Simplification line parameter.").Short('e').Default("10.0").Float64()
 
@@ -48,7 +48,7 @@ func settings() slicers.Settings {
 		PrintSpeed:          *printSpeed * 60,
 		Nozzle:              *nozzle,
 		LayerCount:          0,
-		PlaneCenterZ:        *pcz,
+		RotationCenterZ:        *rcz,
 	}
 }
 
@@ -61,7 +61,7 @@ func main() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 	//most := V(-60.08446554467082, -35.0, 0.0)
-	mesh.Shift(V(*pcx-*ox, *pcy-*oy, *pcz-*oz))
+	mesh.Shift(V(-*ox, -*oy, -*oz))
 	//mesh.Shift(most)
 
 	var gcd gcode.Gcode
