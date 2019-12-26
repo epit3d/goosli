@@ -1,5 +1,7 @@
 package primitives
 
+import "fmt"
+
 var (
 	PlaneXY = Plane{OriginPoint, AxisZ}
 	PlaneYZ = Plane{OriginPoint, AxisX}
@@ -11,8 +13,12 @@ type Plane struct {
 	N Vector
 }
 
-func (a Plane) Rotate(rm RotationMatrix) Plane {
-	return Plane{a.P.ToVector().Rotate(rm).ToPoint(), a.N.Rotate(rm)}
+func (p Plane) String() string {
+	return fmt.Sprintf("P%s N%s", p.P.String(), p.N.String())
+}
+
+func (p Plane) Rotate(rm RotationMatrix) Plane {
+	return Plane{p.P.ToVector().Rotate(rm).ToPoint(), p.N.Rotate(rm)}
 }
 
 func (p Plane) IntersectMesh(mesh *Mesh) Layer {

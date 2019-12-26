@@ -33,6 +33,7 @@ var (
 	printSpeed          = kingpin.Flag("print_speed", "Printing speed.").Default("50").Int()
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
 
+	planesFile              = kingpin.Flag("planes_file", "File with planes description.").Default("planes_file.txt").String()
 	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("vip").String()
 )
 
@@ -48,7 +49,7 @@ func settings() slicers.Settings {
 		PrintSpeed:          *printSpeed * 60,
 		Nozzle:              *nozzle,
 		LayerCount:          0,
-		RotationCenterZ:        *rcz,
+		RotationCenterZ:     *rcz,
 	}
 }
 
@@ -61,7 +62,7 @@ func main() {
 		log.Fatal("failed to load mesh: ", err)
 	}
 	//most := V(-60.08446554467082, -35.0, 0.0)
-	mesh.Shift(V(-*ox, -*oy, -*oz))
+	mesh.Shift(V(*ox, *oy, *oz))
 	//mesh.Shift(most)
 
 	var gcd gcode.Gcode

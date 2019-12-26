@@ -1,6 +1,7 @@
 package primitives
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -12,6 +13,10 @@ var (
 
 type Vector struct {
 	X, Y, Z float64
+}
+
+func (a Vector) String() string {
+	return fmt.Sprintf("X%s Y%s Z%s", StrF(a.X), StrF(a.Y), StrF(a.Z))
 }
 
 func V(x, y, z float64) Vector {
@@ -91,4 +96,14 @@ func (a Vector) ProjectOn(b Vector) Vector {
 
 func (a Vector) ProjectOnPlane(p Plane) Vector {
 	return a.Add(a.ProjectOn(p.N).Reverse()) // substracting orthogonal to the plane component from a
+}
+
+//Rotate vector a about vector b by angle degrees.
+func (a Vector) RotateAbout(b Vector, angle float64) Vector {
+	// Thanks user MNKY at http://math.stackexchange.com/a/1432182/81266
+	theta := ToRadians(angle)
+	prj := a.ProjectOn(b)
+	perp := a.Sub(prj)
+	w := b.Cross(perp)
+	return prj.Add(perp.MulScalar(math.Cos(theta))).Add(w.Normalize().MulScalar(perp.Length()).MulScalar(math.Sin(theta)))
 }

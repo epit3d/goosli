@@ -1,6 +1,7 @@
 package primitives
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -10,6 +11,10 @@ var (
 
 type Point struct {
 	X, Y, Z float64
+}
+
+func (a Point) String() string {
+	return fmt.Sprintf("X%s Y%s Z%s", StrF(a.X), StrF(a.Y), StrF(a.Z))
 }
 
 func (a Point) Equal(b Point) bool {
@@ -53,17 +58,17 @@ func (a Point) ProjectOnLine(b, c Point) Point {
 // Crossing Number method: calculates count of intersections plane with polygon(path) in one direction,
 // if odd - inside. Can have problems with difficult forms as shown here
 // http://geomalgorithms.com/a03-_inclusion.html
-func (p Point) Inside(path Path) bool {
+func (a Point) Inside(path Path) bool {
 	if len(path.Lines) == 0 {
 		return false
 	}
 	n := path.Lines[0].P1.VectorTo(path.Lines[0].P2)
-	pl := Plane{p, n}
-	v := p.VectorTo(path.Lines[0].P1).ProjectOnPlane(pl)
+	pl := Plane{a, n}
+	v := a.VectorTo(path.Lines[0].P1).ProjectOnPlane(pl)
 	c := 0
 	for _, line := range path.Lines {
 		inters := pl.IntersectSegment(line.P1, line.P2)
-		if inters != nil && p.VectorTo(*inters).CodirectedWith(v) {
+		if inters != nil && a.VectorTo(*inters).CodirectedWith(v) {
 			c += 1
 		}
 	}

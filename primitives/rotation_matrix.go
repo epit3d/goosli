@@ -10,7 +10,7 @@ type RotationMatrix struct {
 
 func RotationAroundX(angle float64) RotationMatrix {
 	res := RotationMatrix{}
-	alpha := math.Pi * float64(angle) / 180.0
+	alpha := ToRadians(angle)
 	// transposed matrix to rotate around X
 	res.X = V(1, 0, 0)
 	res.Y = V(0, math.Cos(alpha), math.Sin(alpha))
@@ -20,7 +20,7 @@ func RotationAroundX(angle float64) RotationMatrix {
 
 func RotationAroundZ(angle float64) RotationMatrix {
 	res := RotationMatrix{}
-	alpha := math.Pi * float64(angle) / 180.0
+	alpha := ToRadians(angle)
 	// transposed matrix to rotate around X
 	res.X = V(math.Cos(alpha), math.Sin(alpha), 0)
 	res.Y = V(-math.Sin(alpha), math.Cos(alpha), 0)

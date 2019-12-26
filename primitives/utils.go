@@ -90,3 +90,7 @@ func AlmostZero(f float64) bool {
 func StrF(f float64) string {
 	return strconv.FormatFloat(f, 'f', 3, 64)
 }
+
+func ToRadians(degree float64) float64{
+	return math.Pi * degree / 180.0
+}
