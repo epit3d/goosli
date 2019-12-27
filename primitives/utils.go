@@ -2,6 +2,7 @@ package primitives
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math"
@@ -93,4 +94,12 @@ func StrF(f float64) string {
 
 func ToRadians(degree float64) float64{
 	return math.Pi * degree / 180.0
+}
+
+func ParseFloat(f string) float64 {
+	v, err := strconv.ParseFloat(f, 32)
+	if err!=nil {
+		fmt.Printf("ERROR parsing float: %v from %s\n", err, f)
+	}
+	return float64(v)
 }

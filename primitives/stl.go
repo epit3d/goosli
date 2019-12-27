@@ -6,7 +6,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -67,7 +66,7 @@ func loadSTLAscii(file *os.File) (*Mesh, error) {
 		if len(fields) != 3 {
 			continue
 		}
-		px = Point{parseFloat(fields[0]), parseFloat(fields[1]), parseFloat(fields[2])}
+		px = Point{ParseFloat(fields[0]), ParseFloat(fields[1]), ParseFloat(fields[2])}
 		switch i % 3 {
 		case 0:
 			p1 = px
@@ -82,10 +81,7 @@ func loadSTLAscii(file *os.File) (*Mesh, error) {
 	mesh := NewMesh(triangles)
 	return &mesh, scanner.Err()
 }
-func parseFloat(f string) float64 {
-	v, _ := strconv.ParseFloat(f, 32)
-	return float64(v)
-}
+
 
 func makeFloat(b []byte) float64 {
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(b)))

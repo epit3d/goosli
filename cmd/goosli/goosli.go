@@ -50,6 +50,7 @@ func settings() slicers.Settings {
 		Nozzle:              *nozzle,
 		LayerCount:          0,
 		RotationCenterZ:     *rcz,
+		PlanesFile: *planesFile,
 	}
 }
 
