@@ -36,7 +36,8 @@ go install cmd/goosli_simplifier/goosli_simplifier.go
 ##### Windows (tested on Windows 10)
 ```bash
 cd github.com/l1va/goosli
-GOOS=windows GOARCH=amd64 go build -o goosli cmd/goosli/goosli.go 
+GOOS=windows GOARCH=amd64 go build -o goosli cmd/goosli/goosli.go
+GOOS=windows GOARCH=amd64 go build -o goosli_analyzer cmd/goosli_analyzer/goosli_analyzer.go 
 GOOS=windows GOARCH=amd64 go build -o goosli_colorizer cmd/goosli_colorizer/goosli_colorizer.go
 GOOS=windows GOARCH=amd64 go build -o goosli_cutter cmd/goosli_cutter/goosli_cutter.go 
 GOOS=windows GOARCH=amd64 go build -o goosli_simplifier cmd/goosli_simplifier/goosli_simplifier.go 

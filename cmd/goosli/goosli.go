@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"time"
-	//"github.com/l1va/goosli/slicers/vip"
 )
 
 var (
@@ -33,7 +32,7 @@ var (
 	printSpeed          = kingpin.Flag("print_speed", "Printing speed.").Default("50").Int()
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
 
-	planesFile              = kingpin.Flag("planes_file", "File with planes description.").Default("planes_file.txt").String()
+	planesFile  = kingpin.Flag("planes_file", "File with planes description.").Default("planes_file.txt").String()
 	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("vip").String()
 )
 
@@ -50,7 +49,7 @@ func settings() slicers.Settings {
 		Nozzle:              *nozzle,
 		LayerCount:          0,
 		RotationCenterZ:     *rcz,
-		PlanesFile: *planesFile,
+		PlanesFile:          *planesFile,
 	}
 }
 
