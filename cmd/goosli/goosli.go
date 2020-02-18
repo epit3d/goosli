@@ -2,14 +2,15 @@ package main
 
 import (
 	"bytes"
+	"io/ioutil"
+	"log"
+	"time"
+
 	"github.com/l1va/goosli/gcode"
 	. "github.com/l1va/goosli/primitives"
 	"github.com/l1va/goosli/slicers"
 	"github.com/l1va/goosli/slicers/vip"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"io/ioutil"
-	"log"
-	"time"
 )
 
 var (
@@ -30,6 +31,9 @@ var (
 	bedTemperature      = kingpin.Flag("bed_temperature", "Bed temperature in Celsius.").Default("60").Int()
 	extruderTemperature = kingpin.Flag("extruder_temperature", "Extruder temperature in Celsius.").Default("200").Int()
 	printSpeed          = kingpin.Flag("print_speed", "Printing speed.").Default("50").Int()
+	printSpeedLayer1    = kingpin.Flag("print_speed_layer1", "Printing speed of Layer 1.").Default("50").Int()
+	printSpeedWall      = kingpin.Flag("print_speed_wall", "Printing speed of walls.").Default("50").Int()
+	fanOffLayer1        = kingpin.Flag("fan_off_layer1", "Turn off the fan for Layer 1.").Bool()
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
 
 	planesFile  = kingpin.Flag("planes_file", "File with planes description.").Default("planes_file.txt").String()
@@ -46,10 +50,13 @@ func settings() slicers.Settings {
 		BedTemperature:      *bedTemperature,
 		ExtruderTemperature: *extruderTemperature,
 		PrintSpeed:          *printSpeed * 60,
+		PrintSpeedLayer1:    *printSpeedLayer1 * 60,
+		PrintSpeedWall:      *printSpeedWall * 60,
 		Nozzle:              *nozzle,
 		LayerCount:          0,
 		RotationCenterZ:     *rcz,
 		PlanesFile:          *planesFile,
+		FanOffLayer1:        *fanOffLayer1,
 	}
 }
 

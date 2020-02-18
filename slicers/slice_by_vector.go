@@ -1,17 +1,18 @@
 package slicers
 
 import (
-	"github.com/l1va/goosli/gcode"
-	. "github.com/l1va/goosli/primitives"
 	"math"
 	"sort"
+
+	"github.com/l1va/goosli/gcode"
+	. "github.com/l1va/goosli/primitives"
 )
 
 // SliceByVectorToGcode - Slicing on layers by vector Z
 func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	layers := SliceByVector(mesh, settings.LayerHeight, Z)
-
 	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
+	layers = changePrintingSpeedAndFanState(layers, settings)
 
 	var gcd gcode.Gcode
 	gcd.Add(gcode.LayersMoving{layers, 0})
@@ -109,4 +110,18 @@ func slicingWorker(in chan job, out chan Layer) func(wi, wn int) {
 			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths(paths)}
 		}
 	}
+}
+
+func changePrintingSpeedAndFanState(layers []Layer, settings Settings) []Layer {
+	for ind := range layers {
+		if ind == 0 {
+			layers[ind].PrintSpeed = settings.PrintSpeedLayer1
+			layers[ind].FanOff = settings.FanOffLayer1
+		} else {
+			layers[ind].PrintSpeed = settings.PrintSpeed
+			layers[ind].FanOff = false
+		}
+	}
+
+	return layers
 }
