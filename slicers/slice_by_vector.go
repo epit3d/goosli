@@ -121,6 +121,7 @@ func changePrintingSpeedAndFanState(layers []Layer, settings Settings) []Layer {
 			layers[ind].PrintSpeed = settings.PrintSpeed
 			layers[ind].FanOff = false
 		}
+		layers[ind].WallPrintSpeed = settings.PrintSpeedWall
 	}
 
 	return layers

@@ -64,9 +64,12 @@ type LayersMoving struct {
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 	for i := 0; i < len(lm.Layers); i++ {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
-		printSpeedToGCode(lm.Layers[i].PrintSpeed, b)
 		switchFanGCode(lm.Layers[i].FanOff, b)
+
+		printSpeedToGCode(lm.Layers[i].WallPrintSpeed, b)
 		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", b)
+
+		printSpeedToGCode(lm.Layers[i].PrintSpeed, b)
 		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", b)
 		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", b)
 		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", b)
