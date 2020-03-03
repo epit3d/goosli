@@ -2,9 +2,10 @@ package gcode
 
 import (
 	"bytes"
-	. "github.com/l1va/goosli/primitives"
 	"math"
 	"strconv"
+
+	. "github.com/l1va/goosli/primitives"
 )
 
 type Command interface {
@@ -63,7 +64,12 @@ type LayersMoving struct {
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 	for i := 0; i < len(lm.Layers); i++ {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
+		switchFanGCode(lm.Layers[i].FanOff, b)
+
+		printSpeedToGCode(lm.Layers[i].WallPrintSpeed, b)
 		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", b)
+
+		printSpeedToGCode(lm.Layers[i].PrintSpeed, b)
 		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", b)
 		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", b)
 		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", b)
@@ -71,6 +77,18 @@ func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 }
 func (lm LayersMoving) LayersCount() int {
 	return len(lm.Layers)
+}
+
+func switchFanGCode(fanOff bool, b *bytes.Buffer) {
+	if fanOff {
+		b.WriteString("M107\n")
+	} else {
+		b.WriteString("M106\n")
+	}
+}
+
+func printSpeedToGCode(feedrate int, b *bytes.Buffer) {
+	b.WriteString("F" + strconv.Itoa(feedrate) + "\n")
 }
 
 func pathesToGCode(pths []Path, comment string, b *bytes.Buffer) {
@@ -85,5 +103,3 @@ func pathesToGCode(pths []Path, comment string, b *bytes.Buffer) {
 		} //TODO: optimize - not write coordinate if it was not changed
 	}
 }
-
-

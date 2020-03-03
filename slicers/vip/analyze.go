@@ -2,11 +2,12 @@ package vip
 
 import (
 	"fmt"
-	"github.com/l1va/goosli/helpers"
-	. "github.com/l1va/goosli/primitives"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/l1va/goosli/helpers"
+	. "github.com/l1va/goosli/primitives"
 )
 
 type AnalyzedPlane struct {

@@ -1,8 +1,9 @@
 package slicers
 
 import (
-	. "github.com/l1va/goosli/primitives"
 	"strconv"
+
+	. "github.com/l1va/goosli/primitives"
 )
 
 type Settings struct {
@@ -14,10 +15,13 @@ type Settings struct {
 	BedTemperature      int
 	ExtruderTemperature int
 	PrintSpeed          int
+	PrintSpeedLayer1    int
+	PrintSpeedWall      int
 	Nozzle              float64
 	LayerCount          int
 	RotationCenterZ     float64
 	PlanesFile          string
+	FanOffLayer1        bool
 }
 
 func (s *Settings) ToMap() map[string]string {
