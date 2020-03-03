@@ -22,6 +22,7 @@ type Settings struct {
 	RotationCenterZ     float64
 	PlanesFile          string
 	FanOffLayer1        bool
+	FillingType         string
 }
 
 func (s *Settings) ToMap() map[string]string {
