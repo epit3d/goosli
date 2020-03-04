@@ -9,23 +9,17 @@ import (
 
 func calcFillPlanesCommon(mesh *Mesh, settings Settings, MyAxis Vector, step float64) []Plane {
 	minx, maxx := mesh.MinMaxZ(MyAxis)
-	curP := Point{X: 0, Y: 0, Z: 0}
-	// Todo do not make planes outside the body
-	nMax := int(math.Ceil((maxx - 0) / step))
-	nMin := int(math.Ceil((0 - minx) / step))
-	planes := []Plane{}
-	planes = append(planes, Plane{curP, MyAxis})
+	//get minx which is  "k * step"
+	minx_step := float64(math.Floor((minx)/step)) * step
+	n := int(math.Ceil((maxx - minx_step) / step))
+	curP := MyAxis.MulScalar(minx_step).ToPoint()
 
-	for i := 0; i < nMax; i++ {
+	planes := []Plane{}
+	for i := 0; i < n; i++ {
 		curP = curP.Shift(MyAxis.MulScalar(step))
 		planes = append(planes, Plane{curP, MyAxis})
 	}
 
-	curP = Point{X: 0, Y: 0, Z: 0}
-	for i := 0; i < nMin; i++ {
-		curP = curP.Shift(MyAxis.MulScalar(-step))
-		planes = append(planes, Plane{curP, MyAxis})
-	}
 	return planes
 }
 
@@ -41,7 +35,7 @@ func CalcFillPlanesLines(mesh *Mesh, settings Settings) []Plane {
 func CalcFillPlanesSquares(mesh *Mesh, settings Settings) []Plane {
 	step := (100 / float64(settings.FillDensity/2)) * settings.Nozzle
 
-	//planes := CalcFillPlanes0(mesh, settings, V(1, 0, 0), step)
+	//planes := calcFillPlanesCommon(mesh, settings, V(1, 0, 0), step)
 	//planes = append(planes, CalcFillPlanes0(mesh, settings, V(0, 1, 0), step)...)
 
 	planes := calcFillPlanesCommon(mesh, settings, V(0.7071067812, 0.7071067812, 0), step)
