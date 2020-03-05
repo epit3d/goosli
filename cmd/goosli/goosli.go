@@ -35,7 +35,7 @@ var (
 	printSpeedWall      = kingpin.Flag("print_speed_wall", "Printing speed of walls.").Default("50").Int()
 	fanOffLayer1        = kingpin.Flag("fan_off_layer1", "Turn off the fan for Layer 1.").Bool()
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
-	fillingType         = kingpin.Flag("filling_type", "Filling type(Lines,Squares,Triangles)").Default("Lines").Int()
+	fillingType         = kingpin.Flag("filling_type", "Filling type(Lines,Squares,Triangles)").Default("0").Int()
 
 	planesFile  = kingpin.Flag("planes_file", "File with planes description.").Default("planes_file.txt").String()
 	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("vip").String()
