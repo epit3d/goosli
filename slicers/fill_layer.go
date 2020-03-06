@@ -58,11 +58,11 @@ func CalcFillPlanesTriangles(mesh *Mesh, settings Settings) []Plane {
 func CalcFillPlanes(mesh *Mesh, settings Settings) []Plane {
 	planes := []Plane{}
 	switch settings.FillingType {
-	case 0:
+	case "Lines":
 		planes = CalcFillPlanesLines(mesh, settings)
-	case 1:
+	case "Squares":
 		planes = CalcFillPlanesSquares(mesh, settings)
-	case 2:
+	case "Triangles":
 		planes = CalcFillPlanesTriangles(mesh, settings)
 	default:
 		//	for future changings
