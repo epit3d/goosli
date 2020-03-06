@@ -7,16 +7,66 @@ import (
 	"sort"
 )
 
-func CalcFillPlanes(mesh *Mesh, settings Settings) []Plane {
-	minx, maxx := mesh.MinMaxZ(AxisX)
-	step := (100 / float64(settings.FillDensity)) * settings.Nozzle
-	curP := AxisX.MulScalar(minx).ToPoint()
-	n := int(math.Ceil((maxx - minx) / step))
+func calcFillPlanesCommon(mesh *Mesh, settings Settings, MyAxis Vector, step float64) []Plane {
+	minx, maxx := mesh.MinMaxZ(MyAxis)
+	//get minx which is  "k * step"
+	minx_step := float64(math.Floor((minx)/step)) * step
+	n := int(math.Ceil((maxx - minx_step) / step))
+	curP := MyAxis.MulScalar(minx_step).ToPoint()
 
 	planes := []Plane{}
 	for i := 0; i < n; i++ {
-		curP = curP.Shift(AxisX.MulScalar(step))
-		planes = append(planes, Plane{curP, AxisX})
+		curP = curP.Shift(MyAxis.MulScalar(step))
+		planes = append(planes, Plane{curP, MyAxis})
+	}
+
+	return planes
+}
+
+// filling with lines
+func CalcFillPlanesLines(mesh *Mesh, settings Settings) []Plane {
+	step := (100 / float64(settings.FillDensity)) * settings.Nozzle
+	planes := calcFillPlanesCommon(mesh, settings, AxisX, step)
+
+	return planes
+}
+
+// filling with squares
+func CalcFillPlanesSquares(mesh *Mesh, settings Settings) []Plane {
+	step := (100 / float64(settings.FillDensity/2)) * settings.Nozzle
+
+	//planes := calcFillPlanesCommon(mesh, settings, V(1, 0, 0), step)
+	//planes = append(planes, CalcFillPlanes0(mesh, settings, V(0, 1, 0), step)...)
+
+	planes := calcFillPlanesCommon(mesh, settings, V(0.7071067812, 0.7071067812, 0), step)
+	planes = append(planes, calcFillPlanesCommon(mesh, settings, V(-0.7071067812, 0.7071067812, 0), step)...)
+
+	return planes
+}
+
+// filling with triangles
+func CalcFillPlanesTriangles(mesh *Mesh, settings Settings) []Plane {
+	step := (100 / float64(settings.FillDensity/3)) * settings.Nozzle
+
+	planes := calcFillPlanesCommon(mesh, settings, V(1, 0, 0), step)
+	planes = append(planes, calcFillPlanesCommon(mesh, settings, V(0.5, 0.8660254038, 0), step)...)
+	planes = append(planes, calcFillPlanesCommon(mesh, settings, V(-0.5, 0.8660254038, 0), step)...)
+
+	return planes
+}
+
+func CalcFillPlanes(mesh *Mesh, settings Settings) []Plane {
+	planes := []Plane{}
+	switch settings.FillingType {
+	case "Lines":
+		planes = CalcFillPlanesLines(mesh, settings)
+	case "Squares":
+		planes = CalcFillPlanesSquares(mesh, settings)
+	case "Triangles":
+		planes = CalcFillPlanesTriangles(mesh, settings)
+	default:
+		//	for future changings
+		planes = CalcFillPlanesLines(mesh, settings)
 	}
 	return planes
 }
