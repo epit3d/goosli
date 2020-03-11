@@ -16,3 +16,15 @@ func ColorizeTriangles(m Mesh, angle float64, v Vector) []bool {
 	}
 	return res
 }
+
+func FilterTrianglesByColor(m Mesh, angle float64, v Vector) []Triangle {
+
+	arr := ColorizeTriangles(m, angle, v)
+	var colTriangles []Triangle
+	for i, t := range m.Triangles {
+		if arr[i] == true {
+			colTriangles = append(colTriangles, t)
+		}
+	}
+	return colTriangles
+}
