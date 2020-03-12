@@ -37,6 +37,10 @@ var (
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
 	fillingType         = kingpin.Flag("filling_type", "Filling type(Lines,Squares,Triangles)").Default("Lines").String()
 
+	retraction         = kingpin.Flag("retraction_on", "Turn on the retraction.").Bool()
+	retractionSpeed    = kingpin.Flag("retraction_speed", "How fast to pull in the fillament.").Int()
+	retractionDistance = kingpin.Flag("retraction_distance", "How much fillament to pull in.").Float64()
+
 	planesFile  = kingpin.Flag("planes_file", "File with planes description.").Default("planes_file.txt").String()
 	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("vip").String()
 )
@@ -59,6 +63,9 @@ func settings() slicers.Settings {
 		PlanesFile:          *planesFile,
 		FanOffLayer1:        *fanOffLayer1,
 		FillingType:         *fillingType,
+		Retraction:          *retraction,
+		RetractionSpeed:     *retractionSpeed,
+		RetractionDistance:  *retractionDistance,
 	}
 }
 

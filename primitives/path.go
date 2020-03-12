@@ -1,7 +1,10 @@
 package primitives
 
 type Path struct {
-	Lines []Line
+	Lines              []Line
+	Retraction         bool
+	RetractionSpeed    int
+	RetractionDistance float64
 }
 
 func (p Path) Reverse() Path {

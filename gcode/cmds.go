@@ -66,13 +66,10 @@ func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
 		switchFanGCode(lm.Layers[i].FanOff, b)
 
-		printSpeedToGCode(lm.Layers[i].WallPrintSpeed, b)
-		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", b)
-
-		printSpeedToGCode(lm.Layers[i].PrintSpeed, b)
-		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", b)
-		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", b)
-		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", b)
+		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", lm.Layers[i].WallPrintSpeed, b)
+		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", lm.Layers[i].PrintSpeed, b)
+		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", lm.Layers[i].PrintSpeed, b)
+		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, b)
 	}
 }
 func (lm LayersMoving) LayersCount() int {
@@ -91,10 +88,25 @@ func printSpeedToGCode(feedrate int, b *bytes.Buffer) {
 	b.WriteString("F" + strconv.Itoa(feedrate) + "\n")
 }
 
-func pathesToGCode(pths []Path, comment string, b *bytes.Buffer) {
+func retractionToGCode(b *bytes.Buffer, retraction bool, retractionDistance float64, retractionSpeed int) {
+	if !retraction {
+		return
+	}
+
+	b.WriteString("; Retraction\n")
+	b.WriteString("G1 F" + strconv.Itoa(retractionSpeed) + " E" + StrF(-retractionDistance) + "\n")
+}
+
+func pathesToGCode(pths []Path, comment string, feedrate int, b *bytes.Buffer) {
 	eOff := 0.0 //TODO: fix extruder value
 	b.WriteString(";" + comment + "\n")
 	for _, p := range pths {
+		// Retraction first
+		retractionToGCode(b, p.Retraction, p.RetractionDistance, p.RetractionSpeed)
+
+		// Set the printing speed for this path
+		printSpeedToGCode(feedrate, b)
+
 		b.WriteString("G0 " + p.Lines[0].P1.String() + "\n")
 		for _, line := range p.Lines {
 			eDist := math.Sqrt(math.Pow(line.P2.X-line.P1.X, 2) + math.Pow(line.P2.Y-line.P1.Y, 2) + math.Pow(line.P2.Z-line.P1.Z, 2))

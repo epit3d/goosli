@@ -23,6 +23,9 @@ type Settings struct {
 	PlanesFile          string
 	FanOffLayer1        bool
 	FillingType         string
+	Retraction          bool
+	RetractionSpeed     int
+	RetractionDistance  float64
 }
 
 func (s *Settings) ToMap() map[string]string {
