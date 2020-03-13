@@ -145,12 +145,12 @@ func JoinPaths(paths []Path) []Path {
 	}
 	if p1.Lines[len(p1.Lines)-1].P2.Equal(p2.Lines[len(p2.Lines)-1].P2) {
 		p1.Lines = append(p1.Lines, p2.Reverse().Lines...)
-		println("something not good, reverse path found")
+		//println("something not good, reverse path found")
 		return &p1
 	}
 	if p1.Lines[0].P1.Equal(p2.Lines[0].P1) {
 		p2.Lines = append(p2.Reverse().Lines, p1.Lines...)
-		println("something not good, reverse path found")
+		//println("something not good, reverse path found")
 		return &p2
 	}
 	return nil

@@ -4,13 +4,14 @@ import (
 	"math"
 	"sort"
 
+	"github.com/l1va/goosli/helpers"
 	"github.com/l1va/goosli/gcode"
 	. "github.com/l1va/goosli/primitives"
 )
 
 // SliceByVectorToGcode - Slicing on layers by vector Z
 func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
-	layers := SliceByVector(mesh, settings.LayerHeight, Z)
+	layers := SliceByVector(mesh, Z, settings)
 	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
 	changePrintingSpeedAndFanState(layers, settings)
 	changeRetractionState(layers, settings)
@@ -21,7 +22,11 @@ func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 }
 
 // SliceByVector - Slicing on layers by vector Z
-func SliceByVector(mesh *Mesh, thickness float64, Z Vector) []Layer {
+func SliceByVector(mesh *Mesh, Z Vector, settings Settings) []Layer {
+
+	thickness := settings.LayerHeight
+	angle 	  := settings.ColorizedAngle
+	vn        := settings.UnitVector 
 
 	if mesh == nil || len(mesh.Triangles) == 0 {
 		return nil
@@ -42,9 +47,26 @@ func SliceByVector(mesh *Mesh, thickness float64, Z Vector) []Layer {
 	out := make(chan Layer, n)
 	DoInParallel(slicingWorker(in, out))
 
+	//make support triangles
+	curP := Z.MulScalar(minz).ToPoint()
+	plane := Plane{P: curP, N: Z}
+
+	col_triangles := helpers.FilterTrianglesByColor(*mesh, angle, vn)
+	col_lines := helpers.MakeUndoubledLinesFromTriangles(col_triangles)
+	sup_lines := helpers.MakeSupportLines(col_lines, plane)
+	var sup_triangles []Triangle
+	for i := range col_lines {
+		Tr1 := NewTriangle(sup_lines[i].P1, col_lines[i].P1, col_lines[i].P2)
+		Tr2 := NewTriangle(sup_lines[i].P1, sup_lines[i].P2, col_lines[i].P2)
+		sup_triangles = append(sup_triangles, Tr1, Tr2)
+
+	}
+
+	triangles = append(sup_triangles, triangles...)
+	
 	index := 0
 	var active []*Triangle
-	curP := Z.MulScalar(minz).ToPoint().Shift(sh.MulScalar(0.5))
+	curP = Z.MulScalar(minz).ToPoint().Shift(sh.MulScalar(0.5))
 	for i := 0; i < n; i++ {
 		plane := Plane{P: curP, N: Z}
 		z := curP.ToVector().Dot(Z)

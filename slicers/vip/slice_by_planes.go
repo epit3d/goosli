@@ -41,7 +41,7 @@ func SliceByPlanes(mesh *Mesh, settings slicers.Settings, planes []AnalyzedPlane
 			gcd.Add(gcode.InclineXBack{})
 			rotated = false
 		}
-		add := slicers.SliceByVector(down, settings.LayerHeight, AxisZ)
+		add := slicers.SliceByVector(down, AxisZ, settings)
 		gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(add, settings, fillPlanes), Index: gcd.LayersCount})
 		//TODO: fillPlanes fix
 	}
