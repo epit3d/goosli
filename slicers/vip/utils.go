@@ -13,7 +13,7 @@ func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
 	if addWalls > 0 {
 		for i, layer := range layers { //TODO: in parallel
 			for _, pt := range layer.Paths {
-				if len(pt.Lines) < 3 { //TODO: remove this
+				if len(pt.Points) < 2 { //TODO: remove this
 					continue
 				}
 				offs := offset(pt, addWalls, settings.Nozzle, layer.Norm)

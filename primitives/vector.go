@@ -14,7 +14,9 @@ var (
 type Vector struct {
 	X, Y, Z float64
 }
-
+func ToVector(p1, p2 Point) Vector {
+	return V(p2.X-p1.X, p2.Y-p1.Y, p2.Z-p1.Z)
+}
 func (a Vector) String() string {
 	return fmt.Sprintf("X%s Y%s Z%s", StrF(a.X), StrF(a.Y), StrF(a.Z))
 }

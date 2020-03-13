@@ -21,8 +21,8 @@ var (
 func Slice(mesh *Mesh, settings Settings) gcode.Gcode {
 
 	planes := readPlanes(settings.PlanesFile)
-	if len(planes)>0{
-		return SliceByPlanes(mesh,settings, planes)
+	if len(planes) > 0 {
+		return SliceByPlanes(mesh, settings, planes)
 	}
 
 	layers := SliceByVector(mesh, settings.LayerHeight, AxisZ)
@@ -31,10 +31,10 @@ func Slice(mesh *Mesh, settings Settings) gcode.Gcode {
 	if len(op) == 2 {
 		return SliceBridge(mesh, settings, layers)
 	}
-	println("outside pathes: ", len(op), len(op[0].Lines))
+	println("outside pathes: ", len(op), len(op[0].Points))
 	if len(op) == 1 && isRotation(op[0]) {
 		op = getAllOutsidePathes(layers[len(layers)-1])
-		println("outside pathes: ", len(op), len(op[0].Lines))
+		println("outside pathes: ", len(op), len(op[0].Points))
 		if len(op) == 1 && isRotation(op[0]) {
 			return SliceRotation(mesh, settings, layers)
 		}
@@ -44,12 +44,13 @@ func Slice(mesh *Mesh, settings Settings) gcode.Gcode {
 
 func isRotation(pth Path) bool {
 	cp := FindCentroid(pth)
-	d := cp.DistanceTo(pth.Lines[0].P1)
-	if len(pth.Lines) < 14 { //TODO: hardcode! square is a circle too but with small count of points
+	d := cp.DistanceTo(pth.Points[0])
+	if len(pth.Points) < 14 { //TODO: hardcode! square is a circle too but with small count of points
 		return false
 	}
-	for _, line := range pth.Lines {
-		if cp.DistanceTo(line.P2) < d-radiusDiff || cp.DistanceTo(line.P2) > d+radiusDiff {
+	for i := 1; i < len(pth.Points); i++ {
+		p2 := pth.Points[i]
+		if cp.DistanceTo(p2) < d-radiusDiff || cp.DistanceTo(p2) > d+radiusDiff {
 			return false
 		}
 	}
