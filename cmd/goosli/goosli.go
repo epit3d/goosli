@@ -36,9 +36,14 @@ var (
 	fanOffLayer1        = kingpin.Flag("fan_off_layer1", "Turn off the fan for Layer 1.").Bool()
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
 	fillingType         = kingpin.Flag("filling_type", "Filling type(Lines,Squares,Triangles)").Default("Lines").String()
-
+	
 	planesFile  = kingpin.Flag("planes_file", "File with planes description.").Default("planes_file.txt").String()
 	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("vip").String()
+	angle 		= kingpin.Flag("angle", "Angle of bias to colorize a triangle.").Short('a').Default("30").Float64()
+	nx 			= kingpin.Flag("normali", "Plane's normal x coord.").Short('i').Default("0").Float64()
+	ny    		= kingpin.Flag("normalj", "Plane's normal y coord.").Short('j').Default("0").Float64()
+	nz    		= kingpin.Flag("normalk", "Plane's normal z coord.").Short('k').Default("1").Float64()
+
 )
 
 func settings() slicers.Settings {
@@ -59,6 +64,8 @@ func settings() slicers.Settings {
 		PlanesFile:          *planesFile,
 		FanOffLayer1:        *fanOffLayer1,
 		FillingType:         *fillingType,
+		ColorizedAngle:		 *angle,
+		UnitVector:		 	 V(*nx, *ny, *nz),
 	}
 }
 
