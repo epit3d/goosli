@@ -31,7 +31,7 @@ func SliceRotation(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	// Add horizontal layers
 	gcd.Add(gcode.LayersMoving{PrepareLayers(layers[:i], settings, fillPlanes), gcd.LayersCount})
 
-	anyPoint := layers[i].Paths[0].Lines[0].P1
+	anyPoint := layers[i].Paths[0].Points[0]
 	mesh, _, err := helpers.CutMesh(mesh, Plane{anyPoint, AxisZ})
 	if err != nil {
 		log.Fatal("failed to cut mesh, before rotation: ", err)
@@ -62,7 +62,7 @@ func failRotaion(prevLayer, curLayer Layer) bool {
 		println("curLayer has not one path: ", len(curLayer.Paths))
 	}
 
-	anyP := prevLayer.Paths[0].Lines[0].P1
+	anyP := prevLayer.Paths[0].Points[0]
 	//nearestP := curLayer.Paths[0].Lines[0].P1
 	//d := anyP.DistanceTo(nearestP)
 	//for _, line := range curLayer.Paths[0].Lines {

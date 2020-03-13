@@ -45,6 +45,8 @@ var (
 	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("vip").String()
 )
 
+//TODO: create one binary, not 4
+
 func settings() slicers.Settings {
 	return slicers.Settings{
 		DateTime:            time.Now().Format(time.RFC822),

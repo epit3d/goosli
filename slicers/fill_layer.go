@@ -95,9 +95,9 @@ var (
 func intersectByPlane(pathes []Path, plane Plane) []Path {
 	pts := []Point{}
 	for _, pth := range pathes {
-		for _, line := range pth.Lines {
+		for i := 1; i < len(pth.Points); i++ {
 
-			p := plane.IntersectSegment(line.P1, line.P2)
+			p := plane.IntersectSegment(pth.Points[i-1], pth.Points[i])
 			if p != nil {
 				pts = append(pts, *p)
 			}
@@ -128,10 +128,10 @@ func intersectByPlane(pathes []Path, plane Plane) []Path {
 		return nil
 	}
 	if len(pts) == 2 || len(pts) == 3 {
-		return []Path{Path{Lines: []Line{Line{pts[0], pts[len(pts)-1]}}}}
+		return []Path{{Points: []Point{pts[0], pts[len(pts)-1]}}}
 	}
 	if len(pts) == 4 {
-		return []Path{Path{Lines: []Line{Line{pts[0], pts[1]}}}, Path{Lines: []Line{Line{pts[2], pts[3]}}}}
+		return []Path{{Points: []Point{pts[0], pts[1]}}, {Points: []Point{pts[2], pts[3]}}}
 	}
 	return nil //can not happen
 }

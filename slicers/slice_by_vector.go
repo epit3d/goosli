@@ -105,10 +105,10 @@ func slicingWorker(in chan job, out chan Layer) func(wi, wn int) {
 			paths = paths[:0]
 			for _, t := range job.triangles {
 				if line := job.plane.IntersectTriangle(t); line != nil {
-					paths = append(paths, Path{Lines: []Line{*line}})
+					paths = append(paths, Path{Points: []Point{line.P1, line.P2}})
 				}
 			}
-			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths(paths)}
+			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths2(paths)}
 		}
 	}
 }
