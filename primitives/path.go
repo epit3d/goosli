@@ -1,25 +1,80 @@
 package primitives
 
 type Path struct {
-	Lines []Line
+	Points             []Point
+	Retraction         bool
+	RetractionSpeed    int
+	RetractionDistance float64
 }
 
 func (p Path) Reverse() Path {
 	res := Path{}
-	for _, l := range p.Lines {
-		res.Lines = append(res.Lines, l.Reverse())
+	for i := len(p.Points) - 1; i >= 0; i-- {
+		res.Points = append(res.Points, p.Points[i])
 	}
 	return res
 }
 
-func (p Path) Enclose() Path {
+func (p Path) Equal(p2 Path) bool {
+	if len(p.Points) != len(p2.Points) {
+		return false
+	}
+	for i, pi := range p.Points {
+		if !pi.Equal(p2.Points[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+/*func (p Path) Enclose() Path {
 	s := len(p.Lines)
 	if !p.Lines[s-1].P2.Equal(p.Lines[0].P1) {
 		p.Lines = append(p.Lines, Line{p.Lines[s-1].P2, p.Lines[0].P1})
 	}
 	return p
+}*/
+
+func toslice(m map[Point]Path) []Path {
+	values := make([]Path, 0, len(m))
+
+	for _, v := range m {
+		values = append(values, v)
+	}
+	return values
 }
 
+func JoinPaths2(p []Path) []Path {
+	paths := make([]Path, len(p))
+	copy(paths, p)
+	yes := true
+	for yes {
+		yes = false
+
+		lookup := map[Point]Path{}
+		for i := 0; i < len(paths); {
+			cur := paths[i]
+			if p, ok := lookup[cur.Points[0]]; ok {
+				yes = true
+				delete(lookup, cur.Points[0])
+				p.Points = append(p.Points, cur.Points[1:]...)
+				paths[i] = p
+			} else {
+				if _, ok := lookup[cur.Points[len(cur.Points)-1]]; ok {
+					paths[i] = cur.Reverse()
+				} else {
+					lookup[cur.Points[len(cur.Points)-1]] = cur
+					i++
+				}
+			}
+		}
+		paths = toslice(lookup)
+
+	}
+	return paths
+}
+
+/*
 func JoinPaths(paths []Path) []Path {
 	lookup := make(map[Point]Path, len(paths))
 	for _, path := range paths {
@@ -75,9 +130,9 @@ func JoinPaths(paths []Path) []Path {
 		}
 	}
 	return result
-}
+}*/
 
-func tryJoin(p1, p2 Path) *Path {
+/*func tryJoin(p1, p2 Path) *Path {
 	if p1.Lines[len(p1.Lines)-1].P2.Equal(p2.Lines[0].P1) {
 		p1.Lines = append(p1.Lines, p2.Lines...)
 		//println("works right way")
@@ -99,7 +154,7 @@ func tryJoin(p1, p2 Path) *Path {
 		return &p2
 	}
 	return nil
-}
+}*/
 
 func FindCentroid(path Path) Point { //TODO: refactorme
 	a := 0.0
@@ -111,9 +166,9 @@ func FindCentroid(path Path) Point { //TODO: refactorme
 	cz2 := 0.0
 	cx2 := 0.0
 	cz := 0.0
-	for _, line := range path.Lines {
-		p := line.P1
-		p_1 := line.P2
+	for i := 1; i < len(path.Points); i++ {
+		p := path.Points[i-1]
+		p_1 := path.Points[i]
 		d := p.X*p_1.Y - p_1.X*p.Y
 		a += d
 		cx += (p.X + p_1.X) * d
@@ -152,16 +207,16 @@ func FindCentroid(path Path) Point { //TODO: refactorme
 	//println("z:", z, " ", z1)
 
 	if AlmostZero(a) && AlmostZero(a2) {
-		x = path.Lines[0].P1.X
+		x = path.Points[0].X
 		y = y1
 		z = z1
 	}
 	if AlmostZero(a) && AlmostZero(a3) {
-		y = path.Lines[0].P1.Y
+		y = path.Points[0].Y
 		x = x1
 	}
 	if AlmostZero(a2) && AlmostZero(a3) {
-		z = path.Lines[0].P1.Z
+		z = path.Points[0].Z
 	}
 
 	if AlmostZero(a) && !AlmostZero(a2) {

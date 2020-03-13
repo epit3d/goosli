@@ -25,10 +25,10 @@ func (p Plane) IntersectMesh(mesh *Mesh) Layer {
 	var paths []Path
 	for _, t := range mesh.Triangles {
 		if line := p.IntersectTriangle(&t); line != nil {
-			paths = append(paths, Path{Lines: []Line{*line}})
+			paths = append(paths, Path{Points: []Point{line.P1, line.P2}})
 		}
 	}
-	return Layer{Order: 0, Norm: p.N, Paths: JoinPaths(paths)}
+	return Layer{Order: 0, Norm: p.N, Paths: JoinPaths2(paths)}
 }
 
 func (p Plane) Intersect(t *Triangle) bool {
@@ -88,8 +88,8 @@ func (p Plane) IntersectSegment(p1, p2 Point) *Point {
 
 func (p Plane) IntersectPathCodirectedWith(path Path, v Vector) *Point {
 	cp := FindCentroid(path)
-	for _, line := range path.Lines { //TODO: optimize me
-		pi := p.IntersectSegment(line.P1, line.P2)
+	for i:=1;i<len(path.Points);i++ { //TODO: optimize me
+		pi := p.IntersectSegment(path.Points[i-1],path.Points[i])
 		if pi != nil && cp.VectorTo(*pi).CodirectedWith(v) {
 			return pi
 		}

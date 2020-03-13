@@ -140,9 +140,10 @@ func CalculateFails(prevLayer, curLayer Layer) *Plane {
 
 	for _, pth := range curLayer.Paths {
 		curCp := FindCentroid(pth)
-		if len(pth.Lines) > 0 { //skip pth if it is just a hole
-			l := pth.Lines[0]
-			if l.P1.VectorTo(l.P2).Cross(AxisZ).CodirectedWith(curCp.VectorTo(l.P1)) {
+		if len(pth.Points) > 1 { //skip pth if it is just a hole
+			p1 := pth.Points[0]
+			p2 := pth.Points[1]
+			if p1.VectorTo(p2).Cross(AxisZ).CodirectedWith(curCp.VectorTo(p1)) {
 				continue
 			}
 		}
@@ -208,9 +209,10 @@ func middlePoint(x1, x2 Point) Point {
 func findPrevPath(prevP Point, prevLayer Layer) *Path {
 	for _, pth := range prevLayer.Paths {
 		curP := FindCentroid(pth)
-		if len(pth.Lines) > 0 { //skip pth if it is just a hole
-			l := pth.Lines[0]
-			if l.P1.VectorTo(l.P2).Cross(AxisZ).CodirectedWith(curP.VectorTo(l.P1)) {
+		if len(pth.Points) > 1 { //skip pth if it is just a hole
+			p1 := pth.Points[0]
+			p2 := pth.Points[1]
+			if p1.VectorTo(p2).Cross(AxisZ).CodirectedWith(curP.VectorTo(p1)) {
 				continue
 			}
 		}

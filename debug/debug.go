@@ -86,10 +86,10 @@ func AddLayer(layer Layer, color DebugColor) {
 	if cfg.Debug {
 		var b bytes.Buffer
 		for _, path := range layer.Paths {
-			for _, line := range path.Lines {
+			for i := 1; i < len(path.Points); i++ {
 				b.WriteString("line " + string(color) + " ")
-				b.WriteString(pointToString(line.P1))
-				b.WriteString(pointToString(line.P2) + "\n")
+				b.WriteString(pointToString(path.Points[i-1]))
+				b.WriteString(pointToString(path.Points[i]) + "\n")
 			}
 		}
 		AddToFile(b, cfg.DebugFile)
@@ -99,10 +99,10 @@ func AddLayer(layer Layer, color DebugColor) {
 func AddPath(path Path, color DebugColor) {
 	if cfg.Debug {
 		var b bytes.Buffer
-		for _, line := range path.Lines {
+		for i := 1; i < len(path.Points); i++ {
 			b.WriteString("line " + string(color) + " ")
-			b.WriteString(pointToString(line.P1))
-			b.WriteString(pointToString(line.P2) + "\n")
+			b.WriteString(pointToString(path.Points[i-1]))
+			b.WriteString(pointToString(path.Points[i]) + "\n")
 		}
 		AddToFile(b, cfg.DebugFile)
 	}

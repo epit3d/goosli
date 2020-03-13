@@ -59,15 +59,15 @@ func (a Point) ProjectOnLine(b, c Point) Point {
 // if odd - inside. Can have problems with difficult forms as shown here
 // http://geomalgorithms.com/a03-_inclusion.html
 func (a Point) Inside(path Path) bool {
-	if len(path.Lines) == 0 {
+	if len(path.Points) < 4 {
 		return false
 	}
-	n := path.Lines[0].P1.VectorTo(path.Lines[0].P2)
+	n := path.Points[0].VectorTo(path.Points[1])
 	pl := Plane{a, n}
-	v := a.VectorTo(path.Lines[0].P1).ProjectOnPlane(pl)
+	v := a.VectorTo(path.Points[0]).ProjectOnPlane(pl)
 	c := 0
-	for _, line := range path.Lines {
-		inters := pl.IntersectSegment(line.P1, line.P2)
+	for i := 1; i < len(path.Points); i++ {
+		inters := pl.IntersectSegment(path.Points[i-1], path.Points[i])
 		if inters != nil && a.VectorTo(*inters).CodirectedWith(v) {
 			c += 1
 		}

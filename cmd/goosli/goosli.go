@@ -36,7 +36,10 @@ var (
 	fanOffLayer1        = kingpin.Flag("fan_off_layer1", "Turn off the fan for Layer 1.").Bool()
 	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
 	fillingType         = kingpin.Flag("filling_type", "Filling type(Lines,Squares,Triangles)").Default("Lines").String()
-	
+	retraction         = kingpin.Flag("retraction_on", "Turn on the retraction.").Bool()
+	retractionSpeed    = kingpin.Flag("retraction_speed", "How fast to pull in the fillament.").Int()
+	retractionDistance = kingpin.Flag("retraction_distance", "How much fillament to pull in.").Float64()
+
 	planesFile  = kingpin.Flag("planes_file", "File with planes description.").Default("planes_file.txt").String()
 	slicingType = kingpin.Flag("slicing_type", "Slicing type.").Default("vip").String()
 	angle 		= kingpin.Flag("angle", "Angle of bias to colorize a triangle.").Short('a').Default("30").Float64()
@@ -45,6 +48,8 @@ var (
 	nz    		= kingpin.Flag("normalk", "Plane's normal z coord.").Short('k').Default("1").Float64()
 
 )
+
+//TODO: create one binary, not 4
 
 func settings() slicers.Settings {
 	return slicers.Settings{
@@ -66,6 +71,9 @@ func settings() slicers.Settings {
 		FillingType:         *fillingType,
 		ColorizedAngle:		 *angle,
 		UnitVector:		 	 V(*nx, *ny, *nz),
+		Retraction:          *retraction,
+		RetractionSpeed:     *retractionSpeed,
+		RetractionDistance:  *retractionDistance,
 	}
 }
 

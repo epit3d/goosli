@@ -12,7 +12,8 @@ import (
 func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	layers := SliceByVector(mesh, settings.LayerHeight, Z)
 	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
-	layers = changePrintingSpeedAndFanState(layers, settings)
+	changePrintingSpeedAndFanState(layers, settings)
+	changeRetractionState(layers, settings)
 
 	var gcd gcode.Gcode
 	gcd.Add(gcode.LayersMoving{layers, 0})
@@ -104,15 +105,15 @@ func slicingWorker(in chan job, out chan Layer) func(wi, wn int) {
 			paths = paths[:0]
 			for _, t := range job.triangles {
 				if line := job.plane.IntersectTriangle(t); line != nil {
-					paths = append(paths, Path{Lines: []Line{*line}})
+					paths = append(paths, Path{Points: []Point{line.P1, line.P2}})
 				}
 			}
-			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths(paths)}
+			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths2(paths)}
 		}
 	}
 }
 
-func changePrintingSpeedAndFanState(layers []Layer, settings Settings) []Layer {
+func changePrintingSpeedAndFanState(layers []Layer, settings Settings) {
 	for ind := range layers {
 		if ind == 0 {
 			layers[ind].PrintSpeed = settings.PrintSpeedLayer1
@@ -123,6 +124,21 @@ func changePrintingSpeedAndFanState(layers []Layer, settings Settings) []Layer {
 		}
 		layers[ind].WallPrintSpeed = settings.PrintSpeedWall
 	}
+}
 
-	return layers
+func changeRetractionState(layers []Layer, settings Settings) {
+	for ind := range layers {
+		updateRetractionState(layers[ind].Paths, settings.Retraction, settings.RetractionDistance, settings.RetractionSpeed)
+		updateRetractionState(layers[ind].InnerPs, settings.Retraction, settings.RetractionDistance, settings.RetractionSpeed)
+		updateRetractionState(layers[ind].MiddlePs, settings.Retraction, settings.RetractionDistance, settings.RetractionSpeed)
+		updateRetractionState(layers[ind].Fill, settings.Retraction, settings.RetractionDistance, settings.RetractionSpeed)
+	}
+}
+
+func updateRetractionState(paths []Path, retraction bool, retractionDistance float64, retractinSpeed int) {
+	for ind := range paths {
+		paths[ind].Retraction = retraction
+		paths[ind].RetractionDistance = retractionDistance
+		paths[ind].RetractionSpeed = retractinSpeed
+	}
 }
