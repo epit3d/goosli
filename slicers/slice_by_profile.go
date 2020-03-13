@@ -11,7 +11,7 @@ import (
 // SliceByProfile - Slicing on layers by simple algo
 func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 	debug.RecreateFile()
-	layers := SliceByVector(mesh, settings.LayerHeight, AxisZ)
+	layers := SliceByVector(mesh, AxisZ, settings)
 	LayersToGcode(layers, "/home/l1va/debug.gcode", settings)
 
 	centers := calculateCenters(layers)
@@ -42,7 +42,7 @@ func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 		down = down.Rotate(RotationAroundX(angleX), OriginPoint)
 		gcd.Add(gcode.RotateXZ{angleX, angleZ})
 
-		layers := SliceByVector(down, settings.LayerHeight, AxisZ)
+		layers := SliceByVector(down, AxisZ, settings)
 		gcd.Add(gcode.LayersMoving{layers, gcd.LayersCount})
 	}
 	return gcd

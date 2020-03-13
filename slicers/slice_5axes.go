@@ -37,9 +37,9 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 	//curP := Z.MulScalar(minz).ToPoint().Shift(sh.MulScalar(0.5))
 
 	i := 0
-	layers := SliceByVector(simpMesh, settings.LayerHeight, AxisZ) //TODO: make slicing by one layer?
+	layers := SliceByVector(simpMesh, AxisZ, settings) //TODO: make slicing by one layer?
 	//LayersToGcode(layers, "/home/l1va/debug.gcode")
-	toAdd := SliceByVector(mesh, settings.LayerHeight, AxisZ)
+	toAdd := SliceByVector(mesh, AxisZ, settings)
 	rotated := false
 	angleZ := 0.0
 	down := mesh
@@ -104,7 +104,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 			if err != nil {
 				log.Fatal("failed to cut mesh by newPlane in 5a slicing: ", err)
 			}
-			toAdd = SliceByVector(down, settings.LayerHeight, AxisZ)
+			toAdd = SliceByVector(down, AxisZ, settings)
 			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
 
 			if rotated {
@@ -124,8 +124,8 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 				gcd.Add(gcode.RotateXZ{AngleX: angleX, AngleZ: angleZ})
 				rotated = true
 			}
-			layers = SliceByVector(simpMesh, settings.LayerHeight, AxisZ)
-			toAdd = SliceByVector(mesh, settings.LayerHeight, AxisZ)
+			layers = SliceByVector(simpMesh, AxisZ, settings)
+			toAdd = SliceByVector(mesh, AxisZ, settings)
 			//cmds = append(cmds, gcode.LayersMoving{layers, layersCount})
 			//break
 			i = 0

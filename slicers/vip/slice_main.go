@@ -25,7 +25,7 @@ func Slice(mesh *Mesh, settings Settings) gcode.Gcode {
 		return SliceByPlanes(mesh, settings, planes)
 	}
 
-	layers := SliceByVector(mesh, settings.LayerHeight, AxisZ)
+	layers := SliceByVector(mesh, AxisZ, settings)
 
 	op := getAllOutsidePathes(layers[0])
 	if len(op) == 2 {

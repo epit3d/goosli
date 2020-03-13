@@ -44,7 +44,7 @@ func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	if err != nil {
 		log.Fatal("failed to cut mesh, for one leg: ", err)
 	}
-	oneLeg := SliceByVector(down, settings.LayerHeight, AxisZ)
+	oneLeg := SliceByVector(down, AxisZ, settings)
 	gcd.Add(gcode.LayersMoving{PrepareLayers(oneLeg, settings, fillPlanes), gcd.LayersCount})
 
 	// Rotate bed
@@ -58,7 +58,7 @@ func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		fillPlanes[i] = plane.Rotate(RotationAroundZ(angleZ)).Rotate(RotationAroundX(angleX))
 	}
 
-	rest := SliceByVector(mesh, settings.LayerHeight, AxisZ)
+	rest := SliceByVector(mesh, AxisZ, settings)
 	gcd.Add(gcode.LayersMoving{PrepareLayers(rest, settings, fillPlanes), gcd.LayersCount})
 
 	// Rotate bed back
@@ -124,10 +124,9 @@ func getAllOutsidePathes(layer Layer) []Path { //for horizontal pathes
 	for i, pth := range layer.Paths {
 		curP := FindCentroid(pth)
 
-		if len(pth.Points) > 1 { //skip path if it is just an inner hole
+	if len(pth.Points) > 1 { //skip path if it is just an inner hole
 			p1 := pth.Points[0]
 			p2 := pth.Points[1]
-
 			if p1.VectorTo(p2).Cross(AxisZ).CodirectedWith(curP.VectorTo(p1)) {
 				continue
 			}

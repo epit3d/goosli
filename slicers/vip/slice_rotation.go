@@ -45,7 +45,7 @@ func SliceRotation(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		fillPlanes[i] = plane.Rotate(RotationAroundX(angleX))
 	}
 
-	rest := SliceByVector(mesh, settings.LayerHeight, AxisZ.Rotate(RotationAroundX(angleX)))
+	rest := SliceByVector(mesh, AxisZ.Rotate(RotationAroundX(angleX)), settings)
 	gcd.Add(gcode.LayersMoving{PrepareLayers(rest, settings, fillPlanes), gcd.LayersCount})
 
 	gcd.Add(gcode.InclineXBack{})

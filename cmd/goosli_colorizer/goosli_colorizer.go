@@ -45,6 +45,4 @@ func main() {
 	}
 
 	w.Flush()
-
-	helpers.Support(*mesh, arr)
 }

@@ -47,7 +47,7 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 			if err != nil {
 				log.Fatal("failed to cut mesh by newPlane in default slicing: ", err)
 			}
-			add := SliceByVector(down, settings.LayerHeight, AxisZ)
+			add := SliceByVector(down, AxisZ, settings)
 
 			gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(add, settings, fillPlanes), Index: gcd.LayersCount})
 			println("added: ", len(add), i)
@@ -77,7 +77,7 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 					fillPlanes[j] = plane.Rotate(RotationAroundZ(angleZ)).Rotate(RotationAroundX(angleX))
 				}
 			}
-			layers = SliceByVector(mesh, settings.LayerHeight, AxisZ)
+			layers = SliceByVector(mesh, AxisZ, settings)
 			println("len layers: ", len(layers))
 
 			i = 1

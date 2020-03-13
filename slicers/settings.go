@@ -26,6 +26,8 @@ type Settings struct {
 	Retraction          bool
 	RetractionSpeed     int
 	RetractionDistance  float64
+	ColorizedAngle	    float64
+	UnitVector          Vector
 }
 
 func (s *Settings) ToMap() map[string]string {
