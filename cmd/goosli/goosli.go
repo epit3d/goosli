@@ -46,7 +46,7 @@ var (
 	nx 			= kingpin.Flag("normali", "Plane's normal x coord.").Short('i').Default("0").Float64()
 	ny    		= kingpin.Flag("normalj", "Plane's normal y coord.").Short('j').Default("0").Float64()
 	nz    		= kingpin.Flag("normalk", "Plane's normal z coord.").Short('k').Default("1").Float64()
-
+	supportsOn  = kingpin.Flag("supports_on", "Add supports").Bool()
 )
 
 //TODO: create one binary, not 4
@@ -74,6 +74,7 @@ func settings() slicers.Settings {
 		Retraction:          *retraction,
 		RetractionSpeed:     *retractionSpeed,
 		RetractionDistance:  *retractionDistance,
+		SupportsOn:          *supportsOn,
 	}
 }
 
