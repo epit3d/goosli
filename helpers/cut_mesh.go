@@ -15,6 +15,8 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 	var up []Triangle
 	var down []Triangle
 
+	inters := []Path{}
+
 	for _, t := range mesh.Triangles { //TODO: make it more beautiful
 		var inFront []Point
 		var outFront []Point
@@ -41,6 +43,7 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 				log.Printf("failed to intersect triangle by plane2, skip it: %v, %v\n", t, p)
 				continue
 			}
+			inters = append(inters, Path{Points: []Point{line.P1, line.P2}})
 
 			ts := splitOnThree(outFront[0], *line, t)
 
@@ -68,6 +71,14 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 	//if len(up) == 0 || len(down) == 0 {
 	//	return nil, nil, fmt.Errorf("one of meshes is empty")
 	//}
+	joined := JoinPaths2(inters)
+	for _, pth := range joined {
+		for j := 1; j < len(pth.Points)-1; j++ {
+			t := NewTriangle(pth.Points[0], pth.Points[j], pth.Points[j+1])
+			up = append(up, t)
+			down = append(down, t)
+		}
+	}
 
 	resUp := NewMesh(up)
 	resDown := NewMesh(down)
