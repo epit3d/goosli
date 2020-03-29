@@ -57,6 +57,8 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 				log.Printf("failed to intersect triangle by plane1, skip it: %v, %v\n", t, p)
 				continue
 			}
+			inters = append(inters, Path{Points: []Point{line.P1, line.P2}})
+
 			ts := splitOnThree(inFront[0], *line, t)
 
 			up = append(up, ts[0])
@@ -72,7 +74,11 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 	//	return nil, nil, fmt.Errorf("one of meshes is empty")
 	//}
 	joined := JoinPaths2(inters)
+	println(len(inters), len(joined))
+
+	//debug.RecreateFile()
 	for _, pth := range joined {
+		//debug.AddPath(pth, debug.GreenColor)
 		for j := 1; j < len(pth.Points)-1; j++ {
 			t := NewTriangle(pth.Points[0], pth.Points[j], pth.Points[j+1])
 			up = append(up, t)

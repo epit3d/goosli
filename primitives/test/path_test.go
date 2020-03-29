@@ -17,9 +17,9 @@ func TestPath_Join(t *testing.T) { //TODO: add more and improve
 		{
 			in: []Path{
 				{Points: []Point{{1, 1, 1}, {1, 1, 2}}},
-				{Points: []Point{{1, 1, 2}, {1, 1, 3}}},
+				{Points: []Point{{1, 1, 3}, {1, 1, 2}}},
 				{Points: []Point{{1, 1, 3}, {1, 1, 4}}},
-				{Points: []Point{{1, 1, 4}, {1, 1, 1}}},
+				{Points: []Point{{1, 1, 1}, {1, 1, 4}}},
 			},
 			out: []Path{{Points: []Point{{1, 1, 1}, {1, 1, 2}, {1, 1, 3},
 				{1, 1, 4}, {1, 1, 1}}}},
