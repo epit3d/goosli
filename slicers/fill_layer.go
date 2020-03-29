@@ -93,6 +93,7 @@ var (
 )
 
 func intersectByPlanePolygonWise(pathes []Path, plane Plane) []Path {
+	// TODO: Merge polygons (some polygons may be inside other ones)
 	outPaths := []Path{}
 	for _, pth := range pathes {
 		// Skip polylines

@@ -27,6 +27,75 @@ func (p Path) Equal(p2 Path) bool {
 	return true
 }
 
+func (p Path) IsWindingCW() bool {
+	// Assuming that the points lie in the same plane
+	sum := 0.0
+	for i := 1; i < len(p.Points); i++ {
+		sum += (p.Points[i].X - p.Points[i-1].X) * (p.Points[i].Y + p.Points[i-1].Y)
+	}
+
+	sum += (p.Points[0].X - p.Points[len(p.Points) - 1].X) * (p.Points[0].Y + p.Points[len(p.Points) - 1].Y)
+
+	if sum > 0.0 {
+		return true
+	} else if sum < 0.0 {
+		return false
+	} else {
+		// Something went worng
+		return false
+	}
+}
+
+func (p Path) IsClosed() bool {
+	if len(p.Points) <= 1 {
+		return true
+	}
+
+	return p.Points[0].Equal(p.Points[len(p.Points) - 1])
+}
+
+func (p Path) IsHole() bool {
+	return !p.IsWindingCW()
+}
+
+func (p Path) IsSolid() bool {
+	return !p.IsHole()
+}
+ 
+func (p Path) Close() Path {
+	res := Path{}
+	for i := 0; i < len(p.Points); i++ {
+		res.Points = append(res.Points, p.Points[i])
+	}
+
+	if !p.IsClosed() {
+		res.Points = append(res.Points, p.Points[0])
+	}
+
+	return res
+}
+
+func (p Path) IsInside(p1 Path) bool {
+	for i := 1; i < len(p.Points); i++ {
+		for j := 1; j < len(p1.Points); j++ {
+			l1 := Line{P1: p.Points[i-1], P2: p.Points[i]}
+			l2 := Line{P1: p1.Points[j-1], P2: p1.Points[j]}
+
+			if l1.IsIntersectingSegment(l2) {
+				return false
+			}
+		}
+	}
+
+	for i := 0; i < len(p.Points); i++ {
+		if p.Points[i].Inside(p1) {
+			return true
+		}
+	}
+
+	return false
+}
+
 /*func (p Path) Enclose() Path {
 	s := len(p.Lines)
 	if !p.Lines[s-1].P2.Equal(p.Lines[0].P1) {
