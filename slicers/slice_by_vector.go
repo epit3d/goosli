@@ -4,8 +4,8 @@ import (
 	"math"
 	"sort"
 
-	"github.com/l1va/goosli/helpers"
 	"github.com/l1va/goosli/gcode"
+	"github.com/l1va/goosli/helpers"
 	. "github.com/l1va/goosli/primitives"
 )
 
@@ -25,9 +25,10 @@ func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 func SliceByVector(mesh *Mesh, Z Vector, settings Settings) []Layer {
 
 	thickness := settings.LayerHeight
-	angle 	  := settings.ColorizedAngle
-	vn        := settings.UnitVector 
-	supports  := settings.SupportsOn
+	angle := settings.ColorizedAngle
+	vn := settings.UnitVector
+	supports := settings.SupportsOn
+	support_offset := settings.SupportOffset
 
 	if mesh == nil || len(mesh.Triangles) == 0 {
 		return nil
@@ -54,6 +55,15 @@ func SliceByVector(mesh *Mesh, Z Vector, settings Settings) []Layer {
 		plane := Plane{P: curPoint, N: Z}
 
 		col_triangles := helpers.FilterTrianglesByColor(*mesh, angle, vn)
+
+		if support_offset != 0.0 {
+			var col_triangles_shifted []Triangle
+			for _, t := range col_triangles {
+				col_triangles_shifted = append(col_triangles_shifted, t.Shift(vn.MulScalar(-support_offset)))
+			}
+			col_triangles = col_triangles_shifted
+		}
+
 		col_lines := helpers.MakeUndoubledLinesFromTriangles(col_triangles)
 		sup_lines := helpers.MakeSupportLines(col_lines, plane)
 		var sup_triangles []Triangle
@@ -64,7 +74,7 @@ func SliceByVector(mesh *Mesh, Z Vector, settings Settings) []Layer {
 		}
 		triangles = append(sup_triangles, triangles...)
 	}
-	
+
 	index := 0
 	var active []*Triangle
 	curP := Z.MulScalar(minz).ToPoint().Shift(sh.MulScalar(0.5))
