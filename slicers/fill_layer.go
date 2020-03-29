@@ -1,10 +1,10 @@
 package slicers
 
 import (
-	"github.com/l1va/goosli/debug"
-	. "github.com/l1va/goosli/primitives"
 	"math"
 	"sort"
+
+	. "github.com/l1va/goosli/primitives"
 )
 
 func calcFillPlanesCommon(mesh *Mesh, settings Settings, MyAxis Vector, step float64) []Plane {
@@ -92,6 +92,54 @@ var (
 	x = 0
 )
 
+func intersectByPlanePolygonWise(pathes []Path, plane Plane) []Path {
+	outPaths := []Path{}
+	for _, pth := range pathes {
+		// Skip polylines
+		if !pth.IsClosed() {
+			continue
+		}
+		// Skip holes
+		if pth.IsHole() {
+			continue
+		}
+
+		// Find intersection points with every segment
+		pts   := []Point{}
+		for i := 1; i < len(pth.Points); i++ {
+			p := plane.IntersectSegment(pth.Points[i-1], pth.Points[i])
+			if p != nil {
+				pts = append(pts, *p)
+			}
+		}
+		if len(pts) >= 2 {
+			// Sort intersection points by one of the axes
+			ang := plane.N.ProjectOnPlane(PlaneXY).Angle(AxisY)
+			if nearAngle(ang, 0) || nearAngle(ang, 180) {
+				sort.Slice(pts, func(i, j int) bool { //sort by X
+					return pts[i].X < pts[j].X
+				})
+			} else {
+				sort.Slice(pts, func(i, j int) bool { //sort by Y
+					return pts[i].Y < pts[j].Y
+				})
+			}
+
+			// Add pairs of points
+			for i := 1; i < len(pts); i += 2 {
+				outPaths = append(outPaths, Path{Points: []Point{pts[i-1], pts[i]}})
+			}
+		}
+	}
+
+	// Return filling paths if found
+	if len(outPaths) > 0 {
+		return outPaths
+	} else {
+		return nil
+	}
+}
+
 func intersectByPlane(pathes []Path, plane Plane) []Path {
 	pts := []Point{}
 	for _, pth := range pathes {
@@ -118,14 +166,20 @@ func intersectByPlane(pathes []Path, plane Plane) []Path {
 	}
 
 	if len(pts) > 4 { //TODO: any ideas ?
-		if x < 23 {
-			for i := 1; i < len(pts); i += 2 {
-				debug.AddLine(Line{pts[i-1], pts[i]}, debug.GreenColor)
-			}
-			x += 1
+		paths := []Path{}
+		for i := 1; i < len(pts); i += 2 {
+			paths = append(paths, Path{Points: []Point{pts[i-1], pts[i]}})
+			//debug.AddLine(Line{pts[i-1], pts[i]}, debug.GreenColor)
 		}
-		println("do not know how to fill, pts > 4, skipping :", len(pts))
-		return nil
+		return paths
+		// if x < 23 {
+		// 	for i := 1; i < len(pts); i += 2 {
+		// 		debug.AddLine(Line{pts[i-1], pts[i]}, debug.GreenColor)
+		// 	}
+		// 	x += 1
+		// }
+		// println("do not know how to fill, pts > 4, skipping :", len(pts))
+		// return nil
 	}
 	if len(pts) == 2 || len(pts) == 3 {
 		return []Path{{Points: []Point{pts[0], pts[len(pts)-1]}}}
