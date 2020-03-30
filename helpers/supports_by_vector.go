@@ -1,8 +1,6 @@
 package helpers
 
 import (
-	"log"
-	"math"
 	. "github.com/l1va/goosli/primitives"
 )
 
@@ -36,48 +34,32 @@ func MakeUndoubledLinesFromTriangles(col_triangles []Triangle) []Line {
 	return new_lines
 }
 
+func IntersectTriangles(t Triangle, triangles []Triangle) []Line {
+
+	var lines []Line
+	for _, bt := range triangles {
+		line := bt.IntersectTriangle(&t)
+		if line != nil {
+			lines = append(lines, *line)
+		}
+	}
+	if len(lines) != 0 {
+		return lines
+	}
+	return nil
+}
+
+
 func MakeSupportLines(lines []Line, a Plane) []Line{
 	
 	var pr_lines []Line
 	for _,l := range lines {
-		p1 := ProectionPointToPlane(l.P1, a)
-		p2 := ProectionPointToPlane(l.P2, a)
+		p1 := a.ProectionPointToPlane(l.P1)
+		p2 := a.ProectionPointToPlane(l.P2)
 		pr_lines = append(pr_lines, Line{P1: p1, P2: p2})
 	}
 
 	return pr_lines
-}
-
-func ProectionPointToPlane(M Point, a Plane)  Point {
-
-	var x,y,z float64
-
-	N := a.N
-	P := a.P
-	
-	//plane equation
-	//N.X*(x - P.X) + N.Y*(y - P.Y) + N.Z*(z - P.Z) = 0
-	// canonical straight line equations
-	//(x - M.X)/N.X = (y - M.Y)/N.Y = (z - M.Z)/N.Z = L
-
-	// optimized equations
-	// 	x = L*N.X + M.X
-	//  y = L*N.Y + M.Y
-	//  z = L*N.Z + M.Z
-	//  N.X*x + N.Y*y + N.Z*z = N.X*P.X + N.Y*P.Y + N.Z*P.Z
-
-	//solution by hand
-	L := (N.X*(P.X - M.X) + N.Y*(P.Y - M.Y) + N.Z*(P.Z - M.Z))/(N.X*N.X + N.Y*N.Y + N.Z*N.Z)
-	if math.IsNaN(L) {
-		log.Fatal("Lambda = Nan")
-	}
-
-	x = L*N.X + M.X
-	y = L*N.Y + M.Y
-	z = L*N.Z + M.Z
-	
-	return Point{X: x, Y: y, Z: z}
-
 }
 
 func compareAndDeleteLineFromSlice(lines []Line, temp_l Line) []Line {

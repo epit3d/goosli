@@ -1,6 +1,8 @@
 package primitives
 
-import "fmt"
+import ("fmt"
+		"math"
+		"log")
 
 var (
 	PlaneXY = Plane{OriginPoint, AxisZ}
@@ -79,7 +81,7 @@ func (p Plane) IntersectSegment(p1, p2 Point) *Point {
 	}
 	z := p.P.ToVector().Dot(p.N)
 	t := (z - pr1) / (pr2 - pr1)
-	if t < 0 || t > 1 {
+	if t <= 0 || t >= 1 {
 		return nil
 	}
 	res := p1.Shift(p1.VectorTo(p2).MulScalar(t))
@@ -99,4 +101,22 @@ func (p Plane) IntersectPathCodirectedWith(path Path, v Vector) *Point {
 
 func (p Plane) PointInFront(v Point) bool {
 	return p.P.VectorTo(v).Dot(p.N) >= 0
+}
+
+func (p Plane) ProectionPointToPlane(M Point) Point {
+	var x,y,z float64
+
+	N := p.N
+	P := p.P
+
+	L := (N.X*(P.X - M.X) + N.Y*(P.Y - M.Y) + N.Z*(P.Z - M.Z))/(N.X*N.X + N.Y*N.Y + N.Z*N.Z)
+	if math.IsNaN(L) {
+		log.Fatal("Lambda = Nan")
+	}
+
+	x = L*N.X + M.X
+	y = L*N.Y + M.Y
+	z = L*N.Z + M.Z
+
+	return Point{X: x, Y: y, Z: z}
 }

@@ -54,3 +54,68 @@ func (t *Triangle) MinMaxZ(z Vector) (float64, float64) {
 	pr3 := t.P3.ToVector().Dot(z)
 	return math.Min(pr1, math.Min(pr2, pr3)), math.Max(pr1, math.Max(pr2, pr3))
 }
+
+func (t *Triangle)IntersectTriangle(t2 *Triangle) *Line {
+
+	plane := Plane{P: t.P1, N: t.N}
+	line := plane.IntersectTriangle(t2)
+	if line == nil{
+		return nil
+	}
+
+	b1 := t.pointBelongs(line.P1)
+	b2 := t.pointBelongs(line.P2)
+	if b1 && b2 {
+		return line
+	}
+	if b1 || b2 {
+		p := Line{P1: t.P1, P2: t.P2}.IntersectLine(line)
+		if p != nil{
+			if b1{
+				return &Line{P1: line.P1, P2: *p}
+			}
+			if b2{
+				return &Line{P1: line.P2, P2: *p}
+			}
+		}
+		p = Line{P1: t.P1, P2: t.P3}.IntersectLine(line)
+		if p != nil{
+			if b1{
+				return &Line{P1: line.P1, P2: *p}
+			}
+			if b2{
+				return &Line{P1: line.P2, P2: *p}
+			}
+		}
+		p = Line{P1: t.P3, P2: t.P2}.IntersectLine(line)
+		if p != nil{
+			if b1{
+				return &Line{P1: line.P1, P2: *p}
+			}
+			if b2{
+				return &Line{P1: line.P2, P2: *p}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// in case if triangle and point belong the common plane
+func (t *Triangle) pointBelongs(p Point) bool {
+
+	A := t.P1
+	B := t.P2
+	C := t.P3
+
+	w1 := (A.X - p.X)*(B.Y - A.Y) - (B.X - A.X)*(A.Y - p.Y)
+	w2 := (B.X - p.X)*(C.Y - B.Y) - (C.X - B.X)*(B.Y - p.Y)
+	w3 := (C.X - p.X)*(A.Y - C.Y) - (A.X - C.X)*(C.Y - p.Y)
+
+	if w1>=0 && w2>=0 && w3 >=0 || w1<=0 && w2<=0 && w3 <=0 {
+		return true
+	}
+
+	return false
+}
