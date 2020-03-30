@@ -96,14 +96,6 @@ func (p Path) IsInside(p1 Path) bool {
 	return false
 }
 
-/*func (p Path) Enclose() Path {
-	s := len(p.Lines)
-	if !p.Lines[s-1].P2.Equal(p.Lines[0].P1) {
-		p.Lines = append(p.Lines, Line{p.Lines[s-1].P2, p.Lines[0].P1})
-	}
-	return p
-}*/
-
 func toslice(m map[Point]Path) []Path {
 	values := make([]Path, 0, len(m))
 

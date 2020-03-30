@@ -2,16 +2,19 @@ package vip
 
 import (
 	"bufio"
+	"os"
+
 	. "github.com/l1va/goosli/primitives"
 	. "github.com/l1va/goosli/slicers"
-	"os"
 )
 
 //PrepareLayers add Walls and fill layers
 func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
+	// Add walls
 	addWalls := int(settings.WallThickness / settings.Nozzle)
 	if addWalls > 0 {
 		for i, layer := range layers { //TODO: in parallel
+			println("Layer %v, num path %v", i, len(layer.Paths))
 			for _, pt := range layer.Paths {
 				if len(pt.Points) < 2 { //TODO: remove this
 					continue
@@ -22,6 +25,8 @@ func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
 			}
 		}
 	}
+
+	// Add infill
 	return FillLayers(layers, planes)
 }
 

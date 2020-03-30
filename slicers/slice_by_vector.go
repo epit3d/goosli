@@ -4,8 +4,8 @@ import (
 	"math"
 	"sort"
 
-	"github.com/l1va/goosli/helpers"
 	"github.com/l1va/goosli/gcode"
+	"github.com/l1va/goosli/helpers"
 	. "github.com/l1va/goosli/primitives"
 )
 
