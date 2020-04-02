@@ -1,5 +1,9 @@
 package primitives
 
+import (
+	"math"
+)
+
 type Line struct {
 	P1, P2 Point
 }
@@ -12,10 +16,18 @@ func (l Line) Reverse() Line {
 	return Line{l.P2, l.P1}
 }
 
+func (l Line) Len() float64 {
+	v := math.Sqrt(math.Pow(l.P2.X - l.P1.X, 2) +
+				   math.Pow(l.P2.Y - l.P1.Y, 2) +
+				   math.Pow(l.P2.Z - l.P1.Z, 2))
+	return v
+}
+
 func (l Line) IntersectLine(l2 *Line) *Point {
 
 	a := l.ToVector()
 	b := l2.ToVector()
+
 	den := a.X + a.Y
 	if den != 0 {
 		m := (l2.P1.X + l2.P1.Z - l.P1.X - l.P1.Z - (a.X + a.Z)*(l2.P1.X + l2.P1.Y - l.P1.X - l.P1.Y)/den)

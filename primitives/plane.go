@@ -120,3 +120,10 @@ func (p Plane) ProectionPointToPlane(M Point) Point {
 
 	return Point{X: x, Y: y, Z: z}
 }
+
+func (p Plane) PointBelongs(M Point) bool {
+	if AlmostZero(p.N.X*(M.X - p.P.X) + p.N.Y*(M.Y - p.P.Y) + p.N.Z*(M.Z - p.P.Z)) {
+			return true
+		}
+	return false
+}

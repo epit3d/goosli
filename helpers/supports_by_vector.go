@@ -34,18 +34,22 @@ func MakeUndoubledLinesFromTriangles(col_triangles []Triangle) []Line {
 	return new_lines
 }
 
+
 func IntersectTriangles(t Triangle, triangles []Triangle) []Line {
 
 	var lines []Line
 	for _, bt := range triangles {
-		line := bt.IntersectTriangle(&t)
-		if line != nil {
-			lines = append(lines, *line)
+		 if !(bt.PointBelongs(t.P1) ||  bt.PointBelongs(t.P2) || bt.PointBelongs(t.P3)) {
+			line := bt.IntersectTriangle(&t)
+			if line != nil {
+				lines = append(lines, *line)
+			}
 		}
 	}
 	if len(lines) != 0 {
 		return lines
 	}
+
 	return nil
 }
 
