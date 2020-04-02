@@ -54,16 +54,16 @@ func JoinPaths2(p []Path) []Path {
 		lookup := map[Point]Path{}
 		for i := 0; i < len(paths); {
 			cur := paths[i]
-			if p, ok := lookup[cur.Points[0]]; ok {
+			if p, ok := lookup[cur.Points[0].MapKey()]; ok {
 				yes = true
-				delete(lookup, cur.Points[0])
+				delete(lookup, cur.Points[0].MapKey())
 				p.Points = append(p.Points, cur.Points[1:]...)
 				paths[i] = p
 			} else {
-				if _, ok := lookup[cur.Points[len(cur.Points)-1]]; ok {
+				if _, ok := lookup[cur.Points[len(cur.Points)-1].MapKey()]; ok {
 					paths[i] = cur.Reverse()
 				} else {
-					lookup[cur.Points[len(cur.Points)-1]] = cur
+					lookup[cur.Points[len(cur.Points)-1].MapKey()] = cur
 					i++
 				}
 			}
