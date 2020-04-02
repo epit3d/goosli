@@ -16,6 +16,9 @@ type Point struct {
 func (a Point) String() string {
 	return fmt.Sprintf("X%s Y%s Z%s", StrF(a.X), StrF(a.Y), StrF(a.Z))
 }
+func (a Point) MapKey() Point {
+	return a.RoundPlaces(8)
+}
 
 func (a Point) Equal(b Point) bool {
 
