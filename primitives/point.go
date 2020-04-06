@@ -74,3 +74,16 @@ func (a Point) Inside(path Path) bool {
 	}
 	return c%2 != 0
 }
+
+// See https://www.geeksforgeeks.org/orientation-3-ordered-points/
+func (r Point) Orientation(p Point, q Point) int {
+    val := (q.Y - p.Y) * (r.X - q.X) - (q.X - p.X) * (r.Y - q.Y)
+
+    if AlmostZero(val) {
+		return 0 // Collinear
+	} else if val > 0 {
+		return 1 // Clockwise
+	} else {
+		return 2 // Counterclockwise
+	}
+}
