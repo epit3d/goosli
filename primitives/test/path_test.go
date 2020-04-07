@@ -21,8 +21,8 @@ func TestPath_Join(t *testing.T) { //TODO: add more and improve
 				{Points: []Point{{1, 1, 3}, {1, 1, 4}}},
 				{Points: []Point{{1, 1, 4}, {1, 1, 1}}},
 			},
-			out: []Path{{Points: []Point{{1, 1, 1}, {1, 1, 2}, {1, 1, 3},
-				{1, 1, 4}, {1, 1, 1}}}},
+			out: []Path{{Points: []Point{
+				{1, 1, 4}, {1, 1, 1}, {1, 1, 2}, {1, 1, 3}, {1, 1, 4}}}},
 		},
 		{
 			in: []Path{
@@ -31,8 +31,8 @@ func TestPath_Join(t *testing.T) { //TODO: add more and improve
 				{Points: []Point{{1, 3, 1}, {1, 4, 1}}},
 				{Points: []Point{{1, 2, 1}, {1, 3, 1}}},
 			},
-			out: []Path{{Points: []Point{{1, 3, 1}, {1, 4, 1}, {1, 1, 1},
-				{1, 2, 1}, {1, 3, 1}}}},
+			out: []Path{{Points: []Point{{1, 3, 1}, {1, 4, 1}, {1, 1, 1}, {1, 2, 1},
+				{1, 3, 1},}}},
 		},
 		{
 			in: []Path{
@@ -64,10 +64,20 @@ func TestPath_Join(t *testing.T) { //TODO: add more and improve
 				{Points: []Point{{-19.840, -5.845, 69.351}, {-20.747, -5.845, 67.408}, {-22.116, -5.845, 64.472}}},
 			},
 		},
+		{
+			in: []Path{
+				{Points: []Point{{-19.240, -6.690, 50.000}, {-19.150, -6.820, 51.640}}},
+				{Points: []Point{{-18.970, -7.060, 56.430}, {-19.150, -6.820, 51.640}}},
+				{Points: []Point{{-19.240, -6.690, 50.000}, {-19.230, -6.700, 40.190}}},
+			},
+			out: []Path{
+				{Points: []Point{{-18.970, -7.060, 56.430}, {-19.150, -6.820, 51.640}, {-19.240, -6.690, 50.000}, {-19.230, -6.700, 40.190}}},
+			},
+		},
 	}
 	for i, row := range cases {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			res := JoinPaths2(row.in)
+			res := JoinPaths3(row.in)
 			require.Equal(t, len(row.out), len(res))
 			for _, p := range res {
 				found := false
