@@ -11,7 +11,6 @@ import (
 type Command interface {
 	ToGCode(b *bytes.Buffer)
 	LayersCount() int
-	setParams() ExtrusionParams
 }
 
 type InclineXBack struct {
@@ -24,10 +23,6 @@ func (r InclineXBack) LayersCount() int {
 	return 0
 }
 
-func (r InclineXBack) setParams() ExtrusionParams {
-	return ExtrusionParams{0, 0, 0, 0}
-}
-
 type InclineX struct {
 }
 
@@ -36,10 +31,6 @@ func (r InclineX) ToGCode(b *bytes.Buffer) {
 }
 func (r InclineX) LayersCount() int {
 	return 0
-}
-
-func (r InclineX) setParams() ExtrusionParams {
-	return ExtrusionParams{0, 0, 0, 0}
 }
 
 type RotateXZ struct {
@@ -54,10 +45,6 @@ func (r RotateXZ) LayersCount() int {
 	return 0
 }
 
-func (r RotateXZ) setParams() ExtrusionParams {
-	return ExtrusionParams{0, 0, 0, 0}
-}
-
 type RotateZ struct {
 	Angle float64
 }
@@ -67,10 +54,6 @@ func (r RotateZ) ToGCode(b *bytes.Buffer) {
 }
 func (r RotateZ) LayersCount() int {
 	return 0
-}
-
-func (r RotateZ) setParams() ExtrusionParams {
-	return ExtrusionParams{0, 0, 0, 0}
 }
 
 type LayersMoving struct {
@@ -93,10 +76,6 @@ func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 
 func (lm LayersMoving) LayersCount() int {
 	return len(lm.Layers)
-}
-
-func (lm LayersMoving) setParams() ExtrusionParams {
-	return lm.ExtParams
 }
 
 func switchFanGCode(fanOff bool, b *bytes.Buffer) {
