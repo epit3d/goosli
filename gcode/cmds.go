@@ -73,6 +73,9 @@ func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 		eOff = pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
 		eOff = decreaseEOff(eOff, b)
 	}
+
+	//reset extruder encoder
+	b.WriteString("G92 E0\n")
 }
 
 func (lm LayersMoving) LayersCount() int {
