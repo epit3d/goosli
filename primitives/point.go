@@ -20,6 +20,22 @@ func (a Point) MapKey() Point {
 	return a.RoundPlaces(8)
 }
 
+func (a Point) StringGcode(b Point) string {
+	s_form := ""
+	if math.Abs(a.X-b.X) >= 0.001 {
+		s_form = fmt.Sprintf("%sX%s ", s_form, StrF(a.X))
+	}
+
+	if math.Abs(a.Y-b.Y) >= 0.001 {
+		s_form = fmt.Sprintf("%sY%s ", s_form, StrF(a.Y))
+	}
+
+	if math.Abs(a.Z-b.Z) >= 0.001 {
+		s_form = fmt.Sprintf("%sZ%s", s_form, StrF(a.Z))
+	}
+	return s_form
+}
+
 func (a Point) Equal(b Point) bool {
 
 	return AlmostZero(a.X-b.X) && AlmostZero(a.Y-b.Y) && AlmostZero(a.Z-b.Z)

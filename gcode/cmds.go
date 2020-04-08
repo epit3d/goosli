@@ -121,7 +121,7 @@ func retractionToGCode(b *bytes.Buffer, retraction bool, retractionDistance floa
 }
 
 func pathesToGCode(pths []Path, comment string, feedrate int, extParams ExtrusionParams, b *bytes.Buffer) {
-	eOff := 0.0 //TODO: fix extruder value
+	eOff := 0.0
 	b.WriteString(";" + comment + "\n")
 	for _, p := range pths {
 		// Retraction first
@@ -136,7 +136,7 @@ func pathesToGCode(pths []Path, comment string, feedrate int, extParams Extrusio
 			p2 := p.Points[i]
 			lDist := math.Sqrt(math.Pow(p2.X-p1.X, 2) + math.Pow(p2.Y-p1.Y, 2) + math.Pow(p2.Z-p1.Z, 2))
 			eOff += (4 * extParams.LineWidth * extParams.LayerHeight * lDist) / (math.Pow(extParams.BarDiameter, 2) * math.Pi)
-			b.WriteString("G1 " + p2.String() + " E" + StrF(eOff) + "\n")
-		} //TODO: optimize - not write coordinate if it was not changed
+			b.WriteString("G1 " + p2.StringGcode(p1) + " E" + StrF(eOff) + "\n")
+		}
 	}
 }
