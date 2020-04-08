@@ -63,19 +63,29 @@ type LayersMoving struct {
 }
 
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
+	eOff := 0.0
 	for i := 0; i < len(lm.Layers); i++ {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
 		switchFanGCode(lm.Layers[i].FanOff, b)
-
-		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", lm.Layers[i].WallPrintSpeed, lm.ExtParams, b)
-		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, b)
-		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, b)
-		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, b)
+		eOff = pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", lm.Layers[i].WallPrintSpeed, lm.ExtParams, eOff, b)
+		eOff = pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
+		eOff = pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
+		eOff = pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
+		eOff = decreaseEOff(eOff, b)
 	}
 }
 
 func (lm LayersMoving) LayersCount() int {
 	return len(lm.Layers)
+}
+
+func decreaseEOff(eOff float64, b *bytes.Buffer) float64 {
+	if eOff > 4000 {
+		b.WriteString("G92 E0\n")
+		return 0.0
+	} else {
+		return eOff
+	}
 }
 
 func switchFanGCode(fanOff bool, b *bytes.Buffer) {
@@ -99,15 +109,16 @@ func retractionToGCode(b *bytes.Buffer, retraction bool, retractionDistance floa
 	b.WriteString("G1 F" + strconv.Itoa(retractionSpeed) + " E" + StrF(-retractionDistance) + "\n")
 }
 
-func pathesToGCode(pths []Path, comment string, feedrate int, extParams ExtrusionParams, b *bytes.Buffer) {
-	eOff := 0.0
+func pathesToGCode(pths []Path, comment string, feedrate int, extParams ExtrusionParams, eOff float64, b *bytes.Buffer) float64 {
+
 	b.WriteString(";" + comment + "\n")
+
+	// Set the printing speed for this path
+	printSpeedToGCode(feedrate, b)
+
 	for _, p := range pths {
 		// Retraction first
 		retractionToGCode(b, p.Retraction, p.RetractionDistance, p.RetractionSpeed)
-
-		// Set the printing speed for this path
-		printSpeedToGCode(feedrate, b)
 
 		b.WriteString("G0 " + p.Points[0].String() + "\n")
 		for i := 1; i < len(p.Points); i++ {
@@ -118,4 +129,5 @@ func pathesToGCode(pths []Path, comment string, feedrate int, extParams Extrusio
 			b.WriteString("G1 " + p2.StringGcode(p1) + " E" + StrF(eOff) + "\n")
 		}
 	}
+	return eOff
 }
