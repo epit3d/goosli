@@ -43,8 +43,7 @@ func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 		gcd.Add(gcode.RotateXZ{angleX, angleZ})
 
 		layers := SliceByVector(down, AxisZ, settings)
-		extParams := ExtrusionParams{settings.BarDiameter, settings.Flow, settings.LayerHeight, settings.LineWidth}
-		gcd.Add(gcode.LayersMoving{layers, gcd.LayersCount, extParams})
+		gcd.Add(gcode.LayersMoving{layers, gcd.LayersCount, settings.GetExtrusionParams()})
 	}
 	return gcd
 }

@@ -17,8 +17,7 @@ func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	changeRetractionState(layers, settings)
 
 	var gcd gcode.Gcode
-	extParams := ExtrusionParams{settings.BarDiameter, settings.Flow, settings.LayerHeight, settings.LineWidth}
-	gcd.Add(gcode.LayersMoving{layers, 0, extParams})
+	gcd.Add(gcode.LayersMoving{layers, 0, settings.GetExtrusionParams()})
 	return gcd
 }
 

@@ -47,3 +47,7 @@ func (s *Settings) ToMap() map[string]string {
 		"{layer_count}":          strconv.Itoa(s.LayerCount),
 	}
 }
+
+func (s *Settings) GetExtrusionParams() ExtrusionParams {
+	return ExtrusionParams{s.BarDiameter, s.Flow, s.LayerHeight, s.LineWidth}
+}

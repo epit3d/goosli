@@ -49,14 +49,13 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 		}
 
 		newPlane := CalculateFails(layers[i-1], layers[i])
-		extParams := ExtrusionParams{settings.BarDiameter, settings.Flow, settings.LayerHeight, settings.LineWidth}
 		if newPlane == nil {
 			i++
 			if i == len(layers) {
-				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, ExtParams: extParams})
+				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
 			}
 		} else {
-			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount, ExtParams: extParams})
+			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
 
 			//if rotated {
 			//	break
@@ -104,7 +103,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 				log.Fatal("failed to cut mesh by newPlane in 5a slicing: ", err)
 			}
 			toAdd = SliceByVector(down, AxisZ, settings)
-			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
+			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
 
 			if rotated {
 				simpMesh = simpMesh.Rotate(RotationAroundX(-angleX), OriginPoint)

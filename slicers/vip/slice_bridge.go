@@ -32,8 +32,7 @@ func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		i++
 	}
 	// Add horizontal layers
-	extParams := ExtrusionParams{settings.BarDiameter, settings.Flow, settings.LayerHeight, settings.LineWidth}
-	gcd.Add(gcode.LayersMoving{PrepareLayers(layers[:i], settings, fillPlanes), gcd.LayersCount, extParams})
+	gcd.Add(gcode.LayersMoving{PrepareLayers(layers[:i], settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
 
 	anyPoint := layers[i].Paths[0].Points[0]
 	mesh, down, err := helpers.CutMesh(mesh, Plane{anyPoint, AxisZ})
@@ -46,7 +45,7 @@ func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		log.Fatal("failed to cut mesh, for one leg: ", err)
 	}
 	oneLeg := SliceByVector(down, AxisZ, settings)
-	gcd.Add(gcode.LayersMoving{PrepareLayers(oneLeg, settings, fillPlanes), gcd.LayersCount, extParams})
+	gcd.Add(gcode.LayersMoving{PrepareLayers(oneLeg, settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
 
 	// Rotate bed
 	angleZ := newPlane.N.ProjectOnPlane(PlaneXY).Angle(AxisX) + 90
@@ -60,7 +59,7 @@ func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	}
 
 	rest := SliceByVector(mesh, AxisZ, settings)
-	gcd.Add(gcode.LayersMoving{PrepareLayers(rest, settings, fillPlanes), gcd.LayersCount, extParams})
+	gcd.Add(gcode.LayersMoving{PrepareLayers(rest, settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
 
 	// Rotate bed back
 	gcd.Add(gcode.InclineXBack{})
