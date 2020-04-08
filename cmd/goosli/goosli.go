@@ -25,7 +25,7 @@ var (
 
 	epsilon = kingpin.Flag("epsilon", "Simplification line parameter.").Short('e').Default("10.0").Float64()
 
-	thickness           = kingpin.Flag("thickness", "Set the slice thickness.").Short('t').Default("0.2").Float64()
+	layerHeight         = kingpin.Flag("layer_height", "Set the slice layer height.").Short('t').Default("0.2").Float64()
 	wallThickness       = kingpin.Flag("wall_thickness", "Set the wall thickness.").Default("1.2").Float64()
 	fillDensity         = kingpin.Flag("fill_density", "Fill density in percents.").Default("20").Int()
 	bedTemperature      = kingpin.Flag("bed_temperature", "Bed temperature in Celsius.").Default("60").Int()
@@ -50,7 +50,7 @@ var (
 	supportOffset = kingpin.Flag("support_offset", "Offset (shifting) for support").Default("1.0").Float64()
 
 	barDiameter = kingpin.Flag("bar_diameter", "Plastic bar diameter").Default("1.75").Float64()
-	flow = kingpin.Flag("flow", "Printing flow (0;1]").Default("1.0").Float64()
+	flow        = kingpin.Flag("flow", "Printing flow (0;1]").Default("1.0").Float64()
 )
 
 //TODO: create one binary, not 4
@@ -59,7 +59,7 @@ func settings() slicers.Settings {
 	return slicers.Settings{
 		DateTime:            time.Now().Format(time.RFC822),
 		Epsilon:             *epsilon,
-		LayerHeight:         *thickness,
+		LayerHeight:         *layerHeight,
 		WallThickness:       *wallThickness,
 		FillDensity:         *fillDensity,
 		BedTemperature:      *bedTemperature,
@@ -80,8 +80,8 @@ func settings() slicers.Settings {
 		RetractionDistance:  *retractionDistance,
 		SupportsOn:          *supportsOn,
 		SupportOffset:       *supportOffset,
-		BarDiameter:       *barDiameter,
-		Flow:       *flow,
+		BarDiameter:         *barDiameter,
+		Flow:                *flow,
 	}
 }
 
