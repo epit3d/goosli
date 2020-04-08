@@ -45,7 +45,7 @@ func TestSlicers_SliceByVectorZ(t *testing.T) {
 				LayerHeight:   0.2,
 				WallThickness: 1.2,
 				FillDensity:   20,
-				Nozzle:        0.4,
+				LineWidth:     0.4,
 			}
 
 			gcd := slicers.SliceByVectorToGcode(mesh, AxisZ, sett)

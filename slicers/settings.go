@@ -17,7 +17,7 @@ type Settings struct {
 	PrintSpeed          int
 	PrintSpeedLayer1    int
 	PrintSpeedWall      int
-	Nozzle              float64
+	LineWidth           float64
 	LayerCount          int
 	RotationCenterZ     float64
 	PlanesFile          string
@@ -43,7 +43,7 @@ func (s *Settings) ToMap() map[string]string {
 		"{bed_temperature}":      strconv.Itoa(s.BedTemperature),
 		"{extruder_temperature}": strconv.Itoa(s.ExtruderTemperature),
 		"{print_speed}":          strconv.Itoa(s.PrintSpeed),
-		"{nozzle}":               StrF(s.Nozzle),
+		"{nozzle}":               StrF(s.LineWidth),
 		"{layer_count}":          strconv.Itoa(s.LayerCount),
 	}
 }

@@ -34,7 +34,7 @@ var (
 	printSpeedLayer1    = kingpin.Flag("print_speed_layer1", "Printing speed of Layer 1.").Default("50").Int()
 	printSpeedWall      = kingpin.Flag("print_speed_wall", "Printing speed of walls.").Default("50").Int()
 	fanOffLayer1        = kingpin.Flag("fan_off_layer1", "Turn off the fan for Layer 1.").Bool()
-	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
+	lineWidth           = kingpin.Flag("line_width", "Line Width.").Default("0.4").Float64()
 	fillingType         = kingpin.Flag("filling_type", "Filling type(Lines,Squares,Triangles)").Default("Lines").String()
 	retraction          = kingpin.Flag("retraction_on", "Turn on the retraction.").Bool()
 	retractionSpeed     = kingpin.Flag("retraction_speed", "How fast to pull in the fillament.").Int()
@@ -67,7 +67,7 @@ func settings() slicers.Settings {
 		PrintSpeed:          *printSpeed * 60,
 		PrintSpeedLayer1:    *printSpeedLayer1 * 60,
 		PrintSpeedWall:      *printSpeedWall * 60,
-		Nozzle:              *nozzle,
+		LineWidth:           *lineWidth,
 		LayerCount:          0,
 		RotationCenterZ:     *rcz,
 		PlanesFile:          *planesFile,
