@@ -11,6 +11,7 @@ import (
 type Command interface {
 	ToGCode(b *bytes.Buffer)
 	LayersCount() int
+	setParams() ExtrusionParams
 }
 
 type InclineXBack struct {
@@ -23,6 +24,10 @@ func (r InclineXBack) LayersCount() int {
 	return 0
 }
 
+func (r InclineXBack) setParams() ExtrusionParams {
+	return ExtrusionParams{0, 0, 0, 0}
+}
+
 type InclineX struct {
 }
 
@@ -31,6 +36,10 @@ func (r InclineX) ToGCode(b *bytes.Buffer) {
 }
 func (r InclineX) LayersCount() int {
 	return 0
+}
+
+func (r InclineX) setParams() ExtrusionParams {
+	return ExtrusionParams{0, 0, 0, 0}
 }
 
 type RotateXZ struct {
@@ -45,6 +54,10 @@ func (r RotateXZ) LayersCount() int {
 	return 0
 }
 
+func (r RotateXZ) setParams() ExtrusionParams {
+	return ExtrusionParams{0, 0, 0, 0}
+}
+
 type RotateZ struct {
 	Angle float64
 }
@@ -56,9 +69,14 @@ func (r RotateZ) LayersCount() int {
 	return 0
 }
 
+func (r RotateZ) setParams() ExtrusionParams {
+	return ExtrusionParams{0, 0, 0, 0}
+}
+
 type LayersMoving struct {
-	Layers []Layer
-	Index  int
+	Layers    []Layer
+	Index     int
+	ExtParams ExtrusionParams
 }
 
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
@@ -66,14 +84,19 @@ func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
 		switchFanGCode(lm.Layers[i].FanOff, b)
 
-		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", lm.Layers[i].WallPrintSpeed, b)
-		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", lm.Layers[i].PrintSpeed, b)
-		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", lm.Layers[i].PrintSpeed, b)
-		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, b)
+		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", lm.Layers[i].WallPrintSpeed, lm.ExtParams, b)
+		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, b)
+		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, b)
+		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, b)
 	}
 }
+
 func (lm LayersMoving) LayersCount() int {
 	return len(lm.Layers)
+}
+
+func (lm LayersMoving) setParams() ExtrusionParams {
+	return lm.ExtParams
 }
 
 func switchFanGCode(fanOff bool, b *bytes.Buffer) {
@@ -97,7 +120,7 @@ func retractionToGCode(b *bytes.Buffer, retraction bool, retractionDistance floa
 	b.WriteString("G1 F" + strconv.Itoa(retractionSpeed) + " E" + StrF(-retractionDistance) + "\n")
 }
 
-func pathesToGCode(pths []Path, comment string, feedrate int, b *bytes.Buffer) {
+func pathesToGCode(pths []Path, comment string, feedrate int, extParams ExtrusionParams, b *bytes.Buffer) {
 	eOff := 0.0 //TODO: fix extruder value
 	b.WriteString(";" + comment + "\n")
 	for _, p := range pths {
@@ -111,8 +134,8 @@ func pathesToGCode(pths []Path, comment string, feedrate int, b *bytes.Buffer) {
 		for i := 1; i < len(p.Points); i++ {
 			p1 := p.Points[i-1]
 			p2 := p.Points[i]
-			eDist := math.Sqrt(math.Pow(p2.X-p1.X, 2) + math.Pow(p2.Y-p1.Y, 2) + math.Pow(p2.Z-p1.Z, 2))
-			eOff += eDist
+			lDist := math.Sqrt(math.Pow(p2.X-p1.X, 2) + math.Pow(p2.Y-p1.Y, 2) + math.Pow(p2.Z-p1.Z, 2))
+			eOff += (4 * extParams.LineWidth * extParams.LayerHeight * lDist) / (math.Pow(extParams.BarDiameter, 2) * math.Pi)
 			b.WriteString("G1 " + p2.String() + " E" + StrF(eOff) + "\n")
 		} //TODO: optimize - not write coordinate if it was not changed
 	}

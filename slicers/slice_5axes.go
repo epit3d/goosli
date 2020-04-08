@@ -9,8 +9,7 @@ import (
 	"log"
 )
 
-var
-(
+var (
 	angleDist  = 10
 	angleFull  = 360
 	angleCount = angleFull / angleDist
@@ -50,14 +49,14 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 		}
 
 		newPlane := CalculateFails(layers[i-1], layers[i])
-
+		extParams := ExtrusionParams{settings.BarDiameter, settings.Flow, settings.LayerHeight, settings.LineWidth}
 		if newPlane == nil {
 			i++
 			if i == len(layers) {
-				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount})
+				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, ExtParams: extParams})
 			}
 		} else {
-			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount})
+			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount, ExtParams: extParams})
 
 			//if rotated {
 			//	break
