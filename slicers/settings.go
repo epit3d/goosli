@@ -30,6 +30,8 @@ type Settings struct {
 	UnitVector          Vector
 	SupportsOn          bool
 	SupportOffset       float64
+	BarDiameter         float64
+	Flow                float64
 }
 
 func (s *Settings) ToMap() map[string]string {

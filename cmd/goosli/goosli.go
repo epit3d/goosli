@@ -48,6 +48,9 @@ var (
 	nz            = kingpin.Flag("normalk", "Plane's normal z coord.").Short('k').Default("1").Float64()
 	supportsOn    = kingpin.Flag("supports_on", "Add supports").Bool()
 	supportOffset = kingpin.Flag("support_offset", "Offset (shifting) for support").Default("1.0").Float64()
+
+	barDiameter = kingpin.Flag("bar_diameter", "Plastic bar diameter").Default("1.75").Float64()
+	flow = kingpin.Flag("flow", "Printing flow (0;1]").Default("1.0").Float64()
 )
 
 //TODO: create one binary, not 4
@@ -77,6 +80,8 @@ func settings() slicers.Settings {
 		RetractionDistance:  *retractionDistance,
 		SupportsOn:          *supportsOn,
 		SupportOffset:       *supportOffset,
+		BarDiameter:       *barDiameter,
+		Flow:       *flow,
 	}
 }
 
