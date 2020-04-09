@@ -122,7 +122,7 @@ func tryJoin(p1 Path, p2 Path) *Path {
 
 	if p1.Points[len(p1.Points)-1].Equal(p2.Points[len(p2.Points)-1]) {
 		p1.Points = append(p1.Points, p2.Reverse().Points[1:]...)
-
+		return &p1
 	}
 
 	return nil
