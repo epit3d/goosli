@@ -64,6 +64,8 @@ type LayersMoving struct {
 
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 	eOff := 0.0
+	//reset extruder encoder
+	b.WriteString("G92 E0\n")
 	for i := 0; i < len(lm.Layers); i++ {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
 		switchFanGCode(lm.Layers[i].FanOff, b)
@@ -73,9 +75,6 @@ func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
 		eOff = pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
 		eOff = decreaseEOff(eOff, b)
 	}
-
-	//reset extruder encoder
-	b.WriteString("G92 E0\n")
 }
 
 func (lm LayersMoving) LayersCount() int {
@@ -100,7 +99,7 @@ func switchFanGCode(fanOff bool, b *bytes.Buffer) {
 }
 
 func printSpeedToGCode(feedrate int, b *bytes.Buffer) {
-	b.WriteString("F" + strconv.Itoa(feedrate) + "\n")
+	b.WriteString("G0 F" + strconv.Itoa(feedrate) + "\n")
 }
 
 func retractionToGCode(b *bytes.Buffer, retraction bool, retractionDistance float64, retractionSpeed int) {
