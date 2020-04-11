@@ -25,7 +25,7 @@ var (
 
 	epsilon = kingpin.Flag("epsilon", "Simplification line parameter.").Short('e').Default("10.0").Float64()
 
-	thickness           = kingpin.Flag("thickness", "Set the slice thickness.").Short('t').Default("0.2").Float64()
+	layerHeight         = kingpin.Flag("layer_height", "Set the slice layer height.").Short('t').Default("0.2").Float64()
 	wallThickness       = kingpin.Flag("wall_thickness", "Set the wall thickness.").Default("1.2").Float64()
 	fillDensity         = kingpin.Flag("fill_density", "Fill density in percents.").Default("20").Int()
 	bedTemperature      = kingpin.Flag("bed_temperature", "Bed temperature in Celsius.").Default("60").Int()
@@ -34,7 +34,7 @@ var (
 	printSpeedLayer1    = kingpin.Flag("print_speed_layer1", "Printing speed of Layer 1.").Default("50").Int()
 	printSpeedWall      = kingpin.Flag("print_speed_wall", "Printing speed of walls.").Default("50").Int()
 	fanOffLayer1        = kingpin.Flag("fan_off_layer1", "Turn off the fan for Layer 1.").Bool()
-	nozzle              = kingpin.Flag("nozzle", "Nozzle diameter.").Default("0.4").Float64()
+	lineWidth           = kingpin.Flag("line_width", "Line Width.").Default("0.4").Float64()
 	fillingType         = kingpin.Flag("filling_type", "Filling type(Lines,Squares,Triangles)").Default("Lines").String()
 	retraction          = kingpin.Flag("retraction_on", "Turn on the retraction.").Bool()
 	retractionSpeed     = kingpin.Flag("retraction_speed", "How fast to pull in the fillament.").Int()
@@ -48,6 +48,9 @@ var (
 	nz            = kingpin.Flag("normalk", "Plane's normal z coord.").Short('k').Default("1").Float64()
 	supportsOn    = kingpin.Flag("supports_on", "Add supports").Bool()
 	supportOffset = kingpin.Flag("support_offset", "Offset (shifting) for support").Default("1.0").Float64()
+
+	barDiameter = kingpin.Flag("bar_diameter", "Plastic bar diameter").Default("1.75").Float64()
+	flow        = kingpin.Flag("flow", "Printing flow (0;1]").Default("1.0").Float64()
 )
 
 //TODO: create one binary, not 4
@@ -56,7 +59,7 @@ func settings() slicers.Settings {
 	return slicers.Settings{
 		DateTime:            time.Now().Format(time.RFC822),
 		Epsilon:             *epsilon,
-		LayerHeight:         *thickness,
+		LayerHeight:         *layerHeight,
 		WallThickness:       *wallThickness,
 		FillDensity:         *fillDensity,
 		BedTemperature:      *bedTemperature,
@@ -64,7 +67,7 @@ func settings() slicers.Settings {
 		PrintSpeed:          *printSpeed * 60,
 		PrintSpeedLayer1:    *printSpeedLayer1 * 60,
 		PrintSpeedWall:      *printSpeedWall * 60,
-		Nozzle:              *nozzle,
+		LineWidth:           *lineWidth,
 		LayerCount:          0,
 		RotationCenterZ:     *rcz,
 		PlanesFile:          *planesFile,
@@ -77,6 +80,8 @@ func settings() slicers.Settings {
 		RetractionDistance:  *retractionDistance,
 		SupportsOn:          *supportsOn,
 		SupportOffset:       *supportOffset,
+		BarDiameter:         *barDiameter,
+		Flow:                *flow,
 	}
 }
 
