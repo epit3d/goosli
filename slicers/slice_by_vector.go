@@ -51,6 +51,10 @@ func SliceByVector(mesh *Mesh, Z Vector, settings Settings) []Layer {
 
 	//make support triangles
 	if supports {
+		temp := mesh.CopyTriangles()
+		sort.Slice(temp, func(i, j int) bool {
+			return temp[i].MinZ(Z) > temp[j].MinZ(Z)
+		})
 		curPoint := Z.MulScalar(minz).ToPoint()
 		plane := Plane{P: curPoint, N: Z}
 
@@ -70,7 +74,16 @@ func SliceByVector(mesh *Mesh, Z Vector, settings Settings) []Layer {
 		for i := range col_lines {
 			Tr1 := NewTriangle(sup_lines[i].P1, col_lines[i].P1, col_lines[i].P2)
 			Tr2 := NewTriangle(sup_lines[i].P1, sup_lines[i].P2, col_lines[i].P2)
-			sup_triangles = append(sup_triangles, Tr1, Tr2)
+
+			lines := helpers.IntersectTriangles(Tr1, temp)
+			if lines == nil {
+				sup_triangles = append(sup_triangles, Tr1)
+			}
+
+			lines = helpers.IntersectTriangles(Tr2, temp)
+			if lines == nil {
+				sup_triangles = append(sup_triangles, Tr2)
+			}
 		}
 		triangles = append(sup_triangles, triangles...)
 	}
