@@ -29,7 +29,7 @@ func SliceRotation(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		i++
 	}
 	// Add horizontal layers
-	gcd.Add(gcode.LayersMoving{PrepareLayers(layers[:i], settings, fillPlanes), gcd.LayersCount})
+	gcd.Add(gcode.LayersMoving{PrepareLayers(layers[:i], settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
 
 	anyPoint := layers[i].Paths[0].Points[0]
 	mesh, _, err := helpers.CutMesh(mesh, Plane{anyPoint, AxisZ})
@@ -46,7 +46,7 @@ func SliceRotation(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	}
 
 	rest := SliceByVector(mesh, AxisZ.Rotate(RotationAroundX(angleX)), settings)
-	gcd.Add(gcode.LayersMoving{PrepareLayers(rest, settings, fillPlanes), gcd.LayersCount})
+	gcd.Add(gcode.LayersMoving{PrepareLayers(rest, settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
 
 	gcd.Add(gcode.InclineXBack{})
 	return gcd

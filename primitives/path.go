@@ -1,5 +1,7 @@
 package primitives
 
+import "sort"
+
 type Path struct {
 	Points             []Point
 	Retraction         bool
@@ -81,7 +83,7 @@ func (p Path) IsInside(p1 Path) bool {
 			l1 := Line{P1: p.Points[i-1], P2: p.Points[i]}
 			l2 := Line{P1: p1.Points[j-1], P2: p1.Points[j]}
 
-			if l1.IsIntersectingSegment(l2) {
+			if l1.IsIntersectingSegment(&l2) {
 				return false
 			}
 		}
@@ -105,6 +107,88 @@ func toslice(m map[Point]Path) []Path {
 	return values
 }
 
+type sortp struct {
+	P   Point
+	Ind int
+}
+
+func JoinPaths3(p []Path) []Path {
+	n := len(p)
+	w := make([]int, n)
+	a := make([]sortp, n*2)
+	for i := 0; i < n; i++ {
+		w[i] = i
+		a[2*i] = sortp{
+			P:   p[i].Points[0],
+			Ind: i,
+		}
+		a[2*i+1] = sortp{
+			P:   p[i].Points[len(p[i].Points)-1],
+			Ind: i,
+		}
+	}
+	sort.Slice(a, func(i, j int) bool {
+		b := a[i].P
+		c := a[j].P
+		return b.X < c.X || (AlmostZero(b.X-c.X) && b.Y < c.Y) || (AlmostZero(b.X-c.X) && AlmostZero(b.Y-c.Y) && b.Z < c.Z)
+	})
+
+	for i := 1; i < len(a); i++ {
+		b := a[i-1]
+		c := a[i]
+		if b.P.Equal(c.P) {
+			j1 := b.Ind
+			for w[j1] != j1 {
+				j1 = w[j1]
+			}
+			p1 := p[j1]
+			j2 := c.Ind
+			for w[j2] != j2 {
+				j2 = w[j2]
+			}
+			if j1 == j2 {
+				continue
+			}
+			p2 := p[j2]
+			res := tryJoin(p1, p2)
+			if res != nil {
+				p[j1] = *res
+				w[j2] = j1
+			}
+		}
+	}
+	res := []Path{}
+	for i := 0; i < n; i++ {
+		if w[i] == i {
+			res = append(res, p[i])
+		}
+	}
+	return res
+}
+
+func tryJoin(p1 Path, p2 Path) *Path {
+	if p1.Points[len(p1.Points)-1].Equal(p2.Points[0]) {
+		p1.Points = append(p1.Points, p2.Points[1:]...)
+		return &p1
+	}
+	if p2.Points[len(p2.Points)-1].Equal(p1.Points[0]) {
+		p2.Points = append(p2.Points, p1.Points[1:]...)
+		return &p2
+	}
+
+	if p1.Points[0].Equal(p2.Points[0]) {
+		p1.Points = append(p1.Reverse().Points, p2.Points[1:]...)
+		return &p1
+	}
+
+	if p1.Points[len(p1.Points)-1].Equal(p2.Points[len(p2.Points)-1]) {
+		p1.Points = append(p1.Points, p2.Reverse().Points[1:]...)
+		return &p1
+	}
+
+	return nil
+}
+
 func JoinPaths2(p []Path) []Path {
 	paths := make([]Path, len(p))
 	copy(paths, p)
@@ -115,16 +199,16 @@ func JoinPaths2(p []Path) []Path {
 		lookup := map[Point]Path{}
 		for i := 0; i < len(paths); {
 			cur := paths[i]
-			if p, ok := lookup[cur.Points[0]]; ok {
+			if p, ok := lookup[cur.Points[0].MapKey()]; ok {
 				yes = true
-				delete(lookup, cur.Points[0])
+				delete(lookup, cur.Points[0].MapKey())
 				p.Points = append(p.Points, cur.Points[1:]...)
 				paths[i] = p
 			} else {
-				if _, ok := lookup[cur.Points[len(cur.Points)-1]]; ok {
+				if _, ok := lookup[cur.Points[len(cur.Points)-1].MapKey()]; ok {
 					paths[i] = cur.Reverse()
 				} else {
-					lookup[cur.Points[len(cur.Points)-1]] = cur
+					lookup[cur.Points[len(cur.Points)-1].MapKey()] = cur
 					i++
 				}
 			}
@@ -134,6 +218,64 @@ func JoinPaths2(p []Path) []Path {
 	}
 	return paths
 }
+
+/*
+func JoinPaths(paths []Path) []Path {
+	lookup := make(map[Point]Path, len(paths))
+	for _, path := range paths {
+		lookup[path.Lines[0].P1] = path
+	}
+	var result []Path
+	for len(lookup) > 0 {
+		var v Point
+		for v = range lookup {
+			break
+		}
+		var path Path
+		for {
+			if p, ok := lookup[v]; ok {
+				path.Lines = append(path.Lines, p.Lines[0])
+				delete(lookup, v)
+				v = p.Lines[len(p.Lines)-1].P2
+			} else {
+				break
+			}
+		}
+		result = append(result, path)
+	}
+	for i := 0; i < len(result); i++ {
+		for j := i + 1; j < len(result); j++ {
+			jp := tryJoin(result[i], result[j])
+			if jp != nil {
+				result[i] = *jp
+				result[j] = result[len(result)-1]
+				result = result[:len(result)-1]
+				i = -1
+				break
+			}
+		}
+	}
+	// clean from small lines
+	for i := 0; i < len(result); i++ {
+		for j := 0; j < len(result[i].Lines); j++ {
+			if result[i].Lines[j].ToVector().Length() < 0.1 { //TODO: hardcode
+				if j != 0 {
+					result[i].Lines[j-1].P2 = result[i].Lines[j].P2
+				} else if j < len(result[i].Lines)-1 {
+					result[i].Lines[j+1].P1 = result[i].Lines[j].P1
+				}
+				result[i].Lines = append(result[i].Lines[:j], result[i].Lines[j+1:]...)
+				j--
+			}
+		}
+		if len(result[i].Lines) == 0 {
+			result[i] = result[len(result)-1]
+			result = result[:len(result)-1]
+			i--
+		}
+	}
+	return result
+}*/
 
 func FindCentroid(path Path) Point { //TODO: refactorme
 	a := 0.0

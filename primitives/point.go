@@ -16,6 +16,25 @@ type Point struct {
 func (a Point) String() string {
 	return fmt.Sprintf("X%s Y%s Z%s", StrF(a.X), StrF(a.Y), StrF(a.Z))
 }
+func (a Point) MapKey() Point {
+	return a.RoundPlaces(8)
+}
+
+func (a Point) StringGcode(b Point) string {
+	s_form := ""
+	if math.Abs(a.X-b.X) >= 0.001 {
+		s_form = fmt.Sprintf("%sX%s ", s_form, StrF(a.X))
+	}
+
+	if math.Abs(a.Y-b.Y) >= 0.001 {
+		s_form = fmt.Sprintf("%sY%s ", s_form, StrF(a.Y))
+	}
+
+	if math.Abs(a.Z-b.Z) >= 0.001 {
+		s_form = fmt.Sprintf("%sZ%s", s_form, StrF(a.Z))
+	}
+	return s_form
+}
 
 func (a Point) Equal(b Point) bool {
 
@@ -75,11 +94,11 @@ func (a Point) Inside(path Path) bool {
 	return c%2 != 0
 }
 
-// See https://www.geeksforgeeks.org/orientation-3-ordered-points/  
+// See https://www.geeksforgeeks.org/orientation-3-ordered-points/
 func (r Point) Orientation(p Point, q Point) int {
     val := (q.Y - p.Y) * (r.X - q.X) - (q.X - p.X) * (r.Y - q.Y)
-  
-    if val == 0 {
+
+    if AlmostZero(val) {
 		return 0 // Collinear
 	} else if val > 0 {
 		return 1 // Clockwise

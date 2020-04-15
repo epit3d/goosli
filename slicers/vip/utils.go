@@ -10,8 +10,7 @@ import (
 
 //PrepareLayers add Walls and fill layers
 func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
-	// Add walls
-	addWalls := int(settings.WallThickness / settings.Nozzle)
+	addWalls := int(settings.WallThickness / settings.LineWidth)
 	if addWalls > 0 {
 		for i, layer := range layers { //TODO: in parallel
 			println("Layer %v, num path %v", i, len(layer.Paths))
@@ -19,7 +18,7 @@ func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
 				if len(pt.Points) < 2 { //TODO: remove this
 					continue
 				}
-				offs := offset(pt, addWalls, settings.Nozzle, layer.Norm)
+				offs := offset(pt, addWalls, settings.LineWidth, layer.Norm)
 				layers[i].MiddlePs = append(layers[i].MiddlePs, offs[:len(offs)-1]...)
 				layers[i].InnerPs = append(layers[i].InnerPs, offs[len(offs)-1])
 			}
@@ -31,7 +30,7 @@ func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
 }
 
 func offset(pth Path, addWalls int, nozzle float64, norm Vector) []Path {
-	var res [] Path
+	var res []Path
 	res = append(res, MakeOffset(pth, nozzle, norm))
 	for i := 1; i < addWalls; i++ {
 		res = append(res, MakeOffset(res[i-1], nozzle, norm))

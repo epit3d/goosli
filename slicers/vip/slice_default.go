@@ -40,7 +40,7 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		if newPlane == nil {
 			i++
 			if i == len(layers) {
-				gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(layers, settings, fillPlanes), Index: gcd.LayersCount})
+				gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(layers, settings, fillPlanes), Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
 			}
 		} else {
 			mesh, down, err = helpers.CutMesh(mesh, *newPlane)
@@ -49,7 +49,7 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 			}
 			add := SliceByVector(down, AxisZ, settings)
 
-			gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(add, settings, fillPlanes), Index: gcd.LayersCount})
+			gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(add, settings, fillPlanes), Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
 			println("added: ", len(add), i)
 			//debug.AddLayer(layers[i])
 			if rotated {

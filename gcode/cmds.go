@@ -57,23 +57,37 @@ func (r RotateZ) LayersCount() int {
 }
 
 type LayersMoving struct {
-	Layers []Layer
-	Index  int
+	Layers    []Layer
+	Index     int
+	ExtParams ExtrusionParams
 }
 
 func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
+	eOff := 0.0
+	//reset extruder encoder
+	b.WriteString("G92 E0\n")
 	for i := 0; i < len(lm.Layers); i++ {
 		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
 		switchFanGCode(lm.Layers[i].FanOff, b)
-
-		pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", lm.Layers[i].WallPrintSpeed, b)
-		pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", lm.Layers[i].PrintSpeed, b)
-		pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", lm.Layers[i].PrintSpeed, b)
-		pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, b)
+		eOff = pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", lm.Layers[i].WallPrintSpeed, lm.ExtParams, eOff, b)
+		eOff = pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
+		eOff = pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
+		eOff = pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
+		eOff = decreaseEOff(eOff, b)
 	}
 }
+
 func (lm LayersMoving) LayersCount() int {
 	return len(lm.Layers)
+}
+
+func decreaseEOff(eOff float64, b *bytes.Buffer) float64 {
+	if eOff > 4000 {
+		b.WriteString("G92 E0\n")
+		return 0.0
+	} else {
+		return eOff
+	}
 }
 
 func switchFanGCode(fanOff bool, b *bytes.Buffer) {
@@ -85,7 +99,7 @@ func switchFanGCode(fanOff bool, b *bytes.Buffer) {
 }
 
 func printSpeedToGCode(feedrate int, b *bytes.Buffer) {
-	b.WriteString("F" + strconv.Itoa(feedrate) + "\n")
+	b.WriteString("G0 F" + strconv.Itoa(feedrate) + "\n")
 }
 
 func retractionToGCode(b *bytes.Buffer, retraction bool, retractionDistance float64, retractionSpeed int) {
@@ -97,23 +111,25 @@ func retractionToGCode(b *bytes.Buffer, retraction bool, retractionDistance floa
 	b.WriteString("G1 F" + strconv.Itoa(retractionSpeed) + " E" + StrF(-retractionDistance) + "\n")
 }
 
-func pathesToGCode(pths []Path, comment string, feedrate int, b *bytes.Buffer) {
-	eOff := 0.0 //TODO: fix extruder value
+func pathesToGCode(pths []Path, comment string, feedrate int, extParams ExtrusionParams, eOff float64, b *bytes.Buffer) float64 {
+
 	b.WriteString(";" + comment + "\n")
+
+	// Set the printing speed for this path
+	printSpeedToGCode(feedrate, b)
+
 	for _, p := range pths {
 		// Retraction first
 		retractionToGCode(b, p.Retraction, p.RetractionDistance, p.RetractionSpeed)
-
-		// Set the printing speed for this path
-		printSpeedToGCode(feedrate, b)
 
 		b.WriteString("G0 " + p.Points[0].String() + "\n")
 		for i := 1; i < len(p.Points); i++ {
 			p1 := p.Points[i-1]
 			p2 := p.Points[i]
-			eDist := math.Sqrt(math.Pow(p2.X-p1.X, 2) + math.Pow(p2.Y-p1.Y, 2) + math.Pow(p2.Z-p1.Z, 2))
-			eOff += eDist
-			b.WriteString("G1 " + p2.String() + " E" + StrF(eOff) + "\n")
-		} //TODO: optimize - not write coordinate if it was not changed
+			lDist := math.Sqrt(math.Pow(p2.X-p1.X, 2) + math.Pow(p2.Y-p1.Y, 2) + math.Pow(p2.Z-p1.Z, 2))
+			eOff += (4 * extParams.LineWidth * extParams.LayerHeight * lDist) / (math.Pow(extParams.BarDiameter, 2) * math.Pi)
+			b.WriteString("G1 " + p2.StringGcode(p1) + " E" + StrF(eOff) + "\n")
+		}
 	}
+	return eOff
 }
