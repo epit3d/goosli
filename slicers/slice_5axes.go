@@ -20,7 +20,7 @@ var (
 // SliceByProfile - Slicing on layers by simple algo
 func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 	debug.RecreateFile()
-	var gcd gcode.Gcode
+	gcd := gcode.NewGcode(*settings.GcodeSettings)
 
 	simpMesh, err := helpers.SimplifyMesh(mesh, 2500) //TODO: hardcoded value
 	if err != nil {
@@ -52,10 +52,10 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 		if newPlane == nil {
 			i++
 			if i == len(layers) {
-				gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
+				gcd.AddLayers(toAdd)
 			}
 		} else {
-			gcd.Add(gcode.LayersMoving{Layers: toAdd[:i], Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
+			gcd.AddLayers(toAdd[:i])
 
 			//if rotated {
 			//	break
@@ -103,7 +103,7 @@ func Slice5Axes(mesh *Mesh, settings Settings) gcode.Gcode {
 				log.Fatal("failed to cut mesh by newPlane in 5a slicing: ", err)
 			}
 			toAdd = SliceByVector(down, AxisZ, settings)
-			gcd.Add(gcode.LayersMoving{Layers: toAdd, Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
+			gcd.AddLayers(toAdd)
 
 			if rotated {
 				simpMesh = simpMesh.Rotate(RotationAroundX(-angleX), OriginPoint)

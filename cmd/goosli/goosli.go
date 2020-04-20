@@ -56,7 +56,22 @@ var (
 //TODO: create one binary, not 4
 
 func settings() slicers.Settings {
+	gcodeSettings := gcode.GcodeSettings{
+		BarDiameter:        *barDiameter,
+		Flow:               *flow,
+		LayerHeight:        *layerHeight,
+		LineWidth:          *lineWidth,
+		FanOffLayer1:       *fanOffLayer1,
+		PrintSpeed:         *printSpeed * 60,
+		PrintSpeedLayer1:   *printSpeedLayer1 * 60,
+		PrintSpeedWall:     *printSpeedWall * 60,
+		Retraction:         *retraction,
+		RetractionSpeed:    *retractionSpeed,
+		RetractionDistance: *retractionDistance,
+	}
+
 	return slicers.Settings{
+		GcodeSettings:       &gcodeSettings,
 		DateTime:            time.Now().Format(time.RFC822),
 		Epsilon:             *epsilon,
 		LayerHeight:         *layerHeight,
@@ -64,24 +79,14 @@ func settings() slicers.Settings {
 		FillDensity:         *fillDensity,
 		BedTemperature:      *bedTemperature,
 		ExtruderTemperature: *extruderTemperature,
-		PrintSpeed:          *printSpeed * 60,
-		PrintSpeedLayer1:    *printSpeedLayer1 * 60,
-		PrintSpeedWall:      *printSpeedWall * 60,
-		LineWidth:           *lineWidth,
 		LayerCount:          0,
 		RotationCenterZ:     *rcz,
 		PlanesFile:          *planesFile,
-		FanOffLayer1:        *fanOffLayer1,
 		FillingType:         *fillingType,
 		ColorizedAngle:      *angle,
-		UnitVector:          V(*nx, *ny, *nz),
-		Retraction:          *retraction,
-		RetractionSpeed:     *retractionSpeed,
-		RetractionDistance:  *retractionDistance,
+		UnitVector:          V(*nx, *ny, *nz), //TODO: seems useless, recheck
 		SupportsOn:          *supportsOn,
 		SupportOffset:       *supportOffset,
-		BarDiameter:         *barDiameter,
-		Flow:                *flow,
 	}
 }
 
@@ -121,14 +126,12 @@ func main() {
 }
 
 func CommandsWithTemplates(gcd gcode.Gcode, settings slicers.Settings) bytes.Buffer {
-	settings.LayerCount = gcd.LayersCount
+	settings.LayerCount = gcd.LayerCount()
 	smap := settings.ToMap()
 
 	var buffer bytes.Buffer
 	buffer.WriteString(PrepareDataFile("data/header_template.txt", smap))
-	for _, cmd := range gcd.Cmds {
-		cmd.ToGCode(&buffer)
-	}
+	gcd.ToOutput(&buffer)
 	buffer.WriteString(PrepareDataFile("data/footer_template.txt", smap))
 	return buffer
 }

@@ -13,11 +13,10 @@ import (
 func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	layers := SliceByVector(mesh, Z, settings)
 	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
-	changePrintingSpeedAndFanState(layers, settings)
-	changeRetractionState(layers, settings)
 
-	var gcd gcode.Gcode
-	gcd.Add(gcode.LayersMoving{layers, 0, settings.GetExtrusionParams()})
+	gcd := gcode.NewGcode(*settings.GcodeSettings)
+
+	gcd.AddLayers(layers)
 	return gcd
 }
 
@@ -156,35 +155,5 @@ func slicingWorker(in chan job, out chan Layer) func(wi, wn int) {
 			}
 			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths2(paths)}
 		}
-	}
-}
-
-func changePrintingSpeedAndFanState(layers []Layer, settings Settings) {
-	for ind := range layers {
-		if ind == 0 {
-			layers[ind].PrintSpeed = settings.PrintSpeedLayer1
-			layers[ind].FanOff = settings.FanOffLayer1
-		} else {
-			layers[ind].PrintSpeed = settings.PrintSpeed
-			layers[ind].FanOff = false
-		}
-		layers[ind].WallPrintSpeed = settings.PrintSpeedWall
-	}
-}
-
-func changeRetractionState(layers []Layer, settings Settings) {
-	for ind := range layers {
-		updateRetractionState(layers[ind].Paths, settings.Retraction, settings.RetractionDistance, settings.RetractionSpeed)
-		updateRetractionState(layers[ind].InnerPs, settings.Retraction, settings.RetractionDistance, settings.RetractionSpeed)
-		updateRetractionState(layers[ind].MiddlePs, settings.Retraction, settings.RetractionDistance, settings.RetractionSpeed)
-		updateRetractionState(layers[ind].Fill, settings.Retraction, settings.RetractionDistance, settings.RetractionSpeed)
-	}
-}
-
-func updateRetractionState(paths []Path, retraction bool, retractionDistance float64, retractinSpeed int) {
-	for ind := range paths {
-		paths[ind].Retraction = retraction
-		paths[ind].RetractionDistance = retractionDistance
-		paths[ind].RetractionSpeed = retractinSpeed
 	}
 }

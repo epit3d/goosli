@@ -1,12 +1,14 @@
 package slicers
 
 import (
+	"github.com/l1va/goosli/gcode"
 	"strconv"
 
 	. "github.com/l1va/goosli/primitives"
 )
 
 type Settings struct {
+	GcodeSettings *gcode.GcodeSettings
 	DateTime            string
 	Epsilon             float64
 	LayerHeight         float64
@@ -14,24 +16,14 @@ type Settings struct {
 	FillDensity         int
 	BedTemperature      int
 	ExtruderTemperature int
-	PrintSpeed          int
-	PrintSpeedLayer1    int
-	PrintSpeedWall      int
-	LineWidth           float64
 	LayerCount          int
 	RotationCenterZ     float64
 	PlanesFile          string
-	FanOffLayer1        bool
 	FillingType         string
-	Retraction          bool
-	RetractionSpeed     int
-	RetractionDistance  float64
 	ColorizedAngle      float64
 	UnitVector          Vector
 	SupportsOn          bool
 	SupportOffset       float64
-	BarDiameter         float64
-	Flow                float64
 }
 
 func (s *Settings) ToMap() map[string]string {
@@ -42,12 +34,8 @@ func (s *Settings) ToMap() map[string]string {
 		"{fill_density}":         strconv.Itoa(s.FillDensity),
 		"{bed_temperature}":      strconv.Itoa(s.BedTemperature),
 		"{extruder_temperature}": strconv.Itoa(s.ExtruderTemperature),
-		"{print_speed}":          strconv.Itoa(s.PrintSpeed),
-		"{nozzle}":               StrF(s.LineWidth),
+		"{print_speed}":          strconv.Itoa(s.GcodeSettings.PrintSpeed),
+		//"{nozzle}":               StrF(s.LineWidth),
 		"{layer_count}":          strconv.Itoa(s.LayerCount),
 	}
-}
-
-func (s *Settings) GetExtrusionParams() ExtrusionParams {
-	return ExtrusionParams{s.BarDiameter, s.Flow, s.LayerHeight, s.LineWidth}
 }

@@ -8,7 +8,8 @@ import (
 
 func LayersToGcode(layers []Layer, filename string, settings Settings) {
 	var b bytes.Buffer
-	cmd := gcode.LayersMoving{layers, 0, settings.GetExtrusionParams()}
-	cmd.ToGCode(&b)
+	gcd := gcode.NewGcode(*settings.GcodeSettings)
+	gcd.AddLayers(layers)
+	gcd.ToOutput(&b)
 	ToFile(b, filename)
 }

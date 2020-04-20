@@ -25,7 +25,7 @@ func calcFillPlanesCommon(mesh *Mesh, settings Settings, MyAxis Vector, step flo
 
 // filling with lines
 func CalcFillPlanesLines(mesh *Mesh, settings Settings) []Plane {
-	step := (100 / float64(settings.FillDensity)) * settings.LineWidth
+	step := (100 / float64(settings.FillDensity)) * settings.GcodeSettings.LineWidth
 	planes := calcFillPlanesCommon(mesh, settings, AxisX, step)
 
 	return planes
@@ -33,7 +33,7 @@ func CalcFillPlanesLines(mesh *Mesh, settings Settings) []Plane {
 
 // filling with squares
 func CalcFillPlanesSquares(mesh *Mesh, settings Settings) []Plane {
-	step := (100 / float64(settings.FillDensity/2)) * settings.LineWidth
+	step := (100 / float64(settings.FillDensity/2)) * settings.GcodeSettings.LineWidth
 
 	//planes := calcFillPlanesCommon(mesh, settings, V(1, 0, 0), step)
 	//planes = append(planes, CalcFillPlanes0(mesh, settings, V(0, 1, 0), step)...)
@@ -46,7 +46,7 @@ func CalcFillPlanesSquares(mesh *Mesh, settings Settings) []Plane {
 
 // filling with triangles
 func CalcFillPlanesTriangles(mesh *Mesh, settings Settings) []Plane {
-	step := (100 / float64(settings.FillDensity/3)) * settings.LineWidth
+	step := (100 / float64(settings.FillDensity/3)) * settings.GcodeSettings.LineWidth
 
 	planes := calcFillPlanesCommon(mesh, settings, V(1, 0, 0), step)
 	planes = append(planes, calcFillPlanesCommon(mesh, settings, V(0.5, 0.8660254038, 0), step)...)

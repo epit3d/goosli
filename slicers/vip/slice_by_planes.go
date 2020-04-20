@@ -9,7 +9,8 @@ import (
 )
 
 func SliceByPlanes(mesh *Mesh, settings slicers.Settings, planes []AnalyzedPlane) gcode.Gcode {
-	var gcd gcode.Gcode
+	gcd := gcode.NewGcode(*settings.GcodeSettings)
+
 	fillPlanes := slicers.CalcFillPlanes(mesh, settings)
 	var down *Mesh
 	var err error
@@ -42,7 +43,7 @@ func SliceByPlanes(mesh *Mesh, settings slicers.Settings, planes []AnalyzedPlane
 			rotated = false
 		}
 		add := slicers.SliceByVector(down, AxisZ, settings)
-		gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(add, settings, fillPlanes), Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
+		gcd.AddLayers(PrepareLayers(add, settings, fillPlanes))
 		//TODO: fillPlanes fix
 	}
 

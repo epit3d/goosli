@@ -12,7 +12,7 @@ import (
 func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	debug.RecreateFile()
 	println("BRIDGE slicing:")
-	var gcd gcode.Gcode
+	gcd := gcode.NewGcode(*settings.GcodeSettings)
 
 	fillPlanes := CalcFillPlanes(mesh, settings)
 
@@ -32,7 +32,7 @@ func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		i++
 	}
 	// Add horizontal layers
-	gcd.Add(gcode.LayersMoving{PrepareLayers(layers[:i], settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
+	gcd.AddLayers(PrepareLayers(layers[:i], settings, fillPlanes))
 
 	anyPoint := layers[i].Paths[0].Points[0]
 	mesh, down, err := helpers.CutMesh(mesh, Plane{anyPoint, AxisZ})
@@ -45,7 +45,7 @@ func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		log.Fatal("failed to cut mesh, for one leg: ", err)
 	}
 	oneLeg := SliceByVector(down, AxisZ, settings)
-	gcd.Add(gcode.LayersMoving{PrepareLayers(oneLeg, settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
+	gcd.AddLayers(PrepareLayers(oneLeg, settings, fillPlanes))
 
 	// Rotate bed
 	angleZ := newPlane.N.ProjectOnPlane(PlaneXY).Angle(AxisX) + 90
@@ -59,7 +59,7 @@ func SliceBridge(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	}
 
 	rest := SliceByVector(mesh, AxisZ, settings)
-	gcd.Add(gcode.LayersMoving{PrepareLayers(rest, settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
+	gcd.AddLayers(PrepareLayers(rest, settings, fillPlanes))
 
 	// Rotate bed back
 	gcd.Add(gcode.InclineXBack{})

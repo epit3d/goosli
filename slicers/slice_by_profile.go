@@ -12,7 +12,7 @@ import (
 func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 	debug.RecreateFile()
 	layers := SliceByVector(mesh, AxisZ, settings)
-	LayersToGcode(layers, "/home/l1va/debug.gcode", settings)
+	//LayersToGcode(layers, "/home/l1va/debug.gcode", settings)
 
 	centers := calculateCenters(layers)
 	debug.AddPointsToFile(centers, debug.GreenColor)
@@ -21,7 +21,7 @@ func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 
 	up := mesh
 	var down *Mesh
-	var gcd gcode.Gcode
+	gcd := gcode.NewGcode(*settings.GcodeSettings)
 
 	for i := 1; i < len(simplified); i++ {
 		v := simplified[i-1].VectorTo(simplified[i])
@@ -43,7 +43,7 @@ func SliceByProfile(mesh *Mesh, settings Settings) gcode.Gcode {
 		gcd.Add(gcode.RotateXZ{angleX, angleZ})
 
 		layers := SliceByVector(down, AxisZ, settings)
-		gcd.Add(gcode.LayersMoving{layers, gcd.LayersCount, settings.GetExtrusionParams()})
+		gcd.AddLayers(layers)
 	}
 	return gcd
 }

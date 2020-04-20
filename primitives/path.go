@@ -3,10 +3,7 @@ package primitives
 import "sort"
 
 type Path struct {
-	Points             []Point
-	Retraction         bool
-	RetractionSpeed    int
-	RetractionDistance float64
+	Points []Point
 }
 
 func (p Path) Reverse() Path {
