@@ -9,14 +9,14 @@ import (
 
 //PrepareLayers add Walls and fill layers
 func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
-	addWalls := int(settings.WallThickness / settings.LineWidth)
+	addWalls := int(settings.WallThickness / settings.GcodeSettings.LineWidth)
 	if addWalls > 0 {
 		for i, layer := range layers { //TODO: in parallel
 			for _, pt := range layer.Paths {
 				if len(pt.Points) < 2 { //TODO: remove this
 					continue
 				}
-				offs := offset(pt, addWalls, settings.LineWidth, layer.Norm)
+				offs := offset(pt, addWalls, settings.GcodeSettings.LineWidth, layer.Norm)
 				layers[i].MiddlePs = append(layers[i].MiddlePs, offs[:len(offs)-1]...)
 				layers[i].InnerPs = append(layers[i].InnerPs, offs[len(offs)-1])
 			}

@@ -8,16 +8,35 @@ import (
 	. "github.com/l1va/goosli/primitives"
 )
 
+type State struct {
+	fan        bool
+	layerIndex int
+	eOff       float64
+	feedrate   int
+	isWall     bool
+}
+
+func NewState() State {
+	return State{
+		fan:        false, //start from fan off
+		layerIndex: 0,
+		eOff:       0,
+		feedrate:   0,
+		isWall:     false,
+	}
+}
+
 type Command interface {
-	ToGCode(b *bytes.Buffer)
+	ToGCode(b *bytes.Buffer, state State, sett GcodeSettings) State
 	LayersCount() int
 }
 
 type InclineXBack struct {
 }
 
-func (r InclineXBack) ToGCode(b *bytes.Buffer) {
+func (r InclineXBack) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
 	b.WriteString("M42 \n")
+	return st
 }
 func (r InclineXBack) LayersCount() int {
 	return 0
@@ -26,8 +45,10 @@ func (r InclineXBack) LayersCount() int {
 type InclineX struct {
 }
 
-func (r InclineX) ToGCode(b *bytes.Buffer) {
+func (r InclineX) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
 	b.WriteString("M43 \n")
+	return st
+
 }
 func (r InclineX) LayersCount() int {
 	return 0
@@ -38,8 +59,10 @@ type RotateXZ struct {
 	AngleZ float64
 }
 
-func (r RotateXZ) ToGCode(b *bytes.Buffer) {
+func (r RotateXZ) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
 	b.WriteString("G62 X" + StrF(r.AngleX) + " Z" + StrF(r.AngleZ) + "\n")
+	return st
+
 }
 func (r RotateXZ) LayersCount() int {
 	return 0
@@ -49,87 +72,108 @@ type RotateZ struct {
 	Angle float64
 }
 
-func (r RotateZ) ToGCode(b *bytes.Buffer) {
+func (r RotateZ) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
 	b.WriteString("G0 A" + StrF(r.Angle) + "\n")
+	return st
+
 }
 func (r RotateZ) LayersCount() int {
 	return 0
 }
 
 type LayersMoving struct {
-	Layers    []Layer
-	Index     int
-	ExtParams ExtrusionParams
+	Layers []Layer
 }
 
-func (lm LayersMoving) ToGCode(b *bytes.Buffer) {
-	eOff := 0.0
-	//reset extruder encoder
-	b.WriteString("G92 E0\n")
+func (lm LayersMoving) ToGCode(b *bytes.Buffer, state State, sett GcodeSettings) State {
 	for i := 0; i < len(lm.Layers); i++ {
-		b.WriteString(";LAYER:" + strconv.Itoa(i+lm.Index) + "\n")
-		switchFanGCode(lm.Layers[i].FanOff, b)
-		eOff = pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", lm.Layers[i].WallPrintSpeed, lm.ExtParams, eOff, b)
-		eOff = pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
-		eOff = pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
-		eOff = pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", lm.Layers[i].PrintSpeed, lm.ExtParams, eOff, b)
-		eOff = decreaseEOff(eOff, b)
+		b.WriteString(";LAYER:" + strconv.Itoa(state.layerIndex) + "\n")
+		state = switchFanGCode(state, sett, b)
+
+		state.isWall = true
+		state = pathesToGCode(lm.Layers[i].Paths, "OUTER_PATHES", sett, state, b)
+		state = pathesToGCode(lm.Layers[i].MiddlePs, "MIDDLE_PATHES", sett, state, b)
+		state = pathesToGCode(lm.Layers[i].InnerPs, "INNER_PATHES", sett, state, b)
+		state.isWall = false
+		state = pathesToGCode(lm.Layers[i].Fill, "FILL_PATHES", sett, state, b)
+
+		state = decreaseEOff(state, b)
+		state.layerIndex += 1
 	}
+	return state
 }
 
 func (lm LayersMoving) LayersCount() int {
 	return len(lm.Layers)
 }
 
-func decreaseEOff(eOff float64, b *bytes.Buffer) float64 {
-	if eOff > 4000 {
+func decreaseEOff(state State, b *bytes.Buffer) State {
+	if state.eOff > 4000 {
 		b.WriteString("G92 E0\n")
-		return 0.0
-	} else {
-		return eOff
+		state.eOff = 0
 	}
+	return state
 }
 
-func switchFanGCode(fanOff bool, b *bytes.Buffer) {
-	if fanOff {
-		b.WriteString("M107\n")
+func switchFanGCode(state State, sett GcodeSettings, b *bytes.Buffer) State {
+	if state.layerIndex == 0 && sett.FanOffLayer1 {
+		if state.fan {
+			b.WriteString("M107\n") //fan off
+			state.fan = false
+		}
 	} else {
-		b.WriteString("M106\n")
+		if !state.fan {
+			b.WriteString("M106\n")
+			state.fan = true
+		}
 	}
+	return state
 }
 
-func printSpeedToGCode(feedrate int, b *bytes.Buffer) {
-	b.WriteString("G0 F" + strconv.Itoa(feedrate) + "\n")
+func printSpeedToGCode(state State, sett GcodeSettings, b *bytes.Buffer) State {
+	needed := state.feedrate
+	if state.layerIndex == 0 {
+		needed = sett.PrintSpeedLayer1
+	} else {
+		if state.isWall {
+			needed = sett.PrintSpeedWall
+		} else {
+			needed = sett.PrintSpeed
+		}
+	}
+	if needed != state.feedrate {
+		b.WriteString("G0 F" + strconv.Itoa(needed) + "\n")
+		state.feedrate = needed
+	}
+	return state
 }
 
-func retractionToGCode(b *bytes.Buffer, retraction bool, retractionDistance float64, retractionSpeed int) {
-	if !retraction {
+func retractionToGCode(b *bytes.Buffer, sett GcodeSettings) {
+	if !sett.Retraction {
 		return
 	}
 
-	b.WriteString("; Retraction\n")
-	b.WriteString("G1 F" + strconv.Itoa(retractionSpeed) + " E" + StrF(-retractionDistance) + "\n")
+	b.WriteString("G1 F" + strconv.Itoa(sett.RetractionSpeed) + " E" + StrF(-sett.RetractionDistance) + "\n")
 }
 
-func pathesToGCode(pths []Path, comment string, feedrate int, extParams ExtrusionParams, eOff float64, b *bytes.Buffer) float64 {
-
+func pathesToGCode(pths []Path, comment string, sett GcodeSettings, state State, b *bytes.Buffer) State {
 	b.WriteString(";" + comment + "\n")
 
 	// Set the printing speed for this path
-	printSpeedToGCode(feedrate, b)
+	state = printSpeedToGCode(state, sett, b)
 
 	for _, p := range pths {
 		// Retraction first
-		retractionToGCode(b, p.Retraction, p.RetractionDistance, p.RetractionSpeed)
+		retractionToGCode(b, sett)
 
 		b.WriteString("G0 " + p.Points[0].String() + "\n")
 		for i := 1; i < len(p.Points); i++ {
 			p1 := p.Points[i-1]
 			p2 := p.Points[i]
 			lDist := math.Sqrt(math.Pow(p2.X-p1.X, 2) + math.Pow(p2.Y-p1.Y, 2) + math.Pow(p2.Z-p1.Z, 2))
-			eOff += (4 * extParams.LineWidth * extParams.LayerHeight * lDist) / (math.Pow(extParams.BarDiameter, 2) * math.Pi)
-			b.WriteString("G1 " + p2.StringGcode(p1) + " E" + StrF(eOff) + "\n")
+			state.eOff += (4 * sett.LineWidth * sett.LayerHeight * lDist) / (math.Pow(sett.BarDiameter, 2) * math.Pi)
+			b.WriteString("G1 " + p2.StringGcode(p1) + " E" + StrF(state.eOff) + "\n")
 		}
 	}
-	return eOff
+	return state
 }
