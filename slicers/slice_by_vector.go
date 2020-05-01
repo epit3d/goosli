@@ -12,7 +12,8 @@ import (
 // SliceByVectorToGcode - Slicing on layers by vector Z
 func SliceByVectorToGcode(mesh *Mesh, Z Vector, settings Settings) gcode.Gcode {
 	layers := SliceByVector(mesh, Z, settings)
-	layers = FillLayers(layers, CalcFillPlanes(mesh, settings))
+	fillPanes, fullFillPanes := CalcFillPlanes(mesh, settings)
+	layers = FillLayers(layers, fillPanes, fullFillPanes, settings)
 
 	gcd := gcode.NewGcode(*settings.GcodeSettings)
 

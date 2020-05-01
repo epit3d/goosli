@@ -8,7 +8,7 @@ import (
 )
 
 type Settings struct {
-	GcodeSettings *gcode.GcodeSettings
+	GcodeSettings       *gcode.GcodeSettings
 	DateTime            string
 	Epsilon             float64
 	LayerHeight         float64
@@ -24,6 +24,8 @@ type Settings struct {
 	UnitVector          Vector
 	SupportsOn          bool
 	SupportOffset       float64
+	TopLayers           int
+	BottomLayers        int
 }
 
 func (s *Settings) ToMap() map[string]string {
@@ -36,6 +38,6 @@ func (s *Settings) ToMap() map[string]string {
 		"{extruder_temperature}": strconv.Itoa(s.ExtruderTemperature),
 		"{print_speed}":          strconv.Itoa(s.GcodeSettings.PrintSpeed),
 		//"{nozzle}":               StrF(s.LineWidth),
-		"{layer_count}":          strconv.Itoa(s.LayerCount),
+		"{layer_count}": strconv.Itoa(s.LayerCount),
 	}
 }

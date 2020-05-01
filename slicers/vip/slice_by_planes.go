@@ -11,7 +11,7 @@ import (
 func SliceByPlanes(mesh *Mesh, settings slicers.Settings, planes []AnalyzedPlane) gcode.Gcode {
 	gcd := gcode.NewGcode(*settings.GcodeSettings)
 
-	fillPlanes := slicers.CalcFillPlanes(mesh, settings)
+	fillPlanes, fullFillPlanes := slicers.CalcFillPlanes(mesh, settings)
 	var down *Mesh
 	var err error
 	firstPlane := AnalyzedPlane{tilted: false, rotz: 0, Plane: PlaneXY}
@@ -43,7 +43,7 @@ func SliceByPlanes(mesh *Mesh, settings slicers.Settings, planes []AnalyzedPlane
 			rotated = false
 		}
 		add := slicers.SliceByVector(down, AxisZ, settings)
-		gcd.AddLayers(PrepareLayers(add, settings, fillPlanes))
+		gcd.AddLayers(PrepareLayers(add, settings, fillPlanes, fullFillPlanes))
 		//TODO: fillPlanes fix
 	}
 
