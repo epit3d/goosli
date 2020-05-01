@@ -28,6 +28,8 @@ var (
 	layerHeight         = kingpin.Flag("layer_height", "Set the slice layer height.").Short('t').Default("0.2").Float64()
 	wallThickness       = kingpin.Flag("wall_thickness", "Set the wall thickness.").Default("1.2").Float64()
 	fillDensity         = kingpin.Flag("fill_density", "Fill density in percents.").Default("20").Int()
+	topLayers           = kingpin.Flag("top_layers", "Number of top layers").Default("3").Int()
+	bottomLayers        = kingpin.Flag("bottom_layers", "Number of bottom layers").Default("3").Int()
 	bedTemperature      = kingpin.Flag("bed_temperature", "Bed temperature in Celsius.").Default("60").Int()
 	extruderTemperature = kingpin.Flag("extruder_temperature", "Extruder temperature in Celsius.").Default("200").Int()
 	printSpeed          = kingpin.Flag("print_speed", "Printing speed.").Default("50").Int()
@@ -77,6 +79,8 @@ func settings() slicers.Settings {
 		LayerHeight:         *layerHeight,
 		WallThickness:       *wallThickness,
 		FillDensity:         *fillDensity,
+		TopLayers:           *topLayers,
+		BottomLayers:        *bottomLayers,
 		BedTemperature:      *bedTemperature,
 		ExtruderTemperature: *extruderTemperature,
 		LayerCount:          0,

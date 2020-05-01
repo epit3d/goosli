@@ -8,7 +8,7 @@ import (
 )
 
 //PrepareLayers add Walls and fill layers
-func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
+func PrepareLayers(layers []Layer, settings Settings, planes []Plane, fullPanes []Plane) []Layer {
 	addWalls := int(settings.WallThickness / settings.GcodeSettings.LineWidth)
 	if addWalls > 0 {
 		for i, layer := range layers { //TODO: in parallel
@@ -22,7 +22,7 @@ func PrepareLayers(layers []Layer, settings Settings, planes []Plane) []Layer {
 			}
 		}
 	}
-	return FillLayers(layers, planes)
+	return FillLayers(layers, planes, fullPanes, settings)
 }
 
 func offset(pth Path, addWalls int, nozzle float64, norm Vector) []Path {
