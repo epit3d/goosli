@@ -129,3 +129,134 @@ func TestPath_FindCentroid(t *testing.T) {
 		})
 	}
 }
+
+func TestPath_IsClosed(t *testing.T) {
+	cases := []struct {
+		in  Path
+		out bool
+	}{
+		{
+			in:  Path{Points: []Point{{1, 1, 1}}},
+			out: true,
+		},
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {0, 0, 0}}},
+			out: true,
+		},
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}},
+			out: false,
+		},
+	}
+	for i, row := range cases {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			require.Equal(t, row.out, row.in.IsClosed())
+		})
+	}
+}
+
+func TestPath_Close(t *testing.T) {
+	cases := []struct {
+		in  Path
+		out bool
+	}{
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}},
+			out: true,
+		},
+	}
+	for i, row := range cases {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			require.Equal(t, row.out, row.in.Close().IsClosed())
+		})
+	}
+}
+
+func TestPath_IsInside(t *testing.T) {
+	cases := []struct {
+		in    Path
+		check Path
+		out   bool
+	}{
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}, {0, 0, 0}}},
+			check: Path{Points: []Point{{0.5, 0.5, 0.0}}},
+			out: true,
+		},
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}, {0, 0, 0}}},
+			check: Path{Points: []Point{{0.5, 0.5, 0.0}, {0.75, 0.75, 0.0}}},
+			out: true,
+		},
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}, {0, 0, 0}}},
+			check: Path{Points: []Point{{0.5, 0.5, 0.0}, {0.75, 0.75, 0.0}, {0.25, 0.75, 0.0}, {0.5, 0.5, 0.0}}},
+			out: true,
+		},
+		{
+			in:  Path{Points: []Point{{1, 1, 1}}},
+			check: Path{Points: []Point{{0, 0, 0}}},
+			out: false,
+		},
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}, {0, 0, 0}}},
+			check: Path{Points: []Point{{0.5, 0.5, 0.5}}},
+			out: false,
+		},
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {0, 0, 0}}},
+			check: Path{Points: []Point{{1.5, 0.5, 0.0}}},
+			out: false,
+		},
+		// TODO: Test case when the angle is not 90 degrees
+	}
+	for i, row := range cases {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			require.Equal(t, row.out, row.check.IsInside(row.in))
+		})
+	}
+}
+
+func TestPath_IsWindingCW(t *testing.T) {
+	cases := []struct {
+		in    Path
+		out   bool
+	}{
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}, {0, 0, 0}}},
+			out: true,
+		},
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}, {0, 0, 0}}}.Reverse(),
+			out: false,
+		},
+		// TODO: Test case when the angle is not 90 degrees
+	}
+	for i, row := range cases {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			require.Equal(t, row.out, row.in.IsWindingCW())
+		})
+	}
+}
+
+func TestPath_IsSolid(t *testing.T) {
+	cases := []struct {
+		in    Path
+		out   bool
+	}{
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}, {0, 0, 0}}},
+			out: true,
+		},
+		{
+			in:  Path{Points: []Point{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}, {0, 0, 0}}}.Reverse(),
+			out: false,
+		},
+		// TODO: Test case when the angle is not 90 degrees
+	}
+	for i, row := range cases {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			require.Equal(t, row.out, row.in.IsSolid())
+		})
+	}
+}
