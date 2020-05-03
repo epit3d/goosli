@@ -14,8 +14,9 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	print("DEFAULT slicing:\n")
 	debug.RecreateFile()
 
-	var gcd gcode.Gcode
-	fillPlanes := CalcFillPlanes(mesh, settings)
+	gcd := gcode.NewGcode(*settings.GcodeSettings)
+
+	fillPlanes, fullFillPlanes := CalcFillPlanes(mesh, settings)
 
 	i := 1
 	rotated := false
@@ -40,7 +41,7 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		if newPlane == nil {
 			i++
 			if i == len(layers) {
-				gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(layers, settings, fillPlanes), Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
+				gcd.AddLayers(PrepareLayers(layers, settings, fillPlanes, fullFillPlanes))
 			}
 		} else {
 			mesh, down, err = helpers.CutMesh(mesh, *newPlane)
@@ -49,7 +50,7 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 			}
 			add := SliceByVector(down, AxisZ, settings)
 
-			gcd.Add(gcode.LayersMoving{Layers: PrepareLayers(add, settings, fillPlanes), Index: gcd.LayersCount, ExtParams: settings.GetExtrusionParams()})
+			gcd.AddLayers(PrepareLayers(add, settings, fillPlanes, fullFillPlanes))
 			println("added: ", len(add), i)
 			//debug.AddLayer(layers[i])
 			if rotated {
@@ -64,6 +65,9 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 				for j, plane := range fillPlanes {
 					fillPlanes[j] = plane.Rotate(RotationAroundX(-angleX)).Rotate(RotationAroundZ(-angleZ))
 				}
+				for j, plane := range fullFillPlanes {
+					fullFillPlanes[j] = plane.Rotate(RotationAroundX(-angleX)).Rotate(RotationAroundZ(-angleZ))
+				}
 			} else {
 				angleZ = newPlane.N.ProjectOnPlane(PlaneXY).Angle(AxisX) + 90
 				println(angleZ)
@@ -75,6 +79,9 @@ func SliceDefault2(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 				rotated = true
 				for j, plane := range fillPlanes {
 					fillPlanes[j] = plane.Rotate(RotationAroundZ(angleZ)).Rotate(RotationAroundX(angleX))
+				}
+				for j, plane := range fullFillPlanes {
+					fullFillPlanes[j] = plane.Rotate(RotationAroundZ(angleZ)).Rotate(RotationAroundX(angleX))
 				}
 			}
 			layers = SliceByVector(mesh, AxisZ, settings)

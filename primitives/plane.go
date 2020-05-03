@@ -81,7 +81,7 @@ func (p Plane) IntersectSegment(p1, p2 Point) *Point {
 	}
 	z := p.P.ToVector().Dot(p.N)
 	t := (z - pr1) / (pr2 - pr1)
-	if t <= 0 || t >= 1 {
+	if t < 0 || t > 1 {
 		return nil
 	}
 	res := p1.Shift(p1.VectorTo(p2).MulScalar(t))

@@ -25,7 +25,7 @@ func calcFillPlanesCommon(mesh *Mesh, settings Settings, MyAxis Vector, step flo
 
 // filling with lines
 func CalcFillPlanesLines(mesh *Mesh, settings Settings) []Plane {
-	step := (100 / float64(settings.FillDensity)) * settings.LineWidth
+	step := (100 / float64(settings.FillDensity)) * settings.GcodeSettings.LineWidth
 	planes := calcFillPlanesCommon(mesh, settings, AxisX, step)
 
 	return planes
@@ -33,7 +33,7 @@ func CalcFillPlanesLines(mesh *Mesh, settings Settings) []Plane {
 
 // filling with squares
 func CalcFillPlanesSquares(mesh *Mesh, settings Settings) []Plane {
-	step := (100 / float64(settings.FillDensity/2)) * settings.LineWidth
+	step := (100 / float64(settings.FillDensity/2)) * settings.GcodeSettings.LineWidth
 
 	//planes := calcFillPlanesCommon(mesh, settings, V(1, 0, 0), step)
 	//planes = append(planes, CalcFillPlanes0(mesh, settings, V(0, 1, 0), step)...)
@@ -46,7 +46,7 @@ func CalcFillPlanesSquares(mesh *Mesh, settings Settings) []Plane {
 
 // filling with triangles
 func CalcFillPlanesTriangles(mesh *Mesh, settings Settings) []Plane {
-	step := (100 / float64(settings.FillDensity/3)) * settings.LineWidth
+	step := (100 / float64(settings.FillDensity/3)) * settings.GcodeSettings.LineWidth
 
 	planes := calcFillPlanesCommon(mesh, settings, V(1, 0, 0), step)
 	planes = append(planes, calcFillPlanesCommon(mesh, settings, V(0.5, 0.8660254038, 0), step)...)
@@ -55,7 +55,14 @@ func CalcFillPlanesTriangles(mesh *Mesh, settings Settings) []Plane {
 	return planes
 }
 
-func CalcFillPlanes(mesh *Mesh, settings Settings) []Plane {
+// filling with lines full plane e.g. for top and bottom
+func CalcFillFullPlane(mesh *Mesh, settings Settings) []Plane {
+	step := settings.GcodeSettings.LineWidth
+	planes := calcFillPlanesCommon(mesh, settings, AxisX, step)
+	return planes
+}
+
+func CalcFillPlanes(mesh *Mesh, settings Settings) ([]Plane, []Plane) {
 	planes := []Plane{}
 	switch settings.FillingType {
 	case "Lines":
@@ -68,21 +75,39 @@ func CalcFillPlanes(mesh *Mesh, settings Settings) []Plane {
 		//	for future changings
 		planes = CalcFillPlanesLines(mesh, settings)
 	}
-	return planes
+	fullPlane := CalcFillFullPlane(mesh, settings)
+	return planes, fullPlane
 }
 
-func FillLayers(layers []Layer, planes []Plane) []Layer { //TODO: can be paralleled
+func FillLayers(layers []Layer, planes []Plane, fullPlane []Plane, settings Settings) []Layer { //TODO: can be paralleled
+
+	no_of_layers := len(layers)
 	for i, layer := range layers {
-		inner := layer.InnerPs
-		if inner == nil { //if one layer only
-			inner = layer.Paths
-			//println("inner nil")
-		}
-		for _, plane := range planes {
-			pth := intersectByPlane(inner, plane)
-			if pth != nil {
-				layers[i].Fill = append(layers[i].Fill, pth...)
+		if (i < settings.BottomLayers) || (i >= (no_of_layers - settings.TopLayers)) {
+			inner := layer.InnerPs
+			if inner == nil { //if one layer only
+				inner = layer.Paths
+				//println("inner nil")
 			}
+			for _, plane := range fullPlane {
+				pth := intersectByPlane(inner, plane)
+				if pth != nil {
+					layers[i].Fill = append(layers[i].Fill, pth...)
+				}
+			}
+		} else {
+			inner := layer.InnerPs
+			if inner == nil { //if one layer only
+				inner = layer.Paths
+				//println("inner nil")
+			}
+			for _, plane := range planes {
+				pth := intersectByPlane(inner, plane)
+				if pth != nil {
+					layers[i].Fill = append(layers[i].Fill, pth...)
+				}
+			}
+
 		}
 	}
 	return layers
