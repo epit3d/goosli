@@ -34,6 +34,15 @@ func (l Line) IsCollinearPointOnSegment(p Point) bool {
 	}
 }
 
+func (l Line) IsIntersectingSegment(l1 *Line) bool {
+	intersectionPoint := l.IntersectLine(l1)
+	if intersectionPoint != nil {
+		return true
+	} else {
+		return false
+	}
+}
+
 func (l Line) IntersectLine(l1 *Line) *Point {
 
 	orientation1 := l1.P1.Orientation(l.P1, l.P2)
