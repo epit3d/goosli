@@ -55,6 +55,23 @@ func (t *Triangle) MinMaxZ(z Vector) (float64, float64) {
 	return math.Min(pr1, math.Min(pr2, pr3)), math.Max(pr1, math.Max(pr2, pr3))
 }
 
+func (t *Triangle) IntersectTriangles(triangles []Triangle) []Line {
+
+	var lines []Line
+	for _, bt := range triangles {
+		line := bt.IntersectTriangle(t)
+			if line != nil {
+				lines = append(lines, *line)
+				}
+	}
+
+	if len(lines) != 0 {
+		return lines
+	}
+
+	return nil
+}
+
 func (t *Triangle)IntersectTriangle(t2 *Triangle) *Line {
 
 	plane := Plane{P: t.P1, N: t.N}
@@ -79,26 +96,38 @@ func (t *Triangle)IntersectTriangle(t2 *Triangle) *Line {
 	if b1 || b2 {
 		if p1 != nil{
 			if b1{
-				return &Line{P1: line.P1, P2: *p1}
+				if !line.P1.Equal(*p1){
+					return &Line{P1: line.P1, P2: *p1}
+				}
 			}
 			if b2{
-				return &Line{P1: *p1, P2: line.P2}
+				if !line.P2.Equal(*p1) {
+					return &Line{P1: *p1, P2: line.P2}
+				}
 			}
 		}
 		if p2 != nil{
 			if b1{
-				return &Line{P1: line.P1, P2: *p2}
+				if !line.P1.Equal(*p2){
+					return &Line{P1: line.P1, P2: *p2}
+				}
 			}
 			if b2{
-				return &Line{P1: *p2, P2: line.P2}
+				if !(*p2).Equal(line.P2) {
+					return &Line{P1: *p2, P2: line.P2}
+				}
 			}
 		}
 		if p3 != nil{
 			if b1{
-				return &Line{P1: line.P1, P2: *p3}
+				if !line.P1.Equal(*p3) {
+					return &Line{P1: line.P1, P2: *p3}
+				}
 			}
 			if b2{
-				return &Line{P1: *p3, P2: line.P2}
+				if !(*p3).Equal(line.P2) {
+					return &Line{P1: *p3, P2: line.P2}
+				}
 			}
 		}
 
@@ -106,34 +135,39 @@ func (t *Triangle)IntersectTriangle(t2 *Triangle) *Line {
 
 	// if line crosses 2 sides of triangle
 	if p1 == nil && p2 != nil && p3 != nil{
-		return &Line{P1: *p2, P2: *p3}
+		if (*p2).RoundPlaces(6) != (*p3).RoundPlaces(6) {
+			return &Line{P1: *p2, P2: *p3}
+		}
 	}
 
 	if p1 != nil && p2 == nil && p3 != nil{
-		return &Line{P1: *p1, P2: *p3}
+		if (*p1).RoundPlaces(6) != (*p3).RoundPlaces(6) {
+			return &Line{P1: *p1, P2: *p3}
+		}
 	}
 
 	if p1 != nil && p2 != nil && p3 == nil{
-		return &Line{P1: *p1, P2: *p2}
+		if (*p1).RoundPlaces(6) != (*p2).RoundPlaces(6) {
+			return &Line{P1: *p1, P2: *p2}
+		}
 	}
 
 	// if line cross all siides of triangle (one edge and one vertex)
 	if p1 != nil && p2 != nil && p3 != nil {
-		if p1 == p2 {
+		if (*p1).Equal(*p2) {
 			return &Line{P1: *p1, P2: *p3}
 		}
-		if p1  == p3 {
+		if (*p1).Equal(*p3) {
 			return &Line{P1: *p1, P2: *p2}
 		}
-		if p2  == p3 {
+		if (*p2).Equal(*p3) {
 			return &Line{P1: *p1, P2: *p2}
 		}
 	}
-
 	return nil
 }
 
-func (t *Triangle) PointBelongs(p Point) bool {
+func (t *Triangle) PointBelongs(p Point) bool { //TODO: not right variant, the case with normals should be better, but it not works, why
 
 	plane := Plane{P: t.P1, N: t.N}
 	if plane.PointBelongs(p) {

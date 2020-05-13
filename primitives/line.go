@@ -107,3 +107,23 @@ func (l Line) IntersectLine(l1 *Line) *Point {
     return nil; // Doesn't fall in any of the above cases
 
 }
+
+func (l Line) IntersectTriangle(t Triangle) bool {
+
+	p1 := Line{P1: t.P1, P2: t.P2}.IntersectLine(&l)
+	p2 := Line{P1: t.P1, P2: t.P3}.IntersectLine(&l)
+	p3 := Line{P1: t.P2, P2: t.P3}.IntersectLine(&l)
+
+	if p1 != nil || p2 != nil || p3 != nil {
+		return true
+	}
+
+/*	if p1 == nil && p2 == nil && p3 == nil {
+		if t.PointBelongs(l.P1) {  //or l.P2 - no difference
+			return true
+		}
+	}*/
+
+	return false
+
+}
