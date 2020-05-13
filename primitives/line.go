@@ -36,13 +36,41 @@ func (l Line) IsCollinearPointOnSegment(p Point) bool {
 
 func (l Line) IntersectLine(l1 *Line) *Point {
 
-	orientation1 := l1.P1.Orientation(l.P1, l.P2)
-	orientation2 := l1.P2.Orientation(l.P1, l.P2)
-	orientation3 := l.P1.Orientation(l1.P1, l1.P2)
-	orientation4 := l.P2.Orientation(l1.P1, l1.P2)
+	normal := make([]Vector, 4)
+	orientation := make([]int, 4)
+	var base_normal Vector
+
+	normal[0] = l1.P1.VectorTo(l.P1).Cross(l1.P1.VectorTo(l.P2))
+	normal[1] = l1.P2.VectorTo(l.P1).Cross(l1.P2.VectorTo(l.P2))
+	normal[2] = l.P1.VectorTo(l1.P1).Cross(l.P1.VectorTo(l1.P2))
+	normal[3] = l.P2.VectorTo(l1.P1).Cross(l.P2.VectorTo(l1.P2))
+
+	for i, n := range normal {
+		if AlmostZero(n.X)&&AlmostZero(n.Y)&&AlmostZero(n.Z) {
+			orientation[i] = 0
+			normal[i] = V(0,0,0)
+		} else {
+			base_normal = n
+		}
+	}
+
+	for i, n := range normal {
+		if base_normal.Dot(n) > 0 {
+			orientation[i] = 1
+		}
+		if base_normal.Dot(n) < 0 {
+			orientation[i] = 2
+		}
+	}
+
+
+/*	orientation[0] := l1.P1.Orientation(l.P1, l.P2)
+	orientation[1] := l1.P2.Orientation(l.P1, l.P2)
+	orientation[2] := l.P1.Orientation(l1.P1, l1.P2)
+	orientation[3] := l.P2.Orientation(l1.P1, l1.P2)*/
 
 	// General case
-	if orientation1 != orientation2 && orientation3 != orientation4 {
+	if orientation[0] != orientation[1] && orientation[2] != orientation[3] {
 
 		a := l.ToVector()
 		b := l1.ToVector()
@@ -64,20 +92,16 @@ func (l Line) IntersectLine(l1 *Line) *Point {
 	}
 
 	// Collinear case
-    if (orientation1 == 0 && l.IsCollinearPointOnSegment(l1.P1)) {
-		println("l1.P1  ", l1.P1.Z)
+    if (orientation[0] == 0 && l.IsCollinearPointOnSegment(l1.P1)) {
 		return &l1.P1 }
 
-    if (orientation2 == 0 && l.IsCollinearPointOnSegment(l1.P2)) {
-		println("l1.P2  ", l1.P2.Z)
+    if (orientation[1] == 0 && l.IsCollinearPointOnSegment(l1.P2)) {
 		return &l1.P2 }
 
-    if (orientation3 == 0 && l1.IsCollinearPointOnSegment(l.P1)) {
-		println("l.P1  ", l.P1.Z)
+    if (orientation[2] == 0 && l1.IsCollinearPointOnSegment(l.P1)) {
 		return &l.P1 }
 
-    if (orientation4 == 0 && l1.IsCollinearPointOnSegment(l.P2)) {
-		println("l2.P2  ", l.P2.Z)
+    if (orientation[3] == 0 && l1.IsCollinearPointOnSegment(l.P2)) {
 		return &l.P2 }
 
     return nil; // Doesn't fall in any of the above cases
