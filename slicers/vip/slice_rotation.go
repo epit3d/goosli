@@ -14,8 +14,9 @@ func SliceRotation(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	print("ROTATION slicing:\n")
 
 	debug.RecreateFile()
-	var gcd gcode.Gcode
-	fillPlanes := CalcFillPlanes(mesh, settings)
+	gcd := gcode.NewGcode(*settings.GcodeSettings)
+
+	fillPlanes, fullFillPlanes := CalcFillPlanes(mesh, settings)
 
 	i := 0
 	for i < len(layers) {
@@ -29,7 +30,7 @@ func SliceRotation(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 		i++
 	}
 	// Add horizontal layers
-	gcd.Add(gcode.LayersMoving{PrepareLayers(layers[:i], settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
+	gcd.AddLayers(PrepareLayers(layers[:i], settings, fillPlanes, fullFillPlanes))
 
 	anyPoint := layers[i].Paths[0].Points[0]
 	mesh, _, err := helpers.CutMesh(mesh, Plane{anyPoint, AxisZ})
@@ -44,9 +45,12 @@ func SliceRotation(mesh *Mesh, settings Settings, layers []Layer) gcode.Gcode {
 	for i, plane := range fillPlanes {
 		fillPlanes[i] = plane.Rotate(RotationAroundX(angleX))
 	}
+	for i, plane := range fullFillPlanes {
+		fullFillPlanes[i] = plane.Rotate(RotationAroundX(angleX))
+	}
 
 	rest := SliceByVector(mesh, AxisZ.Rotate(RotationAroundX(angleX)), settings)
-	gcd.Add(gcode.LayersMoving{PrepareLayers(rest, settings, fillPlanes), gcd.LayersCount, settings.GetExtrusionParams()})
+	gcd.AddLayers(PrepareLayers(rest, settings, fillPlanes, fullFillPlanes))
 
 	gcd.Add(gcode.InclineXBack{})
 	return gcd

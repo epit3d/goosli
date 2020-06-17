@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/l1va/goosli/gcode"
 	. "github.com/l1va/goosli/primitives"
 	"github.com/l1va/goosli/slicers"
 	"github.com/stretchr/testify/require"
@@ -45,12 +46,12 @@ func TestSlicers_SliceByVectorZ(t *testing.T) {
 				LayerHeight:   0.2,
 				WallThickness: 1.2,
 				FillDensity:   20,
-				LineWidth:     0.4,
+				GcodeSettings: &gcode.GcodeSettings{LineWidth: 0.4},
 			}
 
 			gcd := slicers.SliceByVectorToGcode(mesh, AxisZ, sett)
 
-			require.Equal(t, row.layers, gcd.LayersCount)
+			require.Equal(t, row.layers, gcd.LayerCount())
 		})
 	}
 }
