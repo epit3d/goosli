@@ -72,34 +72,6 @@ func (l Line) IntersectLine(l1 *Line) *Point {
 		}
 	}
 
-
-/*	orientation[0] := l1.P1.Orientation(l.P1, l.P2)
-	orientation[1] := l1.P2.Orientation(l.P1, l.P2)
-	orientation[2] := l.P1.Orientation(l1.P1, l1.P2)
-	orientation[3] := l.P2.Orientation(l1.P1, l1.P2)*/
-
-	// General case
-	if orientation[0] != orientation[1] && orientation[2] != orientation[3] {
-
-		a := l.ToVector()
-		b := l1.ToVector()
-
-		var m  float64
-		if a.X != 0 {
-			m = (l1.P1.Y - l.P1.Y - (a.Y/a.X)*(l1.P1.X - l.P1.X)) / (b.X*a.Y/a.X - b.Y)
-		} else if a.Y != 0 {
-			m = (l1.P1.X - l.P1.X - (a.X/a.Y)*(l1.P1.Y - l.P1.Y)) / (a.X*b.Y/a.Y - b.X)
-		} else if a.Z != 0 {
-			m = (l1.P1.X - l.P1.X - (a.X/a.Z)*(l1.P1.Z - l.P1.Z)) / (a.X*b.Z/a.Z - b.X)
-		}
-
-		x := l1.P1.X + b.X*m
-		y := l1.P1.Y + b.Y*m
-		z := l1.P1.Z + b.Z*m
-
-		return &Point{x, y, z}
-	}
-
 	// Collinear case
     if (orientation[0] == 0 && l.IsCollinearPointOnSegment(l1.P1)) {
 		return &l1.P1 }
@@ -112,6 +84,33 @@ func (l Line) IntersectLine(l1 *Line) *Point {
 
     if (orientation[3] == 0 && l1.IsCollinearPointOnSegment(l.P2)) {
 		return &l.P2 }
+
+	// General case
+	if orientation[0] != orientation[1] && orientation[2] != orientation[3] {
+
+		a := l.ToVector()
+		b := l1.ToVector()
+
+		var m  float64
+		m = (l1.P1.Y - l.P1.Y - (a.Y/a.X)*(l1.P1.X - l.P1.X)) / (b.X*a.Y/a.X - b.Y)
+
+		if math.IsNaN(m) {
+			m = (l1.P1.X - l.P1.X - (a.X/a.Y)*(l1.P1.Y - l.P1.Y)) / (a.X*b.Y/a.Y - b.X)
+		}
+		if math.IsNaN(m) {
+			m = (l1.P1.X - l.P1.X - (a.X/a.Z)*(l1.P1.Z - l.P1.Z)) / (a.X*b.Z/a.Z - b.X)
+		}
+		if math.IsNaN(m) {
+			m = (l1.P1.Y - l.P1.Y - (a.Y/a.Z)*(l1.P1.Z - l.P1.Z)) / (a.Y*b.Z/a.Z - b.Y)
+		}
+
+		x := l1.P1.X + b.X*m
+		y := l1.P1.Y + b.Y*m
+		z := l1.P1.Z + b.Z*m
+
+		return &Point{x, y, z}
+	}
+
 
     return nil; // Doesn't fall in any of the above cases
 

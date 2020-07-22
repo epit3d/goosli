@@ -101,19 +101,19 @@ func TestLine_IntersectLine(t *testing.T) {
 			in2: Line{Point{1, 6, 0}, Point{7, 3, 0}},
 			out: &Point{5, 4, 0},
 		},
-		// Lines intersect on YZ plane - fail
-/*		{
+		// Lines intersect on YZ plane
+		{
 			in1: Line{Point{0, 3, 2}, Point{0, 8, 7}},
 			in2: Line{Point{0, 1, 6}, Point{0, 7, 3}},
 			out: &Point{0, 5, 4},
-		},*/
+		},
 
-		// Lines intersect on XZ plane - fail
-/*		{
+		// Lines intersect on XZ plane
+		{
 			in1: Line{Point{3, 0, 2}, Point{8, 0, 7}},
 			in2: Line{Point{1, 0, 6}, Point{7, 0, 3}},
 			out: &Point{5, 0, 4},
-		},*/
+		},
 		// Lines intersect
 		{
 			in1: Line{Point{1, 1, -2}, Point{1, -5, 1}},
