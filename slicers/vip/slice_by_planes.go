@@ -8,33 +8,38 @@ import (
 	"log"
 )
 
-func SliceByPlanes(mesh *Mesh, settings slicers.Settings, planes []AnalyzedPlane) gcode.Gcode {
+type BedPlane struct {
+	tilted bool
+	rotz   float64
+}
+
+func SliceByPlanes(mesh *Mesh, settings slicers.Settings, cutPlanes []AnalyzedPlane) gcode.Gcode {
 	gcd := gcode.NewGcode(*settings.GcodeSettings)
 
 	fillPlanes, fullFillPlanes := slicers.CalcFillPlanes(mesh, settings)
 	var down *Mesh
 	var err error
-	firstPlane := AnalyzedPlane{tilted: false, rotz: 0, Plane: PlaneXY}
-	planes = append([]AnalyzedPlane{firstPlane}, planes...)
-	rotated := false
-	for i := 0; i < len(planes); i++ {
-		pl := planes[i]
 
-		if i == len(planes)-1 {
+	bedPlanes := calcBedPlanes(cutPlanes)
+	rotated := false
+	for i := 0; i < len(bedPlanes); i++ {
+		pl := bedPlanes[i]
+
+		if i == len(cutPlanes) {
 			down = mesh
 		} else {
-			mesh, down, err = helpers.CutMesh(mesh, planes[i+1].Plane)
+			mesh, down, err = helpers.CutMesh(mesh, cutPlanes[i].Plane)
 			if err != nil {
 				log.Fatal("failed to cut mesh, by plane: ", err, pl)
 			}
 		}
 
 		if i != 0 {
-			down = down.Rotate(RotationAroundZ(pl.rotz+180), OriginPoint)
-			gcd.Add(gcode.RotateZ{Angle: pl.rotz + 180})
+			down = down.Rotate(RotationAroundZ(pl.rotz), settings.RotationCenter)
+			gcd.Add(gcode.RotateZ{Angle: pl.rotz})
 		}
 		if pl.tilted {
-			down = down.Rotate(RotationAroundX(angleX), OriginPoint)
+			down = down.Rotate(RotationAroundX(-angleX), settings.RotationCenter)
 			gcd.Add(gcode.InclineX{})
 			rotated = true
 		}
@@ -48,4 +53,12 @@ func SliceByPlanes(mesh *Mesh, settings slicers.Settings, planes []AnalyzedPlane
 	}
 
 	return gcd
+}
+
+func calcBedPlanes(cutPlanes []AnalyzedPlane) []BedPlane {
+	res := []BedPlane{BedPlane{tilted: false, rotz: 0}}
+	for _, p := range cutPlanes {
+		res = append(res, BedPlane{tilted: p.tilted, rotz: p.rotz})
+	}
+	return res
 }

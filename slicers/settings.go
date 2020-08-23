@@ -17,7 +17,7 @@ type Settings struct {
 	BedTemperature      int
 	ExtruderTemperature int
 	LayerCount          int
-	RotationCenterZ     float64
+	RotationCenter      Point
 	PlanesFile          string
 	FillingType         string
 	ColorizedAngle      float64

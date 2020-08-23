@@ -84,7 +84,7 @@ func settings() slicers.Settings {
 		BedTemperature:      *bedTemperature,
 		ExtruderTemperature: *extruderTemperature,
 		LayerCount:          0,
-		RotationCenterZ:     *rcz,
+		RotationCenter:      Point{*rcx, *rcy, *rcz},
 		PlanesFile:          *planesFile,
 		FillingType:         *fillingType,
 		ColorizedAngle:      *angle,
