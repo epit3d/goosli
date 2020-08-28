@@ -104,3 +104,58 @@ func TestPlane_IntersectTriangle(t *testing.T) {
 		})
 	}
 }
+
+func TestPlane_ProectionPointToPlane(t *testing.T) {
+	cases := []struct {
+		in1 Plane
+		in2 Point
+		out Point
+	}{
+		{
+			in1: Plane{Point{1, 1, 1}, V(1, 1, 1)},
+			in2: Point{0, 0, 0},
+			out: Point{1, 1, 1},
+		},
+		{
+			in1: Plane{Point{1, 1, 1}, V(0, 0, 1)},
+			in2: Point{0, 0, 0},
+			out: Point{0, 0, 1},
+		},
+		{
+			in1: Plane{Point{1, 1, 1}, V(0, 1, 0)},
+			in2: Point{0, 0, 0},
+			out: Point{0, 1, 0},
+		},
+	}
+	for i, row := range cases {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			res := row.in1.ProectionPointToPlane(row.in2)
+			require.Equal(t, row.out, res)
+		})
+	}
+}
+
+func TestPlane_PointBelongs(t *testing.T) {
+	cases := []struct {
+		in1 Plane
+		in2 Point
+		out bool
+	}{
+		{
+			in1: Plane{Point{1, 1, 1}, V(1, 1, 1)},
+			in2: Point{1, 1, 1},
+			out: true,
+		},
+		{
+			in1: Plane{Point{1, 1, 1}, V(1, 1, 1)},
+			in2: Point{0, 0, 0},
+			out: false,
+		},
+	}
+	for i, row := range cases {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			res := row.in1.PointBelongs(row.in2)
+			require.Equal(t, row.out, res)
+		})
+	}
+}

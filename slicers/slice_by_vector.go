@@ -36,9 +36,6 @@ func SliceByVector(mesh *Mesh, Z Vector, settings Settings) []Layer {
 	Z = Z.Normalize()
 
 	triangles := mesh.CopyTriangles()
-	sort.Slice(triangles, func(i, j int) bool {
-		return triangles[i].MinZ(Z) < triangles[j].MinZ(Z)
-	})
 
 	minz, maxz := mesh.MinMaxZ(Z)
 	n := int(math.Ceil((maxz - minz) / thickness))
@@ -71,22 +68,34 @@ func SliceByVector(mesh *Mesh, Z Vector, settings Settings) []Layer {
 		col_lines := helpers.MakeUndoubledLinesFromTriangles(col_triangles)
 		sup_lines := helpers.MakeSupportLines(col_lines, plane)
 		var sup_triangles []Triangle
+
 		for i := range col_lines {
 			Tr1 := NewTriangle(sup_lines[i].P1, col_lines[i].P1, col_lines[i].P2)
 			Tr2 := NewTriangle(sup_lines[i].P1, sup_lines[i].P2, col_lines[i].P2)
-
-			lines := helpers.IntersectTriangles(Tr1, temp)
+			lines := Tr1.IntersectTriangles(temp)
 			if lines == nil {
 				sup_triangles = append(sup_triangles, Tr1)
+			} else {
+				internal := helpers.MakeInternalSupportTriangles(col_lines[i].P1, col_lines[i].P2, lines)
+				sup_triangles = append(sup_triangles, internal...)
 			}
 
-			lines = helpers.IntersectTriangles(Tr2, temp)
+			lines = Tr2.IntersectTriangles(temp)
 			if lines == nil {
 				sup_triangles = append(sup_triangles, Tr2)
+			} else {
+				fake_point := Point{X: -1, Y: -1, Z: -1}
+				internal := helpers.MakeInternalSupportTriangles(col_lines[i].P2, fake_point, lines)
+				sup_triangles = append(sup_triangles, internal...)
 			}
 		}
+
 		triangles = append(sup_triangles, triangles...)
 	}
+
+	sort.Slice(triangles, func(i, j int) bool {
+		return triangles[i].MinZ(Z) < triangles[j].MinZ(Z)
+	})
 
 	index := 0
 	var active []*Triangle
@@ -154,7 +163,7 @@ func slicingWorker(in chan job, out chan Layer) func(wi, wn int) {
 					paths = append(paths, Path{Points: []Point{line.P1, line.P2}})
 				}
 			}
-			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths2(paths)}
+			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths3(paths)}
 		}
 	}
 }
