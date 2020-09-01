@@ -9,7 +9,7 @@ import (
 
 func MakeOffset(pth Path, nozzle float64, norm Vector) Path {
 	if len(pth.Points) < 3 {
-		println("empty path: n = ",  len(pth.Points))
+		println("can't make offset, empty path: n = ",  len(pth.Points))
 		return pth //TODO: what return ?
 	}
 	norm = norm.Reverse()

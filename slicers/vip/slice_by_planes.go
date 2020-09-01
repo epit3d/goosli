@@ -48,8 +48,11 @@ func SliceByPlanes(mesh *Mesh, settings slicers.Settings, cutPlanes []AnalyzedPl
 			rotated = false
 		}
 		add := slicers.SliceByVector(down, AxisZ, settings)
-		gcd.AddLayers(PrepareLayers(add, settings, fillPlanes, fullFillPlanes))
-		//TODO: fillPlanes fix
+		filled := PrepareLayers(add, settings, fillPlanes, fullFillPlanes) //TODO: fillPlanes fix
+		if i == 0 && len(filled) > 0 {
+			filled[0] = SkirtPathes(filled[0], settings.SkirtLineCount, settings.GcodeSettings.LineWidth)
+		}
+		gcd.AddLayers(filled)
 	}
 
 	return gcd

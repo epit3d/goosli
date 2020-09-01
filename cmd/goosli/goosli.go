@@ -53,6 +53,8 @@ var (
 
 	barDiameter = kingpin.Flag("bar_diameter", "Plastic bar diameter").Default("1.75").Float64()
 	flow        = kingpin.Flag("flow", "Printing flow (0;1]").Default("1.0").Float64()
+
+	skirtLineCount = kingpin.Flag("skirt_line_count", "Build plate Adhesion: skirt line count").Default("3").Int()
 )
 
 //TODO: create one binary, not 4
@@ -91,6 +93,7 @@ func settings() slicers.Settings {
 		UnitVector:          V(*nx, *ny, *nz), //TODO: seems useless, recheck
 		SupportsOn:          *supportsOn,
 		SupportOffset:       *supportOffset,
+		SkirtLineCount: *skirtLineCount,
 	}
 }
 

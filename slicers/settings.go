@@ -26,6 +26,7 @@ type Settings struct {
 	SupportOffset       float64
 	TopLayers           int
 	BottomLayers        int
+	SkirtLineCount      int
 }
 
 func (s *Settings) ToMap() map[string]string {
