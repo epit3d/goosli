@@ -57,12 +57,16 @@ func (l Line) IntersectLine(l1 *Line) *Point {
 		b := l1.ToVector()
 
 		var m float64
-		if a.X != 0 {
-			m = (l1.P1.Y - l.P1.Y - (a.Y/a.X)*(l1.P1.X-l.P1.X)) / (b.X*a.Y/a.X - b.Y)
-		} else if a.Y != 0 {
+		m = (l1.P1.Y - l.P1.Y - (a.Y/a.X)*(l1.P1.X-l.P1.X)) / (b.X*a.Y/a.X - b.Y)
+
+		if math.IsNaN(m) {
 			m = (l1.P1.X - l.P1.X - (a.X/a.Y)*(l1.P1.Y-l.P1.Y)) / (a.X*b.Y/a.Y - b.X)
-		} else if a.Z != 0 {
+		}
+		if math.IsNaN(m) {
 			m = (l1.P1.X - l.P1.X - (a.X/a.Z)*(l1.P1.Z-l.P1.Z)) / (a.X*b.Z/a.Z - b.X)
+		}
+		if math.IsNaN(m) {
+			m = (l1.P1.Y - l.P1.Y - (a.Y/a.Z)*(l1.P1.Z-l.P1.Z)) / (a.Y*b.Z/a.Z - b.Y)
 		}
 
 		x := l1.P1.X + b.X*m
@@ -95,4 +99,44 @@ func (l Line) IntersectLine(l1 *Line) *Point {
 
 	return nil // Doesn't fall in any of the above cases
 
+}
+
+func (l1 Line) IsCollinear(l2 Line) bool {
+	v1 := l1.ToVector()
+	v2 := l2.ToVector()
+	res := v1.Cross(v2)
+	return AlmostZero(res.Length())
+}
+
+// find instersection of lines https://math.stackexchange.com/questions/270767/find-intersection-of-two-3d-lines
+func (l1 Line) IntersectLine2(l2 Line) *Point {
+	f := l2.ToVector()
+	g := Line{l1.P1, l2.P2}.ToVector()
+	e := l1.ToVector()
+	a := f.Cross(g)
+	b := f.Cross(e)
+	//println(a.Length(), b.Length())
+	if AlmostZero(a.Length()) || AlmostZero(b.Length()) {
+		println("A OR B ZERO", StrF(a.Length()), StrF(b.Length()), StrF(l1.Len()), StrF(l2.Len()))
+		return nil
+	}
+	c := 1.0
+	if !a.CodirectedWith(b) {
+		c = -1.0
+	}
+	inters := l1.P1.Shift(e.MulScalar(c * a.Length() / b.Length()))
+	if math.IsNaN(inters.X) || math.IsNaN(inters.Y) || math.IsNaN(inters.Z) || inters.DistanceTo(l1.P2) > 5 || inters.DistanceTo(l2.P1) > 5 { //TODO: distance?
+		println("MORE 5", StrF(inters.DistanceTo(l1.P2)), StrF(inters.DistanceTo(l2.P1)))
+		return nil
+	}
+
+	//mm := Line{l1.P1, inters}.ToVector()
+	d1 := inters.DistanceToLine(l1.P1, l1.P2) //mm.Cross(e).Length() / e.Length()
+	//mm = Line{l2.P1, inters}.ToVector()
+	d2 := inters.DistanceToLine(l2.P1, l2.P2) //mm.Cross(f).Length() / f.Length()
+	if AlmostZero(d1) && AlmostZero(d2) {
+		return &inters
+	}
+	println("DIST", StrF(d1), StrF(d2))
+	return nil
 }

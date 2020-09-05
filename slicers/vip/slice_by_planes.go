@@ -1,6 +1,7 @@
 package vip
 
 import (
+	"github.com/l1va/goosli/debug"
 	"github.com/l1va/goosli/gcode"
 	"github.com/l1va/goosli/helpers"
 	. "github.com/l1va/goosli/primitives"
@@ -15,7 +16,7 @@ type BedPlane struct {
 
 func SliceByPlanes(mesh *Mesh, settings slicers.Settings, cutPlanes []AnalyzedPlane) gcode.Gcode {
 	gcd := gcode.NewGcode(*settings.GcodeSettings)
-
+	debug.RecreateFile()
 	fillPlanes, fullFillPlanes := slicers.CalcFillPlanes(mesh, settings)
 	var down *Mesh
 	var err error

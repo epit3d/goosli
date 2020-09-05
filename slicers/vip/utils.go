@@ -13,9 +13,9 @@ func PrepareLayers(layers []Layer, settings Settings, planes []Plane, fullPanes 
 	addWallsCount := int(settings.WallThickness / settings.GcodeSettings.LineWidth)
 	if addWallsCount > 0 {
 		for i, layer := range layers { //TODO: in parallel
-			println("Layer %v, num path %v", i, len(layer.Paths))
 			for _, pt := range layer.Paths {
 				if len(pt.Points) < 2 { //TODO: remove this
+					println("Path in 1 point! on layer ", i)
 					continue
 				}
 				offs := offset(pt, addWallsCount, settings.GcodeSettings.LineWidth, layer.Norm)

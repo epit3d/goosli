@@ -73,16 +73,22 @@ func CutMesh(mesh *Mesh, p Plane) (*Mesh, *Mesh, error) {
 	//if len(up) == 0 || len(down) == 0 {
 	//	return nil, nil, fmt.Errorf("one of meshes is empty")
 	//}
-	joined := JoinPaths2(inters)
-	println(len(inters), len(joined))
+	joined := JoinPaths3AndMinimize(inters)
+	println("cut mesh, init and joined", len(inters), len(joined))
 
 	//debug.RecreateFile()
-	for _, pth := range joined {
+	for _, pth := range joined { //generate addition triangles to close the cut
 		//debug.AddPath(pth, debug.GreenColor)
 		for j := 1; j < len(pth.Points)-1; j++ {
 			t := NewTriangle(pth.Points[0], pth.Points[j], pth.Points[j+1])
-			up = append(up, t)
-			down = append(down, t)
+			t2 := NewTriangle(pth.Points[j+1], pth.Points[j], pth.Points[0]) //with reverse normal
+			if t.N.CodirectedWith(p.N) { //triangle normal should go inside the mesh
+				up = append(up, t2)
+				down = append(down, t)
+			} else {
+				up = append(up, t)
+				down = append(down, t2)
+			}
 		}
 	}
 

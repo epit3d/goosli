@@ -33,7 +33,7 @@ func (p Path) IsWindingCW() bool {
 		sum += (p.Points[i].X - p.Points[i-1].X) * (p.Points[i].Y + p.Points[i-1].Y)
 	}
 
-	sum += (p.Points[0].X - p.Points[len(p.Points) - 1].X) * (p.Points[0].Y + p.Points[len(p.Points) - 1].Y)
+	sum += (p.Points[0].X - p.Points[len(p.Points)-1].X) * (p.Points[0].Y + p.Points[len(p.Points)-1].Y)
 
 	if sum > 0.0 {
 		return true
@@ -50,7 +50,7 @@ func (p Path) IsClosed() bool {
 		return true
 	}
 
-	return p.Points[0].Equal(p.Points[len(p.Points) - 1])
+	return p.Points[0].Equal(p.Points[len(p.Points)-1])
 }
 
 func (p Path) IsHole() bool {
@@ -60,7 +60,7 @@ func (p Path) IsHole() bool {
 func (p Path) IsSolid() bool {
 	return !p.IsHole()
 }
- 
+
 func (p Path) Close() Path {
 	res := Path{}
 	for i := 0; i < len(p.Points); i++ {
@@ -109,6 +109,7 @@ type sortp struct {
 	Ind int
 }
 
+//Join pathes by first or last points if possible
 func JoinPaths3(p []Path) []Path {
 	n := len(p)
 	w := make([]int, n)
@@ -163,6 +164,47 @@ func JoinPaths3(p []Path) []Path {
 	return res
 }
 
+func JoinPaths3AndMinimize(p []Path) []Path {
+	joined := JoinPaths3(p)
+	for i := 0; i < len(joined); i++ {
+		joined[i] = joined[i].MinimizeLines()
+	}
+	return joined
+}
+
+//Merge collinear lines in the path
+func (p Path) MinimizeLines() Path {
+	if len(p.Points) < 3 {
+		return p
+	}
+	res := Path{Points: []Point{p.Points[0], p.Points[1]}}
+	l1 := Line{p.Points[0], p.Points[1]}
+	for i := 2; i < len(p.Points); i++ {
+		pt := p.Points[i]
+		l2 := Line{l1.P2, pt}
+		if l1.IsCollinear(l2) {
+			l1.P2 = pt
+			res.Points[len(res.Points)-1] = pt
+		} else {
+			l1 = l2
+			res.Points = append(res.Points, pt)
+		}
+	}
+	if res.IsClosed() { //check first and last line in the closed path (rest are ok here)
+		l2 := Line{res.Points[0], res.Points[1]}
+		if l1.IsCollinear(l2) {
+			if l1.Len() > l2.Len() {
+				res.Points[len(res.Points)-1] = res.Points[1] //not first because first is equal to last
+				res.Points = res.Points[1:]
+			} else {
+				res.Points[0] = res.Points[len(res.Points)-2] //not last because last is equal to first
+				res.Points = res.Points[:len(res.Points)-1]
+			}
+		}
+	}
+	return res
+}
+
 func tryJoin(p1 Path, p2 Path) *Path {
 	if p1.Points[len(p1.Points)-1].Equal(p2.Points[0]) {
 		p1.Points = append(p1.Points, p2.Points[1:]...)
@@ -172,16 +214,18 @@ func tryJoin(p1 Path, p2 Path) *Path {
 		p2.Points = append(p2.Points, p1.Points[1:]...)
 		return &p2
 	}
-
-	if p1.Points[0].Equal(p2.Points[0]) {
+	// not reverse, direction should be right, fix it before
+	/*if p1.Points[0].Equal(p2.Points[0]) {
+		println("reverse 1")
 		p1.Points = append(p1.Reverse().Points, p2.Points[1:]...)
 		return &p1
 	}
 
 	if p1.Points[len(p1.Points)-1].Equal(p2.Points[len(p2.Points)-1]) {
+		println("reverse 2")
 		p1.Points = append(p1.Points, p2.Reverse().Points[1:]...)
 		return &p1
-	}
+	}*/
 
 	return nil
 }

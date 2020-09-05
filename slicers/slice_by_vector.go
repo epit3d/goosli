@@ -154,7 +154,7 @@ func slicingWorker(in chan job, out chan Layer) func(wi, wn int) {
 					paths = append(paths, Path{Points: []Point{line.P1, line.P2}})
 				}
 			}
-			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths2(paths)}
+			out <- Layer{Order: job.order, Norm: job.plane.N, Paths: JoinPaths3AndMinimize(paths)}
 		}
 	}
 }
