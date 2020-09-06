@@ -8,7 +8,11 @@ import (
 )
 
 func calcFillPlanesCommon(mesh *Mesh, settings Settings, MyAxis Vector, step float64) []Plane {
-	minx, maxx := mesh.MinMaxZ(MyAxis)
+	mina, maxa := mesh.MinMaxZ(AxisX)
+	minb, maxb := mesh.MinMaxZ(AxisY)
+	a, b := math.Sqrt(mina*mina+minb*minb), math.Sqrt(maxa*maxa+maxb*maxb)
+
+	minx, maxx := - math.Max(a, b), math.Max(a, b) //TODO: hack, seems will work not always (rotations and inclinations)
 	//get minx which is  "k * step"
 	minx_step := float64(math.Floor((minx)/step)) * step
 	n := int(math.Ceil((maxx - minx_step) / step))
@@ -113,10 +117,6 @@ func FillLayers(layers []Layer, planes []Plane, fullPlane []Plane, settings Sett
 	return layers
 }
 
-var (
-	x = 0
-)
-
 func intersectByPlanePolygonWise(pathes []Path, plane Plane) []Path {
 	// TODO: Merge polygons (some polygons may be inside other ones)
 	outPaths := []Path{}
@@ -131,7 +131,7 @@ func intersectByPlanePolygonWise(pathes []Path, plane Plane) []Path {
 		}
 
 		// Find intersection points with every segment
-		pts   := []Point{}
+		pts := []Point{}
 		for i := 1; i < len(pth.Points); i++ {
 			p := plane.IntersectSegment(pth.Points[i-1], pth.Points[i])
 			if p != nil {
