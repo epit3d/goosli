@@ -10,7 +10,7 @@ import (
 
 //PrepareLayers add Walls and fill layers
 func PrepareLayers(layers []Layer, settings Settings, planes []Plane, fullPanes []Plane) []Layer {
-	addWallsCount := int(settings.WallThickness / settings.GcodeSettings.LineWidth)
+	addWallsCount := int(settings.WallThickness/settings.GcodeSettings.LineWidth) - 1
 	if addWallsCount > 0 {
 		for i, layer := range layers { //TODO: in parallel
 			for _, pt := range layer.Paths {
@@ -19,8 +19,10 @@ func PrepareLayers(layers []Layer, settings Settings, planes []Plane, fullPanes 
 					continue
 				}
 				offs := offset(pt, addWallsCount, settings.GcodeSettings.LineWidth, layer.Norm)
-				layers[i].MiddlePs = append(layers[i].MiddlePs, offs[:len(offs)-1]...)
-				layers[i].InnerPs = append(layers[i].InnerPs, offs[len(offs)-1])
+				if len(offs) > 0 {
+					layers[i].MiddlePs = append(layers[i].MiddlePs, offs[:len(offs)-1]...)
+					layers[i].InnerPs = append(layers[i].InnerPs, offs[len(offs)-1])
+				}
 			}
 		}
 	}
@@ -47,9 +49,18 @@ func SkirtPathes(first Layer, count int, lineWidth float64) Layer {
 }
 func offset(pth Path, addWallsCount int, nozzle float64, norm Vector) []Path {
 	var res []Path
-	res = append(res, MakeOffset(pth, nozzle, norm))
+	first := MakeOffset(pth, nozzle, norm)
+	if first == nil {
+		return res
+	}
+	res = append(res, *first)
+
 	for i := 1; i < addWallsCount; i++ {
-		res = append(res, MakeOffset(res[i-1], nozzle, norm))
+		ff := MakeOffset(res[i-1], nozzle, norm)
+		if ff == nil {
+			return res
+		}
+		res = append(res, *ff)
 	}
 	return res
 
