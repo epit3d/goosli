@@ -113,8 +113,50 @@ func FillLayers(layers []Layer, planes []Plane, fullPlane []Plane, settings Sett
 			}
 
 		}
+
+		layers[i].Fill = sortFillPathes(layers[i].Fill)
+
 	}
 	return layers
+}
+
+func sortFillPathes(fill []Path) []Path { //TODO: refactor me
+	if len(fill) < 2 {
+		return fill
+	}
+	res := []Path{fill[0]}
+	used := make([]bool, len(fill))
+	used[0] = true
+	for i := 1; i < len(fill); i++ {
+		d := math.MaxFloat32
+		sj := 0
+		rev := false
+		pts := res[len(res)-1].Points
+		p := pts[len(pts)-1]
+		for j := 1; j < len(fill); j++ {
+			if used[j] {
+				continue
+			}
+			pts2 := fill[j].Points
+			if pts2[0].DistanceTo(p) < d {
+				d = pts2[0].DistanceTo(p)
+				sj = j
+				rev = false
+			}
+			if pts2[len(pts2)-1].DistanceTo(p) < d {
+				d = pts2[len(pts2)-1].DistanceTo(p)
+				sj = j
+				rev = true
+			}
+		}
+		used[sj] = true
+		if rev {
+			res = append(res, fill[sj].Reverse())
+		} else {
+			res = append(res, fill[sj])
+		}
+	}
+	return res
 }
 
 func intersectByPlanePolygonWise(pathes []Path, plane Plane) []Path {

@@ -23,7 +23,7 @@ func MakeOffset(pth Path, nozzle float64, norm Vector) *Path {
 		copyNewPth = append(copyNewPth, newPth[i-1])
 	}
 
-	closedPath := pth.IsClosed()
+	closedPath := pth.IsClosed() //TODO: refactor everything here
 	if closedPath {
 		newPth = append(newPth, newPth[0]) // add first line to the end
 	}
@@ -82,5 +82,6 @@ func MakeOffset(pth Path, nozzle float64, norm Vector) *Path {
 	for i := 0; i < len(afterRemove); i++ {
 		res.Points = append(res.Points, afterRemove[i].P2)
 	}
+	res = res.MinimizeLines()
 	return &res
 }
