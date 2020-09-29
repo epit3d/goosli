@@ -16,6 +16,12 @@ type Point struct {
 func (a Point) String() string {
 	return fmt.Sprintf("X%s Y%s Z%s", StrF(a.X), StrF(a.Y), StrF(a.Z))
 }
+func (a Point) StringDelta(dx,dy,dz float64) string {
+	return fmt.Sprintf("X%s Y%s Z%s", StrF(a.X+dx), StrF(a.Y+dy), StrF(a.Z+dz))
+}
+func (a Point) StringDeltaZ(dz float64) string {
+	return fmt.Sprintf("Z%s", StrF(a.Z+dz))
+}
 func (a Point) MapKey() Point {
 	return a.RoundPlaces(8)
 }

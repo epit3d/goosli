@@ -26,6 +26,8 @@ func MakeOffset(pth Path, nozzle float64, norm Vector) *Path {
 	closedPath := pth.IsClosed() //TODO: refactor everything here
 	if closedPath {
 		newPth = append(newPth, newPth[0]) // add first line to the end
+	} else {
+		println("not closed ", StrF(pth.Points[0].DistanceTo(pth.Points[len(pth.Points)-1])))
 	}
 	for i := 0; i < len(newPth)-1; i++ {
 		inters := newPth[i].IntersectLine2(newPth[i+1])

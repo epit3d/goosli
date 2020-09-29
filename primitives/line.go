@@ -117,7 +117,7 @@ func (l1 Line) IntersectLine2(l2 Line) *Point {
 	b := f.Cross(e)
 	//println(a.Length(), b.Length())
 	if AlmostZero(a.Length()) || AlmostZero(b.Length()) {
-		println("A OR B ZERO", StrF(a.Length()), StrF(b.Length()), StrF(l1.Len()), StrF(l2.Len()))
+		println("A OR B ZERO", StrF(a.Length()), StrF(b.Length()), StrF(l1.Len()), StrF(l2.Len()), StrF(g.Length()))
 		return nil
 	}
 	c := 1.0
@@ -125,7 +125,7 @@ func (l1 Line) IntersectLine2(l2 Line) *Point {
 		c = -1.0
 	}
 	inters := l1.P1.Shift(e.MulScalar(c * a.Length() / b.Length()))
-	if math.IsNaN(inters.X) || math.IsNaN(inters.Y) || math.IsNaN(inters.Z) || inters.DistanceTo(l1.P2) > 50 || inters.DistanceTo(l2.P1) > 50 { //TODO: distance?
+	if math.IsNaN(inters.X) || math.IsNaN(inters.Y) || math.IsNaN(inters.Z) || inters.DistanceTo(l1.P2) > 2 || inters.DistanceTo(l2.P1) > 2 { //TODO: distance?
 		println("MORE 5", StrF(inters.DistanceTo(l1.P2)), StrF(inters.DistanceTo(l2.P1)))
 		return nil
 	}

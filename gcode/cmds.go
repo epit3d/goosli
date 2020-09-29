@@ -14,6 +14,7 @@ type State struct {
 	eOff       float64
 	feedrate   int
 	isWall     bool
+	pos        Point
 }
 
 func NewState() State {
@@ -23,6 +24,7 @@ func NewState() State {
 		eOff:       0,
 		feedrate:   0,
 		isWall:     false,
+		pos:        OriginPoint,
 	}
 }
 
@@ -164,9 +166,11 @@ func pathesToGCode(pths []Path, comment string, sett GcodeSettings, state State,
 
 	for _, p := range pths {
 		// Retraction first
+		b.WriteString("G0 " + state.pos.StringDeltaZ(0.5) + "\n") //z up a little during retract
 		retractionToGCode(b, sett)
+		b.WriteString("G0 " + p.Points[0].StringDelta(0, 0, 0.5) + "\n")
+		b.WriteString("G0 " + p.Points[0].StringDeltaZ(0) + "\n")
 
-		b.WriteString("G0 " + p.Points[0].String() + "\n")
 		for i := 1; i < len(p.Points); i++ {
 			p1 := p.Points[i-1]
 			p2 := p.Points[i]
@@ -174,6 +178,7 @@ func pathesToGCode(pths []Path, comment string, sett GcodeSettings, state State,
 			state.eOff += (4 * sett.LineWidth * sett.LayerHeight * lDist) / (math.Pow(sett.BarDiameter, 2) * math.Pi)
 			b.WriteString("G1 " + p2.StringGcode(p1) + " E" + StrF(state.eOff) + "\n")
 		}
+		state.pos = p.Points[len(p.Points)-1]
 	}
 	return state
 }
