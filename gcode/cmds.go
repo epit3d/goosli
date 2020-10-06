@@ -37,7 +37,11 @@ type InclineXBack struct {
 }
 
 func (r InclineXBack) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
-	b.WriteString("M42 \n")
+	b.WriteString("G0 X0 Y0 Z200 \n")
+	b.WriteString("T2 \n")
+	//b.WriteString("G92 E0 \n")
+	b.WriteString("G1 F300 E0 \n")
+	b.WriteString("T0 \n")
 	return st
 }
 func (r InclineXBack) LayersCount() int {
@@ -48,7 +52,11 @@ type InclineX struct {
 }
 
 func (r InclineX) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
-	b.WriteString("M43 \n")
+	b.WriteString("G0 X0 Y0 Z200 \n")
+	b.WriteString("T2 \n")
+	//b.WriteString("G92 E0 \n")
+	b.WriteString("G1 F300 E60 \n")
+	b.WriteString("T0 \n")
 	return st
 
 }
@@ -75,7 +83,12 @@ type RotateZ struct {
 }
 
 func (r RotateZ) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
-	b.WriteString("G0 A" + StrF(r.Angle) + "\n")
+	//b.WriteString("G0 A" + StrF(r.Angle) + "\n")
+	b.WriteString("G0 X0 Y0 Z200 \n")
+	b.WriteString("T1 \n")
+	//b.WriteString("G92 E0 \n")
+	b.WriteString("G1 F300 E"+StrF(r.Angle)+" \n")
+	b.WriteString("T0 \n")
 	return st
 
 }

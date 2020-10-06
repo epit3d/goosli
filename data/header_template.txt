@@ -5,6 +5,7 @@
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
 
+T0
 M190 S{bed_temperature}         ;Set bed temperature and wait
 M109 S{extruder_temperature}    ;Set extruder temperature and wait
 G21             ;metric values
