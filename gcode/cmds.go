@@ -36,13 +36,15 @@ type Command interface {
 type InclineXBack struct {
 }
 
-func (r InclineXBack) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
+func (r InclineXBack) ToGCode(b *bytes.Buffer, state State, sett GcodeSettings) State {
 	b.WriteString("G0 X0 Y0 Z200 \n")
 	b.WriteString("T2 \n")
-	//b.WriteString("G92 E0 \n")
+	b.WriteString("G92 E0 \n")
 	b.WriteString("G1 F300 E0 \n")
+	b.WriteString("G92 E0 \n")
 	b.WriteString("T0 \n")
-	return st
+	b.WriteString("G92 E" + StrF(state.eOff) + "\n")
+	return state
 }
 func (r InclineXBack) LayersCount() int {
 	return 0
@@ -51,13 +53,15 @@ func (r InclineXBack) LayersCount() int {
 type InclineX struct {
 }
 
-func (r InclineX) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
+func (r InclineX) ToGCode(b *bytes.Buffer, state State, sett GcodeSettings) State {
 	b.WriteString("G0 X0 Y0 Z200 \n")
 	b.WriteString("T2 \n")
-	//b.WriteString("G92 E0 \n")
+	b.WriteString("G92 E0 \n")
 	b.WriteString("G1 F300 E60 \n")
+	b.WriteString("G92 E0 \n")
 	b.WriteString("T0 \n")
-	return st
+	b.WriteString("G92 E" + StrF(state.eOff) + "\n")
+	return state
 
 }
 func (r InclineX) LayersCount() int {
@@ -82,14 +86,16 @@ type RotateZ struct {
 	Angle float64
 }
 
-func (r RotateZ) ToGCode(b *bytes.Buffer, st State, sett GcodeSettings) State {
+func (r RotateZ) ToGCode(b *bytes.Buffer, state State, sett GcodeSettings) State {
 	//b.WriteString("G0 A" + StrF(r.Angle) + "\n")
 	b.WriteString("G0 X0 Y0 Z200 \n")
 	b.WriteString("T1 \n")
-	//b.WriteString("G92 E0 \n")
-	b.WriteString("G1 F300 E"+StrF(r.Angle)+" \n")
+	b.WriteString("G92 E0 \n")
+	b.WriteString("G1 F300 E" + StrF(r.Angle) + " \n")
+	b.WriteString("G92 E0 \n")
 	b.WriteString("T0 \n")
-	return st
+	b.WriteString("G92 E" + StrF(state.eOff) + "\n")
+	return state
 
 }
 func (r RotateZ) LayersCount() int {
