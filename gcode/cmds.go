@@ -15,6 +15,8 @@ type State struct {
 	feedrate   int
 	isWall     bool
 	pos        Point
+	t1         float64
+	t2         float64
 }
 
 func NewState() State {
@@ -25,6 +27,8 @@ func NewState() State {
 		feedrate:   0,
 		isWall:     false,
 		pos:        OriginPoint,
+		t1:         0,
+		t2:         0,
 	}
 }
 
@@ -39,11 +43,12 @@ type InclineXBack struct {
 func (r InclineXBack) ToGCode(b *bytes.Buffer, state State, sett GcodeSettings) State {
 	b.WriteString("G0 X0 Y0 Z200 \n")
 	b.WriteString("T2 \n")
-	b.WriteString("G92 E0 \n")
+	b.WriteString("G92 E" + StrF(state.t2) + "\n")
 	b.WriteString("G1 F300 E0 \n")
 	b.WriteString("G92 E0 \n")
 	b.WriteString("T0 \n")
 	b.WriteString("G92 E" + StrF(state.eOff) + "\n")
+	state.t2 = 0
 	return state
 }
 func (r InclineXBack) LayersCount() int {
@@ -56,11 +61,12 @@ type InclineX struct {
 func (r InclineX) ToGCode(b *bytes.Buffer, state State, sett GcodeSettings) State {
 	b.WriteString("G0 X0 Y0 Z200 \n")
 	b.WriteString("T2 \n")
-	b.WriteString("G92 E0 \n")
+	b.WriteString("G92 E" + StrF(state.t2) + " \n")
 	b.WriteString("G1 F300 E60 \n")
 	b.WriteString("G92 E0 \n")
 	b.WriteString("T0 \n")
 	b.WriteString("G92 E" + StrF(state.eOff) + "\n")
+	state.t2 = 60
 	return state
 
 }
@@ -90,11 +96,12 @@ func (r RotateZ) ToGCode(b *bytes.Buffer, state State, sett GcodeSettings) State
 	//b.WriteString("G0 A" + StrF(r.Angle) + "\n")
 	b.WriteString("G0 X0 Y0 Z200 \n")
 	b.WriteString("T1 \n")
-	b.WriteString("G92 E0 \n")
+	b.WriteString("G92 E" + StrF(state.t1) + " \n")
 	b.WriteString("G1 F300 E" + StrF(r.Angle) + " \n")
 	b.WriteString("G92 E0 \n")
 	b.WriteString("T0 \n")
 	b.WriteString("G92 E" + StrF(state.eOff) + "\n")
+	state.t1 = r.Angle
 	return state
 
 }
